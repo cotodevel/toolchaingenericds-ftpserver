@@ -167,11 +167,11 @@ int main(int _argc, sint8 **_argv) {
 	while (1){
 		scanKeys();
 		
-		if (keysPressed() & A){
+		if (keysPressed() & KEY_A){
 			
 			//FTP
 			
-			while(keysPressed() & A){
+			while(keysPressed() & KEY_A){
 				scanKeys();
 			}
 		}

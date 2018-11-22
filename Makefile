@@ -69,12 +69,14 @@ export DIRS_ARM7_HEADER = source/	\
 export DIRS_ARM9_SRC = source/	\
 			source/interrupts/	\
 			source/gui/	\
-			../common/
+			../common/	\
+			source/ftp
 			
 export DIRS_ARM9_HEADER = include/	\
 			source/gui/	\
 			../common/	\
-			../$(PosIndCodeDIR_FILENAME)/$(DIR_ARM9)/include/
+			../$(PosIndCodeDIR_FILENAME)/$(DIR_ARM9)/include/	\
+			source/ftp
 
 # Build Target(s)	(both processors here)
 all: $(EXECUTABLE_FNAME)

@@ -1,6 +1,6 @@
 This is the Toolchain Generic FTP project:
 
-It is based on the Open Source FTP library found at : https://www.oryx-embedded.com and added the TGDS layer so it runs on the NintendoDS.
+It is based on the Open Source FTP library from: https://github.com/kingk85/uFTP and added the TGDS layer so it runs on the NintendoDS.
 
 Compile Toolchain: To compile this project you will need to follow the steps at https://bitbucket.org/Coto88/toolchaingenericds : Then simply extract the project somewhere.
 

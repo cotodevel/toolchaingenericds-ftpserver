@@ -26,16 +26,16 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include <syslog.h>
+#include "syslog.h"
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
 #include <sys/stat.h>
-#include <sys/resource.h>
 #include <signal.h>
 
 
 #include "fileManagement.h"
+#include "resource.h"
 
 #define LOCKFILE "/var/run/uFTP.pid"
 #define LOCKMODE (S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)

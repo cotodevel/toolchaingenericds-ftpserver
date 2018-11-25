@@ -39,6 +39,7 @@
 #include "connection.h"
 #include "time.h"
 #include "time_nds.h"
+#include "socket_dswifi.h"
 
 /* Return the higher socket available*/
 int getMaximumSocketFd(int mainSocket, ftpDataType * ftpData)

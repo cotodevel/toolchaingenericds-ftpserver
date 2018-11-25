@@ -22,8 +22,8 @@
  * THE SOFTWARE.
  */
 
-
 #include <stdio.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -37,6 +37,8 @@
 
 #include "../ftpData.h"
 #include "connection.h"
+#include "time.h"
+#include "time_nds.h"
 
 /* Return the higher socket available*/
 int getMaximumSocketFd(int mainSocket, ftpDataType * ftpData)

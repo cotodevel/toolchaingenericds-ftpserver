@@ -48,7 +48,7 @@ int isProcessAlreadyRunning(void)
     fd = open(LOCKFILE, O_RDWR|O_CREAT, LOCKMODE);
     if (fd < 0) 
     {
-        syslog(LOG_ERR, "can’t open %s: %s", LOCKFILE, strerror(errno));
+        printf("can't open %s: %s", LOCKFILE, strerror(errno));
         exit(1);
     }
     //printf("\nFile pid opened.");
@@ -60,7 +60,7 @@ int isProcessAlreadyRunning(void)
         close(fd);
         return(1);
         }
-        syslog(LOG_ERR, "can’t lock %s: %s", LOCKFILE, strerror(errno));
+        printf("can't lock %s: %s", LOCKFILE, strerror(errno));
         exit(1);
     }
     

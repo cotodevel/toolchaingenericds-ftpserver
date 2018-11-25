@@ -33,13 +33,18 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <sys/statvfs.h>
+//#include <sys/statvfs.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
 
 #include "fileManagement.h"
 #include "dynamicVectors.h"
+
+//TGDS File System
+#include "fsfatlayerTGDS.h"
+#include "fileHandleTGDS.h"
+
 
 static int FILE_CompareString(const void * a, const void * b);
 
@@ -76,7 +81,8 @@ int FILE_IsDirectory(char *DirectoryPath)
 
 long int FILE_GetAvailableSpace(const char* path)
 {
-    struct statvfs stat;
+    /*
+	struct statvfs stat;
 
     if (statvfs(path, &stat) != 0)
     {
@@ -86,6 +92,8 @@ long int FILE_GetAvailableSpace(const char* path)
 
     // the available size is f_bsize * f_bavail
     return stat.f_bsize * stat.f_bavail;
+	*/
+	
 }
 
 /* Get the file size */

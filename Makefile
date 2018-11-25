@@ -70,7 +70,7 @@ export DIRS_ARM9_SRC = source/	\
 			source/interrupts/	\
 			source/gui/	\
 			../common/	\
-			source/ftp	\
+			source/ftp/	\
 			source/ftp/library
 			
 			
@@ -78,7 +78,7 @@ export DIRS_ARM9_HEADER = include/	\
 			source/gui/	\
 			../common/	\
 			../$(PosIndCodeDIR_FILENAME)/$(DIR_ARM9)/include/	\
-			source/ftp	\
+			source/ftp/	\
 			source/ftp/library
 
 # Build Target(s)	(both processors here)

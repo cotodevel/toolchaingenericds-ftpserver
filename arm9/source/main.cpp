@@ -72,6 +72,7 @@ using namespace std;
 #include "nds_cp15_misc.h"
 #include "notifierProcessor.h"
 #include "limitsTGDS.h"
+#include "ftpServer.h"
 
 char curChosenBrowseFile[MAX_TGDSFILENAME_LENGTH+1];
 
@@ -164,19 +165,22 @@ int main(int _argc, sint8 **_argv) {
 	//custom Handler
 	menuShow();
 	
+	runFtpServer();
+	
 	while (1){
 		scanKeys();
 		
 		if (keysPressed() & KEY_A){
 			
 			//FTP
-			
+			printf("alive!");
 			while(keysPressed() & KEY_A){
 				scanKeys();
 			}
 		}
 		
 		if (keysPressed() & KEY_SELECT){
+			clrscr();
 			menuShow();
 		}
 		

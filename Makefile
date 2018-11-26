@@ -31,7 +31,7 @@ include $(DEFAULT_GCC_PATH)Makefile.basenewlib
 
 #Custom
 # Project Specific
-export EXECUTABLE_FNAME = ToolchainGenericDS-template.nds
+export EXECUTABLE_FNAME = ToolchainGenericDS-FTP.nds
 export EXECUTABLE_VERSION_HEADER =	0.1
 export EXECUTABLE_VERSION =	"$(EXECUTABLE_VERSION_HEADER)"
 

@@ -11,49 +11,4 @@ After compiling, run the example in NDS.
 Project Specific description: 
 currently in development.
 
-
-//todos:
-
-umask -> change file/dir permissions in linux
-
--
-
-readlink ->
-
-readlink -f will return 0 for a non-existent file in an existing directory whereas realpath returns 1. However, readlink -e will behave like realpath and return 1 for a non-existent file.
-
-readlink -f
-$ readlink -f non-existent-file
-/home/user/non-existent-file
-$ echo $?
-0
-readlink -e
-$ readlink -e non-existent-file
-$ echo $?
-1
-
--
-
--> getrlimit
-
--
-
--> setsid
-
--
-
--> sigaction
-
--
-
--> lstat
-
--
-
--> getgrgid
-
--
-
--> getgrnam
-
 Coto

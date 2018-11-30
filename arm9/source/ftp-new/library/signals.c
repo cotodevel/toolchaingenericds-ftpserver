@@ -34,7 +34,7 @@ static void ignore_sigpipe(void);
 /* Catch Signal Handler functio */
 void signal_callback_handler(int signum) 
 {
-    printf("Caught signal SIGPIPE %d\n",signum);
+    printf("Caught signal SIGPIPE %d ",signum);
 }
 
 static void ignore_sigpipe(void)
@@ -51,8 +51,8 @@ static void ignore_sigpipe(void)
         sa.sa_handler = SIG_IGN;
 
         if (sigemptyset(&sa.sa_mask) < 0 || sigaction(SIGPIPE, &sa, 0) < 0) {
-                perror("Could not ignore the SIGPIPE signal");
-                exit(0);
+                printf("Could not ignore the SIGPIPE signal");
+                //exit(0);
         }
 }
 

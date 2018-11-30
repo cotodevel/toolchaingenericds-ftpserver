@@ -64,11 +64,11 @@ int writen(int sd,char *ptr,int size)
 }
 
 
-
+//could cause segfaults
 int ftpResponseSender(int s, int n, char* mes)
 {
 	char data[128];
-	sprintf(data, "%d %s\r\n", n, mes);
+	sprintf(data, "%d %s ", n, mes);
 	return send(s,data,strlen(data),0);
 }
 
@@ -85,7 +85,7 @@ const char * getpwd(const char *cwd)
 	if (!(pwd = getenv("PWD")) || pwd[0] != '/' || stat(pwd, &pst) < 0)
 		return cwd;
 	if (stat(cwd, &cst) < 0){
-		//iprintf("stat %s:", cwd);
+		//printf("stat %s:", cwd);
 	}
 	return (pst.st_dev == cst.st_dev && pst.st_ino == cst.st_ino) ? pwd : cwd;
 }

@@ -60,7 +60,7 @@ int getMaximumSocketFd(int mainSocket, ftpDataType * ftpData)
 
 int createSocket(ftpDataType * ftpData)
 {
-  printf("\nCreating main socket on port %d", ftpData->ftpParameters.port);
+  printf(" Creating main socket on port %d", ftpData->ftpParameters.port);
   int sock, errorCode;
   struct sockaddr_in temp;
 
@@ -77,12 +77,12 @@ int createSocket(ftpDataType * ftpData)
     
 #ifdef SO_REUSEADDR
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse)) < 0)
-        perror("setsockopt(SO_REUSEADDR) failed");
+        printf("setsockopt(SO_REUSEADDR) failed");
 #endif
 
 #ifdef SO_REUSEPORT
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (const char*)&reuse, sizeof(reuse)) < 0) 
-        perror("setsockopt(SO_REUSEPORT) failed");
+        printf("setsockopt(SO_REUSEPORT) failed");
 #endif
   //Bind socket
   errorCode = bind(sock,(struct sockaddr*) &temp,sizeof(temp));
@@ -108,12 +108,12 @@ int createPassiveSocket(int port)
 
 #ifdef SO_REUSEADDR
    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse)) < 0)
-        perror("setsockopt(SO_REUSEADDR) failed");
+        printf("setsockopt(SO_REUSEADDR) failed");
 #endif
 
 #ifdef SO_REUSEPORT
    if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (const char*)&reuse, sizeof(reuse)) < 0) 
-       perror("setsockopt(SO_REUSEPORT) failed");
+       printf("setsockopt(SO_REUSEPORT) failed");
 #endif
 
   //Bind socket
@@ -141,40 +141,40 @@ int createActiveSocket(int port, char *ipAddress)
   serv_addr.sin_port = htons(port); 
   if(inet_pton(AF_INET, ipAddress, &serv_addr.sin_addr)<=0)
   {
-      printf("\n inet_pton error occured\n");
+      printf(" inet_pton error occured ");
       return -1;
   } 
 
   if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
   {
-      printf("\n2 Error : Could not create socket \n");
+      printf(" Error : Could not create socket ");
       return -1;
   }
   else
   {
-      printf("\n sockfd = %d \n", sockfd);
+      printf(" sockfd = %d ", sockfd);
   }
   
   
   int reuse = 1;
 #ifdef SO_REUSEADDR
    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse)) < 0)
-        perror("setsockopt(SO_REUSEADDR) failed");
+        printf("setsockopt(SO_REUSEADDR) failed");
 #endif
 
 #ifdef SO_REUSEPORT
     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, (const char*)&reuse, sizeof(reuse)) < 0) 
-       perror("setsockopt(SO_REUSEPORT) failed");
+       printf("setsockopt(SO_REUSEPORT) failed");
 #endif
   
 
   if(connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
   {
-     printf("\n3 Error : Connect Failed \n");
+     printf(" 3 Error : Connect Failed ");
      return -1;
   }
 
-  printf("\n Connection socket %d is going to start ip: %s:%d \n",sockfd, ipAddress, port);
+  printf(" Connection socket %d is going to start ip: %s:%d ",sockfd, ipAddress, port);
 
   return sockfd;
 }
@@ -224,21 +224,21 @@ void closeSocket(ftpDataType * ftpData, int processingSocket)
         ftpData->connectedClients = 0;
     }
 
-    printf("Client id: %d disconnected", processingSocket);
-    printf("\nServer: Clients connected:%d", ftpData->connectedClients);
+    printf(" Client id: %d disconnected", processingSocket);
+    printf(" Server: Clients connected:%d", ftpData->connectedClients);
     return;
 }
 
 void closeClient(ftpDataType * ftpData, int processingSocket)
 {
-    printf("\nQUIT FLAG SET!\n");
+    printf(" QUIT FLAG SET! ");
 
     if (ftpData->clients[processingSocket].workerData.threadIsAlive == 1)
     {
         void *pReturn;
         pthread_cancel(ftpData->clients[processingSocket].workerData.workerThread);
         pthread_join(ftpData->clients[processingSocket].workerData.workerThread, &pReturn);
-        printf("\nQuit command received the Pasv Thread has been cancelled.");
+        printf(" Quit command received the Pasv Thread has been cancelled.");
     }
 
     FD_CLR(ftpData->clients[processingSocket].socketDescriptor, &ftpData->connectionData.rsetAll);    
@@ -276,15 +276,15 @@ void checkClientConnectionTimeout(ftpDataType * ftpData)
 void flushLoginWrongTriesData(ftpDataType * ftpData)
 {
     int i;
-    //printf("\n flushLoginWrongTriesData size of the vector : %d", ftpData->loginFailsVector.Size);
+    //printf(" flushLoginWrongTriesData size of the vector : %d", ftpData->loginFailsVector.Size);
     
     for (i = (ftpData->loginFailsVector.Size-1); i >= 0; i--)
     {
-        //printf("\n last login fail attempt : %d", ((loginFailsDataType *) ftpData->loginFailsVector.Data[i])->failTimeStamp);
+        //printf(" last login fail attempt : %d", ((loginFailsDataType *) ftpData->loginFailsVector.Data[i])->failTimeStamp);
         
         if ( (time(NULL) - ((loginFailsDataType *) ftpData->loginFailsVector.Data[i])->failTimeStamp) > WRONG_PASSWORD_ALLOWED_RETRY_TIME)
         {
-            //printf("\n Deleting element : %d", i);
+            //printf(" Deleting element : %d", i);
             ftpData->loginFailsVector.DeleteAt(&ftpData->loginFailsVector, i, deleteLoginFailsData);
         }
     }
@@ -351,9 +351,9 @@ int evaluateClientSocketConnection(ftpDataType * ftpData)
                           &(ftpData->clients[availableSocketIndex].server_sockaddr_in.sin_addr),
                           ftpData->clients[availableSocketIndex].serverIpAddress,
                           INET_ADDRSTRLEN);
-                printf("\n Server IP: %s", ftpData->clients[availableSocketIndex].serverIpAddress);
+                printf(" Server IP: %s", ftpData->clients[availableSocketIndex].serverIpAddress);
                 printf("Server: New client connected with id: %d", availableSocketIndex);
-                printf("\nServer: Clients connected: %d", ftpData->connectedClients);
+                printf(" Server: Clients connected: %d", ftpData->connectedClients);
                 sscanf (ftpData->clients[availableSocketIndex].serverIpAddress,"%d.%d.%d.%d",   &ftpData->clients[availableSocketIndex].serverIpAddressInteger[0],
                                                                                                 &ftpData->clients[availableSocketIndex].serverIpAddressInteger[1],
                                                                                                 &ftpData->clients[availableSocketIndex].serverIpAddressInteger[2],
@@ -363,9 +363,9 @@ int evaluateClientSocketConnection(ftpDataType * ftpData)
                           &(ftpData->clients[availableSocketIndex].client_sockaddr_in.sin_addr),
                           ftpData->clients[availableSocketIndex].clientIpAddress,
                           INET_ADDRSTRLEN);
-                printf("\n Client IP: %s", ftpData->clients[availableSocketIndex].clientIpAddress);
+                printf(" Client IP: %s", ftpData->clients[availableSocketIndex].clientIpAddress);
                 ftpData->clients[availableSocketIndex].clientPort = (int) ntohs(ftpData->clients[availableSocketIndex].client_sockaddr_in.sin_port);      
-                printf("\nClient port is: %d\n", ftpData->clients[availableSocketIndex].clientPort);
+                printf(" Client port is: %d", ftpData->clients[availableSocketIndex].clientPort);
 
                 ftpData->clients[availableSocketIndex].connectionTimeStamp = (int)time(NULL);
                 ftpData->clients[availableSocketIndex].lastActivityTimeStamp = (int)time(NULL);
@@ -384,7 +384,7 @@ int evaluateClientSocketConnection(ftpDataType * ftpData)
                 if (ftpData->ftpParameters.maximumConnectionsPerIp > 0 &&
                     numberOfConnectionFromSameIp >= ftpData->ftpParameters.maximumConnectionsPerIp)
                 {
-                    dprintf(ftpData->clients[availableSocketIndex].socketDescriptor, "530 too many connection from your ip address %s \r\n", ftpData->clients[availableSocketIndex].clientIpAddress);
+                    dprintf(ftpData->clients[availableSocketIndex].socketDescriptor, "530 too many connection from your ip address %s ", ftpData->clients[availableSocketIndex].clientIpAddress);
                     ftpData->clients[availableSocketIndex].closeTheClient = 1;
                 }
                 else
@@ -398,7 +398,7 @@ int evaluateClientSocketConnection(ftpDataType * ftpData)
             {
                 //Errors while accepting, socket will be closed
                 ftpData->clients[availableSocketIndex].closeTheClient = 1;
-                printf("\n2 Errno = %d", errno);
+                printf(" Errno = %d", errno);
                 return 1;
             }
         }
@@ -409,7 +409,7 @@ int evaluateClientSocketConnection(ftpDataType * ftpData)
             struct sockaddr_in socketRefuse_sockaddr_in;
             if ((socketRefuseFd = accept(ftpData->connectionData.theMainSocket, (struct sockaddr *)&socketRefuse_sockaddr_in, (socklen_t*)&socketRefuse_in_size))!=-1)
             {
-                char *messageToWrite = "10068 Server reached the maximum number of connection, please try later.\r\n";
+                char *messageToWrite = "10068 Server reached the maximum number of connection, please try later. ";
                 write(socketRefuseFd, messageToWrite, strlen(messageToWrite));
                 shutdown(socketRefuseFd, SHUT_RDWR);
                 close(socketRefuseFd);
@@ -418,7 +418,7 @@ int evaluateClientSocketConnection(ftpDataType * ftpData)
             else
             {
                 ftpData->clients[availableSocketIndex].closeTheClient = 1;
-                printf("\n3 Errno = %d", errno);
+                printf(" Errno = %d", errno);
                 return 1;
             }
         }

@@ -69,12 +69,12 @@ void ftp_cmd_CWD(int s, int cmd, char* arg){
 		//otherwise return 500/550
 		//sprintf(tempBuf,"%s: No such file or directory.",currentPath);
 		ftpResponseSender(sock2, 550, currentPath);
-		iprintf(" CWD FAIL => %s \n", currentPath);
+		printf("CWD FAIL => %s ", currentPath);
 	}
 	else{
 		//if dir/file exists then ret: 250 or 200.
 		ftpResponseSender(sock2, 250, "ok");
-		iprintf(" CWD OK => %s \n", currentPath);
+		printf(" CWD OK => %s ", currentPath);
 	}
 	
 	//while(1==1){}	//ok so far

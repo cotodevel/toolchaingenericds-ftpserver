@@ -65,20 +65,20 @@ void configurationRead(ftpParameters_DataType *ftpParameters)
 
     if (FILE_IsFile(LOCAL_CONFIGURATION_FILENAME) == 1)
     {
-        printf("\nReading configuration from \n -> %s \n", LOCAL_CONFIGURATION_FILENAME);
+        printf(" Reading configuration from -> %s ", LOCAL_CONFIGURATION_FILENAME);
 
         returnCode = readConfigurationFile(LOCAL_CONFIGURATION_FILENAME, &configParameters);
 
-        printf("\nDONE\n");
+        printf(" DONE ");
 
     }
     else if (FILE_IsFile(DEFAULT_CONFIGURATION_FILENAME) == 1)
     {
-        printf("\nReading configuration from \n -> %s\n", DEFAULT_CONFIGURATION_FILENAME);
+        printf(" Reading configuration from -> %s ", DEFAULT_CONFIGURATION_FILENAME);
 
         returnCode = readConfigurationFile(DEFAULT_CONFIGURATION_FILENAME, &configParameters);
 
-        printf("\nDONE\n");
+        printf(" DONE ");
 
     }
 
@@ -88,8 +88,8 @@ void configurationRead(ftpParameters_DataType *ftpParameters)
     }
     else
     {
-        printf("\nError: could not read the configuration file located at: \n -> %s or at \n -> %s", DEFAULT_CONFIGURATION_FILENAME, LOCAL_CONFIGURATION_FILENAME);
-        exit(1);
+        printf(" Error: could not read the configuration file located at: -> %s or at -> %s", DEFAULT_CONFIGURATION_FILENAME, LOCAL_CONFIGURATION_FILENAME);
+        //exit(1);
     }
 
     return;
@@ -109,8 +109,8 @@ void applyConfiguration(ftpParameters_DataType *ftpParameters)
 
         if (returnCode == 1)
         {
-            printf("\nThe process is already running..");
-            exit(0);
+            printf(" The process is already running..");
+            //exit(0);
         }
     }
 }
@@ -130,7 +130,7 @@ void initFtpData(ftpDataType *ftpData)
     ftpData->serverIp.ip[3] = 1;
 
     memset(ftpData->welcomeMessage, 0, 1024);
-    strcpy(ftpData->welcomeMessage, "220 Hello\r\n");
+    strcpy(ftpData->welcomeMessage, "220 Hello ");
 
     DYNV_VectorGeneric_InitWithSearchFunction(&ftpData->loginFailsVector, searchInLoginFailsVector);
 
@@ -307,7 +307,7 @@ static int readConfigurationFile(char *path, DYNV_VectorGenericDataType *paramet
                 nameIndex = 0;
                 valueIndex = 0;
                 state = STATE_START;
-                printf("\nParameter read: %s = %s", parameter.name, parameter.value);
+                printf(" Parameter read: %s = %s", parameter.name, parameter.value);
 
                 parametersVector->PushBack(parametersVector, &parameter, sizeof(parameter_DataType));
             }
@@ -330,7 +330,7 @@ static int readConfigurationFile(char *path, DYNV_VectorGenericDataType *paramet
         memset(value, 0, PARAMETER_SIZE_LIMIT);
         nameIndex = 0;
         valueIndex = 0;
-        printf("\nParameter read: %s = %s", parameter.name, parameter.value);
+        printf(" Parameter read: %s = %s", parameter.name, parameter.value);
         parametersVector->PushBack(parametersVector, &parameter, sizeof(parameter_DataType));
     }
 
@@ -363,42 +363,42 @@ static int parseConfigurationFile(ftpParameters_DataType *ftpParameters, DYNV_Ve
             userOwnerX[PARAMETER_SIZE_LIMIT], 
             groupOwnerX[PARAMETER_SIZE_LIMIT];
     
-    printf("\nReading configuration settings..");
+    printf(" Reading configuration settings..");
     
     searchIndex = searchParameter("MAXIMUM_ALLOWED_FTP_CONNECTION", parametersVector);
     if (searchIndex != -1)
     {
         ftpParameters->maxClients = atoi(((parameter_DataType *) parametersVector->Data[searchIndex])->value);
-        printf("\nMAXIMUM_ALLOWED_FTP_CONNECTION: %d", ftpParameters->maxClients);
+        printf(" MAXIMUM_ALLOWED_FTP_CONNECTION: %d", ftpParameters->maxClients);
     }
     else
     {
         ftpParameters->maxClients = 10;
-        printf("\nMAXIMUM_ALLOWED_FTP_CONNECTION parameter not found in the configuration file, using the default value: %d", ftpParameters->maxClients);
+        printf(" MAXIMUM_ALLOWED_FTP_CONNECTION parameter not found in the configuration file, using the default value: %d", ftpParameters->maxClients);
     }
     
     searchIndex = searchParameter("MAX_CONNECTION_NUMBER_PER_IP", parametersVector);
     if (searchIndex != -1)
     {
         ftpParameters->maximumConnectionsPerIp = atoi(((parameter_DataType *) parametersVector->Data[searchIndex])->value);
-        printf("\nMAX_CONNECTION_NUMBER_PER_IP: %d", ftpParameters->maximumConnectionsPerIp);
+        printf(" MAX_CONNECTION_NUMBER_PER_IP: %d", ftpParameters->maximumConnectionsPerIp);
     }
     else
     {
         ftpParameters->maximumConnectionsPerIp = 4;
-        printf("\nMAX_CONNECTION_NUMBER_PER_IP parameter not found in the configuration file, using the default value: %d", ftpParameters->maximumConnectionsPerIp);
+        printf(" MAX_CONNECTION_NUMBER_PER_IP parameter not found in the configuration file, using the default value: %d", ftpParameters->maximumConnectionsPerIp);
     }
 
     searchIndex = searchParameter("MAX_CONNECTION_TRY_PER_IP", parametersVector);
     if (searchIndex != -1)
     {
         ftpParameters->maximumUserAndPassowrdLoginTries = atoi(((parameter_DataType *) parametersVector->Data[searchIndex])->value);
-        printf("\nMAX_CONNECTION_TRY_PER_IP: %d", ftpParameters->maximumUserAndPassowrdLoginTries);
+        printf(" MAX_CONNECTION_TRY_PER_IP: %d", ftpParameters->maximumUserAndPassowrdLoginTries);
     }
     else
     {
         ftpParameters->maximumUserAndPassowrdLoginTries = 3;
-        printf("\nMAX_CONNECTION_TRY_PER_IP parameter not found in the configuration file, using the default value: %d", ftpParameters->maximumUserAndPassowrdLoginTries);
+        printf(" MAX_CONNECTION_TRY_PER_IP parameter not found in the configuration file, using the default value: %d", ftpParameters->maximumUserAndPassowrdLoginTries);
     }
     
 
@@ -407,13 +407,13 @@ static int parseConfigurationFile(ftpParameters_DataType *ftpParameters, DYNV_Ve
     if (searchIndex != -1)
     {
         ftpParameters->port = atoi(((parameter_DataType *) parametersVector->Data[searchIndex])->value);
-        printf("\nFTP_PORT: %d", ftpParameters->port);
+        printf(" FTP_PORT: %d", ftpParameters->port);
         
     }
     else
     {
         ftpParameters->port = 21;
-        printf("\nFTP_PORT parameter not found in the configuration file, using the default value: %d", ftpParameters->maxClients);
+        printf(" FTP_PORT parameter not found in the configuration file, using the default value: %d", ftpParameters->maxClients);
     }
     
     
@@ -424,11 +424,11 @@ static int parseConfigurationFile(ftpParameters_DataType *ftpParameters, DYNV_Ve
         if(compareStringCaseInsensitive(((parameter_DataType *) parametersVector->Data[searchIndex])->value, "true", strlen("true")) == 1)
             ftpParameters->daemonModeOn = 1;
         
-        printf("\nDAEMON_MODE value: %d", ftpParameters->daemonModeOn);
+        printf(" DAEMON_MODE value: %d", ftpParameters->daemonModeOn);
     }
     else
     {
-        printf("\nDAEMON_MODE parameter not found in the configuration file, using the default value: %d", ftpParameters->daemonModeOn);
+        printf(" DAEMON_MODE parameter not found in the configuration file, using the default value: %d", ftpParameters->daemonModeOn);
     }
     
     ftpParameters->singleInstanceModeOn = 0;
@@ -441,7 +441,7 @@ static int parseConfigurationFile(ftpParameters_DataType *ftpParameters, DYNV_Ve
     }
     else
     {
-        printf("\nSINGLE_INSTANCE parameter not found in the configuration file, using the default value: %d", ftpParameters->singleInstanceModeOn);
+        printf(" SINGLE_INSTANCE parameter not found in the configuration file, using the default value: %d", ftpParameters->singleInstanceModeOn);
     }
 
     ftpParameters->maximumIdleInactivity = 3600;
@@ -449,11 +449,11 @@ static int parseConfigurationFile(ftpParameters_DataType *ftpParameters, DYNV_Ve
     if (searchIndex != -1)
     {
         ftpParameters->maximumIdleInactivity = atoi(((parameter_DataType *) parametersVector->Data[searchIndex])->value);
-        printf("\nIDLE_MAX_TIMEOUT value: %d", ftpParameters->maximumIdleInactivity);
+        printf(" IDLE_MAX_TIMEOUT value: %d", ftpParameters->maximumIdleInactivity);
     }
     else
     {
-        printf("\nIDLE_MAX_TIMEOUT parameter not found in the configuration file, using the default value: %d", ftpParameters->maximumIdleInactivity);
+        printf(" IDLE_MAX_TIMEOUT parameter not found in the configuration file, using the default value: %d", ftpParameters->maximumIdleInactivity);
     }
 
     searchIndex = searchParameter("FTP_SERVER_IP", parametersVector);
@@ -463,7 +463,7 @@ static int parseConfigurationFile(ftpParameters_DataType *ftpParameters, DYNV_Ve
                                                                                                     &ftpParameters->ftpIpAddress[1],
                                                                                                     &ftpParameters->ftpIpAddress[2],
                                                                                                     &ftpParameters->ftpIpAddress[3]);
-        printf("\nFTP_SERVER_IP value: %d.%d.%d.%d",    ftpParameters->ftpIpAddress[0],
+        printf(" FTP_SERVER_IP value: %d.%d.%d.%d",    ftpParameters->ftpIpAddress[0],
                                                         ftpParameters->ftpIpAddress[1],
                                                         ftpParameters->ftpIpAddress[2],
                                                         ftpParameters->ftpIpAddress[3]);
@@ -474,7 +474,7 @@ static int parseConfigurationFile(ftpParameters_DataType *ftpParameters, DYNV_Ve
         ftpParameters->ftpIpAddress[1] = 0;
         ftpParameters->ftpIpAddress[2] = 0;
         ftpParameters->ftpIpAddress[3] = 1;       
-        printf("\nFTP_SERVER_IP parameter not found in the configuration file, listening on all available networks");
+        printf(" FTP_SERVER_IP parameter not found in the configuration file, listening on all available networks");
     }    
     
     /* USER SETTINGS */
@@ -504,17 +504,17 @@ static int parseConfigurationFile(ftpParameters_DataType *ftpParameters, DYNV_Ve
         searchUserOwnerIndex = searchParameter(userOwnerX, parametersVector);
         searchGroupOwnerIndex = searchParameter(groupOwnerX, parametersVector);        
         
-        //printf("\ngroupOwnerX = %s", groupOwnerX);
-        //printf("\nuserOwnerX = %s", userOwnerX);
-        //printf("\nsearchUserOwnerIndex = %d", searchUserOwnerIndex);
-        //printf("\nsearchGroupOwnerIndex = %d", searchGroupOwnerIndex);
+        //printf(" groupOwnerX = %s", groupOwnerX);
+        //printf(" userOwnerX = %s", userOwnerX);
+        //printf(" searchUserOwnerIndex = %d", searchUserOwnerIndex);
+        //printf(" searchGroupOwnerIndex = %d", searchGroupOwnerIndex);
 
         
         if (searchUserIndex == -1 ||
             searchPasswordIndex == -1 ||
             searchHomeIndex == -1)
         {
-            printf("\n BREAK ");
+            printf(" BREAK ");
             break;
         }
 
@@ -555,15 +555,15 @@ static int parseConfigurationFile(ftpParameters_DataType *ftpParameters, DYNV_Ve
             userData.ownerShip.userOwnerString  = NULL;
         }
 
-        printf("\n\nUser parameter found");
-        printf("\nName: %s", userData.name);
-        printf("\nPassword: %s", userData.password);
-        printf("\nHomePath: %s", userData.homePath);
-        printf("\ngroupOwnerStr: %s", userData.ownerShip.groupOwnerString);
-        printf("\nuserOwnerStr: %s", userData.ownerShip.userOwnerString);        
-        printf("\nuserData.gid = %d", userData.ownerShip.gid);
-        printf("\nuserData.uid = %d", userData.ownerShip.uid);
-        printf("\nuserData.ownerShipSet = %d", userData.ownerShip.ownerShipSet);
+        printf(" User parameter found");
+        printf(" Name: %s", userData.name);
+        printf(" Password: %s", userData.password);
+        printf(" HomePath: %s", userData.homePath);
+        printf(" groupOwnerStr: %s", userData.ownerShip.groupOwnerString);
+        printf(" userOwnerStr: %s", userData.ownerShip.userOwnerString);        
+        printf(" userData.gid = %d", userData.ownerShip.gid);
+        printf(" userData.uid = %d", userData.ownerShip.uid);
+        printf(" userData.ownerShipSet = %d", userData.ownerShip.ownerShipSet);
         
         
         ftpParameters->usersVector.PushBack(&ftpParameters->usersVector, &userData, sizeof(usersParameters_DataType));

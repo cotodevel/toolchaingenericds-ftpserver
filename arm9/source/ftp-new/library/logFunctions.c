@@ -33,7 +33,7 @@ void printTimeStamp(void)
 {
    // time_t ltime; /* calendar time */
    // ltime=time(NULL); /* get current cal time */
-   // printf("\n\n %s -->",asctime( localtime(&ltime) ) );
+   // printf(" %s -->",asctime( localtime(&ltime) ) );
 }
 
 void makeTimeout(struct timespec *tsp, long seconds)

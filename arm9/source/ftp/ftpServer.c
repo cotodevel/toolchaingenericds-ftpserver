@@ -13,7 +13,6 @@
 #include <netdb.h>
 
 
-
 /*FTP server*/
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -53,42 +52,45 @@ void ftp_server_setup(){
 	if(sock1 == -1)
 	{
 		printf("Socket creation failed");
-		//exit(1);
+		return;
 	}
 	
 	//set server
+	memset(&server, 0, sizeof(server));
+	memset(&client, 0, sizeof(client));
+	
 	srv_len = sizeof(server);
 	server.sin_port = htons((int)FTP_PORT);//default listening port
-	server.sin_addr.s_addr = inet_addr("192.168.43.108"); //192.168.43.108
+	
+	server.sin_addr.s_addr = inet_addr((const char*)print_ip((uint32)Wifi_GetIP()));	//this DS Console IP is server.
+	
 	k = bind(sock1,(struct sockaddr*)&server,srv_len);
 	if(k == -1)
 	{
 		printf("Binding error");
-		//exit(1);
+		return;
 	}
 	k = listen(sock1,1);
 	if(k == -1)
 	{
 		printf("Listen failed");
-		//exit(1);
+		return;
 	}
 	
-	iprintf("\t FTP Server Begins\n");
-	iprintf("server address: %s\n", inet_ntoa( server.sin_addr));
-	iprintf("local port: %d\n", (int) ntohs(server.sin_port));
+	printf("FTP Server Begins");
+	printf("server address: %s ", inet_ntoa(server.sin_addr));
+	printf("local port: %d ", (int) ntohs(server.sin_port));
 	
-	
-	iprintf("WAITING FOR CONNECTION");
+	printf("Waiting for connection:");
 	sock2 = accept(sock1,(struct sockaddr*)&client, &cli_len);
 	i = 1;
 	
-		
 	//will print once client is connected
-	iprintf("\t Client Connected\n");
+	printf("Client Connected ");
 	ftpResponseSender(sock2, 200, "hello");
 	
-	iprintf("client address: %s\n", inet_ntoa( client.sin_addr));
-	iprintf("client port: %d\n", (int) ntohs(client.sin_port));
+	printf("client address: %s ", inet_ntoa( client.sin_addr));
+	printf("client port: %d ", (int) ntohs(client.sin_port));
 	
 
 }
@@ -114,7 +116,7 @@ int ftp_openCommandChannel()
 		
 	}
 	
-	iprintf("WAITING FOR CONNECTION FROM CLIENT \n");
+	printf("Waiting for connection from Client. ");
 	
 	int ret  = accept(sock1,(struct sockaddr*)&client, &cli_len);
 	
@@ -134,9 +136,9 @@ int ftp_openCommandChannel()
 		//fcntl(ret, F_SETFL, O_NONBLOCK);
 		
 		//will print once client is connected
-		//iprintf("\t Client Connected\n");
-		//iprintf("client address: %s\n", inet_ntoa( client.sin_addr));
-		//iprintf("client port: %d\n", (int) ntohs(client.sin_port));
+		//printf(" Client Connected ");
+		//printf("client address: %s ", inet_ntoa( client.sin_addr));
+		//printf("client port: %d ", (int) ntohs(client.sin_port));
 		
 	}
 
@@ -145,14 +147,14 @@ int ftp_openCommandChannel()
 */
 /*
 int updateclient_ftp_conn(){
-	iprintf("WAITING FOR CONNECTION");
+	printf("Waiting for connection. ");
 	sock2 = accept(sock1,(struct sockaddr*)&client, &cli_len);
 	i = 1;
 	
 	//will print once client is connected
-	iprintf("\t Client Connected\n");
-	iprintf("client address: %s\n", inet_ntoa( client.sin_addr));
-	iprintf("client port: %d\n", (int) ntohs(client.sin_port));
+	printf("Client Connected. ");
+	printf("client address: %s ", inet_ntoa( client.sin_addr));
+	printf("client port: %d ", (int) ntohs(client.sin_port));
 	
 
 }
@@ -165,7 +167,7 @@ int ftp_getConnection()
 	//Do we have Client activity?
 	if(connfd>=0)
 	{
-		iprintf("received connection ! %d\ngreeting... \n ",connfd);
+		printf("received connection! Socket: %d welcome! ",connfd);
 		ftpResponseSender(connfd, 200, "hello");
 	}
 	return connfd;
@@ -185,7 +187,7 @@ int do_ftp_server(){
 	
 	//test
 	/*
-	iprintf("CMD: %s \n",command);
+	printf("CMD: %s ",command);
 	
 	//LOGIN PART
 	if(!strcmp(command, "USER"))
@@ -195,7 +197,7 @@ int do_ftp_server(){
 	
 	if(!strcmp(command, "PASS"))
 	{
-		iprintf("PASS");
+		printf("PASS");
 	}
 	
 	if(!strcmp(command, "ls"))
@@ -267,7 +269,7 @@ int do_ftp_server(){
 
 	else if(!strcmp(command, "bye") || !strcmp(command, "quit"))
 	{
-		printf("FTP server quitting..\n");
+		printf("FTP server quitting.. ");
 		i = 1;
 		send(sock2, &i, sizeof(int), 0);
 		//exit(0);
@@ -279,18 +281,18 @@ int do_ftp_server(){
 	//void * memcpy ( void * destination, const void * source, size_t num );
 	memcpy ((u8*)command,(u8*)buffer, 4);
 	
-	iprintf("CMD: %s \n",command);
+	printf("CMD: %s ",command);
 	
 	if(!strcmp(command, "USER"))
 	{
-		iprintf("sent user resp!\n ");
+		printf("Sent user resp! ");
 		ftp_cmd_USER(sock2, 200, "password ?");
 		valid = true;
 	}
 	
 	if(!strcmp(command, "PASS"))
 	{
-		iprintf("sent pass resp!\n ");
+		printf("Sent pass resp! ");
 		ftp_cmd_PASS(sock2, 200, "ok");
 		valid = true;
 	}
@@ -315,7 +317,7 @@ int do_ftp_server(){
 	
 	//default unsupported, accordingly by: https://cr.yp.to/ftp/syst.html
 	if(!strcmp(command, "SYST")){
-		iprintf("sent SYST cmd \n");
+		printf("sent SYST cmd ");
 		ftp_cmd_SYST(sock2, 215, "UNIX Type: L8");
 		valid = true;
 	}
@@ -324,7 +326,7 @@ int do_ftp_server(){
 	if(!strcmp(command, "TYPE")){
 		//227
 		//500, 501, 502, 421, 530
-		iprintf("set PASV response \n");
+		printf("set PASV response ");
 		ftp_cmd_TYPE(sock2, 227, "Entering Passive Mode");
 		//while(1==1){}	//after this it does nothing. check why
 		valid = true;
@@ -358,25 +360,24 @@ int do_ftp_server(){
 			
 			memcpy ( currentPath, (u8*) getpwd((const char *)currentPath), sizeof(getpwd((const char *)currentPath)));
 			
-			//fprintf(stdout, "Current working dir: %s\n", cwd);
-			iprintf("PWD OK: %s \n",currentPath);
+			//fprintf(stdout, "Current working dir: %s ", cwd);
+			printf("PWD OK: %s ",currentPath);
 		}
 		else{
-			//perror("getcwd() error");
-			iprintf("PWD PHAIL \n");
+			printf("getcwd() error");
 		}
 		*/
 		
 		//void * memcpy ( void * destination, const void * source, size_t num );
 		//memcpy((u8*)tmpStr,cwd,sizeof(cwd));
 		
-		iprintf("trying dir: %s",currentPath);
+		printf("trying dir: %s",currentPath);
 		
 		if (chdir(currentPath)) {
-			iprintf("PWD ERROR");
+			printf("PWD ERROR");
 		}
 		else{
-			iprintf("PWD OK");
+			printf("PWD OK");
 		}
 		
 		//while(1==1){}	//works so far.

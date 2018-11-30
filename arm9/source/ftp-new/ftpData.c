@@ -227,7 +227,7 @@ int writeListDataInfoToSocket(char * thePath, int theSocket, int *filesNumber, i
     FILE_GetDirectoryInodeList(thePath, &fileList, &fileAndFoldersCount, 0);
     *filesNumber = fileAndFoldersCount;
 
-    returnCode = dprintf(theSocket, "total %d\r\n", fileAndFoldersCount);
+    returnCode = printf(theSocket, "total %d ", fileAndFoldersCount);
     if (returnCode <= 0)
     {
         return -1;
@@ -247,14 +247,13 @@ int writeListDataInfoToSocket(char * thePath, int theSocket, int *filesNumber, i
         data.isFile = 0;
         data.isDirectory = 0;
         
-        
-        //printf("\nPROCESSING: %s", fileList[i]);
-        //fflush(0);
+        //printf(" PROCESSING: %s", fileList[i]);
         
         if (FILE_IsDirectory(fileList[i]) == 1)
         {
-            //printf("\nis directory");
+            //printf(" Is directory");
             //fflush(0);
+			
             data.isDirectory = 1;
             data.isFile = 0;
             data.isLink = 0;
@@ -263,7 +262,7 @@ int writeListDataInfoToSocket(char * thePath, int theSocket, int *filesNumber, i
         }
         else if (FILE_IsFile(fileList[i]) == 1)
         {
-            //printf("\nis file");
+            //printf(" Is file");
             //fflush(0);
             data.isDirectory = 0;
             data.isFile = 1;
@@ -273,12 +272,12 @@ int writeListDataInfoToSocket(char * thePath, int theSocket, int *filesNumber, i
         }
         if (data.isDirectory == 0 && data.isFile == 0)
         {
-            //printf("\nNot a directory, not a file, broken link");
+            //printf(" Not a directory, not a file, broken link");
             continue;
         }
         
       
-        //printf("\nFILE SIZE : %lld", data.fileSize);
+        //printf(" FILE SIZE : %lld", data.fileSize);
 
         data.owner = FILE_GetOwner(fileList[i]);
         data.groupOwner = FILE_GetGroupOwner(fileList[i]);
@@ -316,7 +315,7 @@ int writeListDataInfoToSocket(char * thePath, int theSocket, int *filesNumber, i
         {
             case COMMAND_TYPE_LIST:
             {
-                returnCode = dprintf(theSocket, "%s %d %s %s %lld %s %s\r\n", 
+                returnCode = printf(theSocket, "%s %d %s %s %lld %s %s ", 
                 data.inodePermissionString == NULL? "Uknown" : data.inodePermissionString
                 ,data.numberOfSubDirectories
                 ,data.owner == NULL? "Uknown" : data.owner
@@ -330,14 +329,14 @@ int writeListDataInfoToSocket(char * thePath, int theSocket, int *filesNumber, i
             
             case COMMAND_TYPE_NLST:
             {
-            returnCode = dprintf(theSocket, "%s\r\n",data.fileNameNoPath);    
+            returnCode = printf(theSocket, "%s ",data.fileNameNoPath);    
             }
             break;
 
             
             default:
             {
-                printf("\nWarning switch default in function writeListDataInfoToSocket (%d)", commandType);
+                printf(" Warning switch default in function writeListDataInfoToSocket (%d)", commandType);
             }
             break;
 
@@ -387,7 +386,7 @@ int searchInLoginFailsVector(void * loginFailsVector, void *element)
     {
         if (strcmp( ((loginFailsDataType *) element)->ipAddress, (((loginFailsDataType *) ((DYNV_VectorGenericDataType *)loginFailsVector)->Data[i])->ipAddress)) == 0)
         {
-            //printf("\n\n***IP address found: %s in %d", ((loginFailsDataType *) element)->ipAddress, i);
+            //printf(" ***IP address found: %s in %d", ((loginFailsDataType *) element)->ipAddress, i);
             return i;
         }
     }
@@ -407,7 +406,7 @@ void getListDataInfo(char * thePath, DYNV_VectorGenericDataType *directoryInfo)
     ftpListDataType data;
     FILE_GetDirectoryInodeList(thePath, &data.fileList, &fileAndFoldersCount, 0);
     
-    //printf("\nNUMBER OF FILES: %d", fileAndFoldersCount);
+    //printf(" NUMBER OF FILES: %d", fileAndFoldersCount);
     //fflush(0);
     
     for (i = 0; i < fileAndFoldersCount; i++)
@@ -424,12 +423,12 @@ void getListDataInfo(char * thePath, DYNV_VectorGenericDataType *directoryInfo)
         data.isDirectory = 0;
         
         
-        //printf("\nPROCESSING: %s", data.fileList[i]);
+        //printf(" PROCESSING: %s", data.fileList[i]);
         //fflush(0);
         
         if (FILE_IsDirectory(data.fileList[i]) == 1)
         {
-            //printf("\nis file");
+            //printf(" Is file");
             //fflush(0);
             data.isDirectory = 1;
             data.isFile = 0;
@@ -438,7 +437,7 @@ void getListDataInfo(char * thePath, DYNV_VectorGenericDataType *directoryInfo)
         }
         else if (FILE_IsFile(data.fileList[i]) == 1)
         {
-            //printf("\nis file");
+            //printf("Is file");
             //fflush(0);
             data.isDirectory = 0;
             data.isFile = 1;
@@ -447,11 +446,11 @@ void getListDataInfo(char * thePath, DYNV_VectorGenericDataType *directoryInfo)
         }
         if (data.isDirectory == 0 && data.isFile == 0)
         {
-            printf("\nNot a directory, not a file, broken link");
+            printf("Not a directory, not a file, broken link");
             continue;
         }
         
-        printf("\nFILE SIZE : %lld", data.fileSize);
+        printf("FILE SIZE : %lld", data.fileSize);
 
         data.owner = FILE_GetOwner(data.fileList[i]);
         data.groupOwner = FILE_GetGroupOwner(data.fileList[i]);

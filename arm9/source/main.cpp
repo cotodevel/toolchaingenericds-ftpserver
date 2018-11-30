@@ -73,6 +73,8 @@ using namespace std;
 #include "notifierProcessor.h"
 #include "limitsTGDS.h"
 #include "ftpserver.h" //#include "ftpServer.h"
+#include "wifi_arm9.h"
+#include "dswnifi_lib.h"
 
 char curChosenBrowseFile[MAX_TGDSFILENAME_LENGTH+1];
 
@@ -143,7 +145,6 @@ std::string parsefileNameTGDS(std::string fileName){
 int main(int _argc, sint8 **_argv) {
 	
 	/*			TGDS 1.4 Standard ARM9 Init code start	*/
-	IRQInit();
 	
 	bool project_specific_console = false;	//set default console or custom console: default console
 	GUI_init(project_specific_console);
@@ -162,9 +163,13 @@ int main(int _argc, sint8 **_argv) {
 	}
 	/*			TGDS 1.4 Standard ARM9 Init code end	*/
 	
+	printf("    ");
+	printf("    ");
+	
 	//custom Handler
 	menuShow();
 	
+	connectDSWIFIAP(DSWNIFI_ENTER_WIFIMODE);
 	ftp_server_setup();
 	
 	while (1){

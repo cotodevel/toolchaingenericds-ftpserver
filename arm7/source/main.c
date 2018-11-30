@@ -33,7 +33,6 @@ USA
 int main(int _argc, sint8 **_argv) {
 //---------------------------------------------------------------------------------
 	/*			TGDS 1.4 Standard ARM7 Init code start	*/
-	IRQInit();
 	installWifiFIFO();		
 	/*			TGDS 1.4 Standard ARM7 Init code end	*/
 	

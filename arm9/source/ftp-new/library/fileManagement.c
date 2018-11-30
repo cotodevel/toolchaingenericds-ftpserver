@@ -198,7 +198,7 @@ void FILE_GetDirectoryInodeList(char * DirectoryInodeName, char *** InodeList, i
     
     if (FILE_IsDirectory(DirectoryInodeName))
     {
-        printf("\nReading directory: %s", DirectoryInodeName);
+        printf(" Reading directory: %s", DirectoryInodeName);
         
         DIR *TheDirectory;
         struct dirent *dir;
@@ -242,7 +242,7 @@ void FILE_GetDirectoryInodeList(char * DirectoryInodeName, char *** InodeList, i
     }
     else if (FILE_IsFile(DirectoryInodeName))
     {
-        printf("\nAdding single file to inode list: %s", DirectoryInodeName);
+        printf(" Adding single file to inode list: %s", DirectoryInodeName);
         int ReallocSize = sizeof(char *) * (FileAndFolderIndex+1)+1;
         (*InodeList) = (char ** ) realloc((*InodeList), ReallocSize );
         int nsize = strlen(DirectoryInodeName) * sizeof(char) + 2;
@@ -255,7 +255,7 @@ void FILE_GetDirectoryInodeList(char * DirectoryInodeName, char *** InodeList, i
     }
     else
     {
-        printf("\n%s is not a file or a directory", DirectoryInodeName);
+        printf(" %s is not a file or a directory", DirectoryInodeName);
         //No valid path specified, returns zero elements
         (*FilesandFolders) = 0;
     }
@@ -482,22 +482,22 @@ int FILE_StringParametersBinarySearch(DYNV_VectorGenericDataType *TheVectorGener
 	while (littler <= last)
 		{
 		CompareResult = strcmp(((FILE_StringParameter_DataType *)TheVectorGeneric->Data[middle])->Name, Needle);
-		//printf("CompareResult = %d.\n", CompareResult);
+		//printf("CompareResult = %d. ", CompareResult);
 
 		if ((CompareResult == 0))
 			{
-			//printf("%d found at location %d.\n", Needle, middle);
+			//printf("%d found at location %d. ", Needle, middle);
 			return middle;
 			}
 			else if (CompareResult < 0)
 			{
 			littler = middle + 1;
-			//printf("Needle bigger than middle  at %d .\n", middle);
+			//printf("Needle bigger than middle  at %d . ", middle);
 			}
 		else
 			{
 			last = middle - 1;
-			//printf("Needle lower than middle  at %d.\n", middle);
+			//printf("Needle lower than middle  at %d. ", middle);
 			}
 
 			middle = (littler + last)/2;
@@ -505,7 +505,7 @@ int FILE_StringParametersBinarySearch(DYNV_VectorGenericDataType *TheVectorGener
 
 	if (littler > last)
 		{
-		//printf("Not found! %d is not present in the list.\n", Needle);
+		//printf("Not found! %d is not present in the list.", Needle);
 		return -1;
 		}
 
@@ -615,11 +615,11 @@ void FILE_AppendToString(char ** sourceString, char *theString)
 
 void FILE_DirectoryToParent(char ** sourceString)
 {
-    //printf("\n");
+    //printf(" ");
    int i = 0, theLastSlash = -1, strLen = 0;
 
    strLen = strlen(*sourceString);
-   //printf("\nstrLen = %d", strLen);
+   //printf(" strLen = %d", strLen);
 
    for (i = 0; i < strLen; i++)
    {
@@ -627,7 +627,7 @@ void FILE_DirectoryToParent(char ** sourceString)
        if ( (*sourceString)[i] == '/')
        {
            theLastSlash = i;
-           //printf("\n theLastSlash = %d", theLastSlash);
+           //printf(" theLastSlash = %d", theLastSlash);
        }
    }
 

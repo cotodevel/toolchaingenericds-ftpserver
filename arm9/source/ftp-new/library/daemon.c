@@ -49,9 +49,10 @@ int isProcessAlreadyRunning(void)
     if (fd < 0) 
     {
         printf("can't open %s: %s", LOCKFILE, strerror(errno));
-        exit(1);
+        //exit(1);
+		return -1;
     }
-    //printf("\nFile pid opened.");
+    //printf(" File pid opened.");
     
     if ((returnCode = FILE_LockFile(fd)) < 0) 
     {
@@ -61,10 +62,10 @@ int isProcessAlreadyRunning(void)
         return(1);
         }
         printf("can't lock %s: %s", LOCKFILE, strerror(errno));
-        exit(1);
+        return -1;	//exit(1);
     }
     
-    //printf("\nFILE_LockFile returnCode = %d", returnCode);    
+    //printf(" FILE_LockFile returnCode = %d", returnCode);    
     ftruncate(fd, 0);
     sprintf(buf, "%ld", (long)getpid());
     write(fd, buf, strlen(buf)+1);
@@ -96,9 +97,9 @@ void daemonize(const char *cmd)
     */
     if ((pid = fork()) < 0)
         printf("%s: can’t fork", cmd);
-    else if (pid != 0) /* parent */
-        exit(0);
-    
+    else if (pid != 0){ /* parent */
+        return;	//exit(0);
+	}
     setsid();
     
     /*
@@ -112,8 +113,9 @@ void daemonize(const char *cmd)
         printf("%s: can’t ignore SIGHUP", cmd);
     if ((pid = fork()) < 0)
         printf("%s: can’t fork", cmd);
-    else if (pid != 0) /* parent */
-    exit(0);
+    else if (pid != 0){ /* parent */
+		return; //exit(0);
+	}
     /*
     * Change the current working directory to the root so
     * we won’t prevent file systems from being unmounted.

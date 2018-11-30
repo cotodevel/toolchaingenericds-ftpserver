@@ -53,7 +53,7 @@ void DYNV_VectorGeneric_InitWithSearchFunction(DYNV_VectorGenericDataType *TheVe
 void DYNV_VectorGeneric_PushBack(DYNV_VectorGenericDataType *TheVectorGeneric, void * TheElementData, int TheElementSize)
 {
 
-    //printf("\nPush back Address of TheVector = %lX", TheVectorGeneric);
+    //printf(" Push back Address of TheVector = %lX", TheVectorGeneric);
 
     if (TheVectorGeneric->Data != NULL)
     {

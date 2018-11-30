@@ -52,9 +52,9 @@ using namespace std;
 #include "fileHandleTGDS.h"
 #include "reent.h"
 #include "sys/types.h"
+#include "typedefsTGDS.h"
 #include "dsregs.h"
 #include "dsregs_asm.h"
-#include "typedefsTGDS.h"
 #include "consoleTGDS.h"
 #include "utilsTGDS.h"
 
@@ -72,7 +72,7 @@ using namespace std;
 #include "nds_cp15_misc.h"
 #include "notifierProcessor.h"
 #include "limitsTGDS.h"
-#include "ftpServer.h"
+#include "ftpserver.h" //#include "ftpServer.h"
 
 char curChosenBrowseFile[MAX_TGDSFILENAME_LENGTH+1];
 
@@ -165,9 +165,12 @@ int main(int _argc, sint8 **_argv) {
 	//custom Handler
 	menuShow();
 	
-	runFtpServer();
+	ftp_server_setup();
 	
 	while (1){
+	
+		do_ftp_server();
+		
 		scanKeys();
 		
 		if (keysPressed() & KEY_A){

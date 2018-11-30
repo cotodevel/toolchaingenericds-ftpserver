@@ -1,38 +1,73 @@
-/*
- * The MIT License
- *
- * Copyright 2018 Ugo Cirmignani.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
+#ifndef FTP_SERVER_H
+#define FTP_SERVER_H
+
+#define FTP_PORT 21
+
+#include "typedefsTGDS.h"
+#include "dsregs.h"
+#include "dsregs_asm.h"
+
+#include <stdarg.h>
+#include <string.h>
+#include <unistd.h>
+
+#include <dswifi9.h>
+#include <netdb.h>
 
 
-#ifndef FTPSERVER_H
-#define FTPSERVER_H
+/*FTP server*/
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+ 
+/*for getting file size using stat()*/
+#include<sys/stat.h>
+ 
+/*for sendfile()*/
+//#include<sys/sendfile.h>
+ 
+/*for O_RDONLY*/
+#include<fcntl.h>
+#include "util.h"
+#include "sgIP_Config.h"
 
-#define MAX_FTP_CLIENTS                 10
-#define UFTP_SERVER_VERSION             "1.0.1 beta"
 
-void runFtpServer(void);
-void *connectionWorkerHandle(void * socketId);
-void workerCleanup(void *socketId);
-void signal_callback_handler(int signum);
+#endif
 
-#endif /* FTPSERVER_H */
+#define MY_PORT_ID 6081
+#define MAXLINE 256
+#define MAXSIZE 512   
 
+#define ACK                   2
+#define NACK                  3
+#define REQUESTFILE           100
+#define COMMANDNOTSUPPORTED   150
+#define COMMANDSUPPORTED      160
+#define BADFILENAME           200
+#define FILENAMEOK            400
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern int do_ftp_server();
+extern void ftp_server_setup();
+
+int ftp_openCommandChannel();
+int ftp_getConnection();
+
+extern struct sockaddr_in server, client;
+extern struct stat obj;
+extern int sock1, sock2;
+extern char buf[100], command[5], filename[20];
+extern int k, i, size, srv_len,cli_len, c;
+extern int filehandle;
+
+extern char currentPath[4096];
+extern char tempBuf[4096];
+
+#ifdef __cplusplus
+}
+#endif

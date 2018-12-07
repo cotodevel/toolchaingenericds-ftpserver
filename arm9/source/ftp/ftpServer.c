@@ -61,8 +61,7 @@ void ftp_server_setup(){
 	
 	srv_len = sizeof(server);
 	server.sin_port = htons((int)FTP_PORT);//default listening port
-	
-	server.sin_addr.s_addr = inet_addr((const char*)print_ip((uint32)Wifi_GetIP()));	//this DS Console IP is server.
+	server.sin_addr.s_addr = INADDR_ANY;	//the socket will be bound to all local interfaces (and we just have one up to this point, being the DS Client IP acquired from the DHCP server).
 	
 	k = bind(sock1,(struct sockaddr*)&server,srv_len);
 	if(k == -1)
@@ -78,7 +77,7 @@ void ftp_server_setup(){
 	}
 	
 	printf("FTP Server Begins");
-	printf("server address: %s ", inet_ntoa(server.sin_addr));
+	printf("server address: %s ", (char*)print_ip((uint32)Wifi_GetIP()));
 	printf("local port: %d ", (int) ntohs(server.sin_port));
 	
 	printf("Waiting for connection:");

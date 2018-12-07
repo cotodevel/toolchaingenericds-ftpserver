@@ -1,11 +1,20 @@
 #ifndef UTIL_NDS
 #define UTIL_NDS
 
-#define BUFFERSIZE 512
+#define BUFFERSIZE (int)(512)
 
 #include "typedefsTGDS.h"
 #include "dsregs.h"
 #include "dsregs_asm.h"
+
+#define FTP_SERVER_IDLE (uint32)(0xffff1010)				//idle -> connect FTP Client (FTP_SERVER_CONNECTING_PHASE1)
+#define FTP_SERVER_CONNECTING (uint32)(0xffff1011)	//FTP Server <--> FTP Client Initial Handshake (FTP_SERVER_CONNECTING_PHASE2)
+#define FTP_SERVER_WORKING (uint32)(0xffff1012)	//FTP Server <--> FTP Client Actual Session. If something fails it will disconnect here.
+
+//error codes
+#define FTP_SERVER_PROC_RUNNING (sint32)(0)
+#define FTP_SERVER_PROC_FAILED (sint32)(-1)
+
 
 #endif
 
@@ -13,9 +22,13 @@
 extern "C" {
 #endif
 
-extern int writen(int sd,char *ptr,int size);
-extern int readn(int sd,char *ptr,int size);
-extern void wy_fileName_collector(char *_buffer, char  *_nameBuffer);
+extern uint32 CurFTPState;
+extern u32 getFTPState();
+extern void setFTPState(uint32 FTPState);
+
+
+extern int recv_all(int sockfd, void *buf, size_t len, int flags);
+extern bool send_all(int socket, void *buffer, size_t length);
 
 int ftpResponseSender(int s, int n, char* mes);
 extern const char * getpwd(const char *cwd);

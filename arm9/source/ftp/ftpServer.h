@@ -53,8 +53,6 @@ extern "C" {
 #endif
 
 extern int do_ftp_server();
-extern void ftp_server_setup();
-
 int ftp_openCommandChannel();
 int ftp_getConnection();
 

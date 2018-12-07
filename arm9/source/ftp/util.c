@@ -36,43 +36,53 @@
 #include "util.h"
 #include "sgIP_Config.h"
 
+uint32 CurFTPState = 0;
+u32 getFTPState(){
+	return CurFTPState;
+}
 
-int readn(int sd,char *ptr,int size)
-{         int no_left,no_read;
-          no_left = size;
-          while (no_left > 0) 
-                     { no_read = read(sd,ptr,no_left);
-                       if(no_read <0)  return(no_read);
-                       if (no_read == 0) break;
-                       no_left -= no_read;
-                       ptr += no_read;
-                     }
-          return(size - no_left);
+void setFTPState(uint32 FTPState){
+	CurFTPState = FTPState;
+} 
+
+int recv_all(int sockfd, void *buf, size_t len, int flags)
+{
+    size_t toread = len;
+    char  *bufptr = (char*) buf;
+    while (toread > 0)
+    {
+        ssize_t rsz = recv(sockfd, bufptr, toread, flags);
+        if (rsz <= 0){
+            return rsz;  /* Error or other end closed cnnection */
+		}
+        toread -= rsz;  /* Read less next time */
+        bufptr += rsz;  /* Next buffer position to read into */
+    }
+
+    return len;
 }
 
 
-int writen(int sd,char *ptr,int size)
-{         int no_left,no_written;
-          no_left = size;
-          while (no_left > 0) 
-                     { no_written = write(sd,ptr,no_left);
-                       if(no_written <=0)  return(no_written);
-                       no_left -= no_written;
-                       ptr += no_written;
-                     }
-          return(size - no_left);
+bool send_all(int socket, void *buffer, size_t length)
+{
+    char *ptr = (char*) buffer;
+    while (length > 0)
+    {
+        int i = send(socket, ptr, length);
+        if (i < 1) return false;
+        ptr += i;
+        length -= i;
+    }
+    return true;
 }
 
 
-//could cause segfaults
 int ftpResponseSender(int s, int n, char* mes)
 {
 	char data[128];
 	sprintf(data, "%d %s ", n, mes);
-	return send(s,data,strlen(data),0);
+	return send_all(s, data, strlen(data));
 }
-
-
 
 
 //FTP CMDS

@@ -168,16 +168,19 @@ int main(int _argc, sint8 **_argv) {
 	
 	//custom Handler
 	menuShow();
-	
-	connectDSWIFIAP(DSWNIFI_ENTER_WIFIMODE);
-	ftp_server_setup();
+	setFTPState(FTP_SERVER_IDLE);
 	
 	while (1){
-	
-		do_ftp_server();
+		
+		sint32 FTP_STATUS = do_ftp_server();
+		if(FTP_STATUS == FTP_SERVER_PROC_RUNNING){
+			//Server Running
+		}
+		else if(FTP_STATUS == FTP_SERVER_PROC_FAILED){
+			//Server Disconnected/Idle!
+		}
 		
 		scanKeys();
-		
 		if (keysPressed() & KEY_A){
 			
 			//FTP

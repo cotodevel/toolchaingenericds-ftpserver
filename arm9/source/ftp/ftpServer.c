@@ -87,9 +87,8 @@ int do_ftp_server(){
 			//prepare socket (server)
 			sock1 = socket(AF_INET, SOCK_STREAM, 0);
 			
-			//can't, the full frame from the DS must be valid to PC Client
 			//int i=1;
-			//i=ioctl(sock1, FIONBIO,&i); // Client Socket: set non-blocking port (so it allows us to retrieve data without blocking more requests DS FTP Server requires)
+			//i=ioctl(sock1, FIONBIO,&i); // Server Socket: Accepted connections can't be blocked or the server will fail to detect client IP
 			
 			if(sock1 == -1){
 				printf("Socket creation failed");
@@ -124,9 +123,9 @@ int do_ftp_server(){
 			   this call.
 			*/
 			sock2 = accept(sock1,(struct sockaddr*)&client, &cli_len);
-			//can't otherwise duplicate packets 
+			
 			//int i=1;
-			//i=ioctl(sock2, FIONBIO,&i); // Client Socket: set non-blocking port (so it allows us to retrieve data without blocking more requests DS FTP Server requires)
+			//i=ioctl(sock2, FIONBIO,&i);
 			
 			//will print once client is connected
 			printf("[Client Connected]");
@@ -138,7 +137,7 @@ int do_ftp_server(){
 		break;
 	
 		case(FTP_SERVER_CONNECTING):{
-			ftpResponseSender(sock2, 200, "ANY-DOMAIN.COM FTP Service");	//after this, a command should be received in the DS
+			ftpResponseSender(sock2, 220, "ANY-DOMAIN.COM FTP Service");	//after this, a command should be received in the DS
 			//todo: find out why client is sending garbage data 
 			
 			setFTPState(FTP_SERVER_WORKING);
@@ -147,13 +146,13 @@ int do_ftp_server(){
 		case(FTP_SERVER_WORKING):{
 			
 			//Actual FTP Service			
-			char buffer[512];
-			memset(buffer, 0, 512);
+			char buffer[1024];
+			memset(buffer, 0, 1024);
 			
 			int flags = 0;
 			int ret = recv_all(sock2, (char*)&buffer[0], sizeof(buffer), flags);
 			
-			if(ret < 0){
+			if((ret < 0) && ((ret != EWOULDBLOCK) && (ret != EAGAIN))){
 				close(sock2);
 				
 				setFTPState(FTP_SERVER_IDLE);

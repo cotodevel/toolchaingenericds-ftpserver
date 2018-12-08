@@ -179,7 +179,7 @@ int main(int _argc, sint8 **_argv) {
 		else if(FTP_STATUS == FTP_SERVER_PROC_FAILED){
 			//Server Disconnected/Idle!
 		}
-		
+		/*
 		scanKeys();
 		if (keysPressed() & KEY_A){
 			
@@ -194,7 +194,7 @@ int main(int _argc, sint8 **_argv) {
 			clrscr();
 			menuShow();
 		}
-		
+		*/
 		IRQVBlankWait();
 	}
 

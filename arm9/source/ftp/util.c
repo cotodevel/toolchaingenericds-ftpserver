@@ -80,8 +80,8 @@ bool send_all(int socket, void *buffer, size_t length)
 int ftpResponseSender(int s, int n, char* mes)
 {
 	char data[128];
-	sprintf(data, "%d %s ", n, mes);
-	return send_all(s, data, strlen(data));
+	sprintf(data, "%d %s \r\n\n", n, mes);
+	return send(s, data, strlen(data));
 }
 
 

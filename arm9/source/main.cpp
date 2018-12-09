@@ -144,13 +144,15 @@ std::string parsefileNameTGDS(std::string fileName){
 
 int main(int _argc, sint8 **_argv) {
 	
-	/*			TGDS 1.4 Standard ARM9 Init code start	*/
-	
+	/*			TGDS 1.5 Standard ARM9 Init code start	*/
 	bool project_specific_console = false;	//set default console or custom console: default console
 	GUI_init(project_specific_console);
 	GUI_clear();
 	
 	sint32 fwlanguage = (sint32)getLanguage();
+	
+	printf("     ");
+	printf("     ");
 	
 	int ret=FS_init();
 	if (ret == 0)
@@ -161,7 +163,8 @@ int main(int _argc, sint8 **_argv) {
 	{
 		printf("FS Init error.");
 	}
-	/*			TGDS 1.4 Standard ARM9 Init code end	*/
+	switch_dswnifi_mode(dswifi_idlemode);
+	/*			TGDS 1.5 Standard ARM9 Init code end	*/
 	
 	printf("    ");
 	printf("    ");

@@ -155,8 +155,6 @@ int main(int _argc, sint8 **_argv) {
 	printf("     ");
 	printf("     ");
 	printf("     ");
-	printf("     ");
-	printf("     ");
 	
 	int ret=FS_init();
 	if (ret == 0)
@@ -170,8 +168,6 @@ int main(int _argc, sint8 **_argv) {
 	switch_dswnifi_mode(dswifi_idlemode);
 	/*			TGDS 1.5 Standard ARM9 Init code end	*/
 	
-	printf("    ");
-	printf("    ");
 	
 	//custom Handler
 	menuShow();

@@ -44,12 +44,6 @@ USA
 
 #endif
 
-//Coto: Hardware IPC struct packed 
-struct sIPCSharedTGDSSpecific* getsIPCSharedTGDSSpecific(){
-	struct sIPCSharedTGDSSpecific* sIPCSharedTGDSSpecificInst = (__attribute__((packed)) struct sIPCSharedTGDSSpecific*)(getUserIPCAddress());
-	return sIPCSharedTGDSSpecificInst;
-}
-
 //inherits what is defined in: common_shared.c
 #ifdef ARM9
 __attribute__((section(".itcm")))
@@ -57,12 +51,12 @@ __attribute__((section(".itcm")))
 void HandleFifoNotEmptyWeakRef(uint32 cmd1,uint32 cmd2,uint32 cmd3,uint32 cmd4){
 	
 	switch (cmd1) {
-		//NDS7: uses NDS IPC FIFO as a layer from GBA IO @ ARM9
+		//NDS7: 
 		#ifdef ARM7
 		
 		#endif
 		
-		//NDS9: uses NDS IPC FIFO as a layer from GBA IO @ ARM7
+		//NDS9: 
 		#ifdef ARM9
 		
 		#endif

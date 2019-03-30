@@ -153,6 +153,10 @@ int main(int _argc, sint8 **_argv) {
 	
 	printf("     ");
 	printf("     ");
+	printf("     ");
+	printf("     ");
+	printf("     ");
+	printf("     ");
 	
 	int ret=FS_init();
 	if (ret == 0)

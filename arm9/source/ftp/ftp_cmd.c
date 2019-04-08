@@ -3,7 +3,7 @@
 #include "dsregs_asm.h"
 
 #include "ftp_cmd.h"
-#include "ftpserver.h"
+#include "ftpServer.h"
 
 #include <stdarg.h>
 #include <string.h>

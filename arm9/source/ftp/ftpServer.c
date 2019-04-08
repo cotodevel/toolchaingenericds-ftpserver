@@ -1,4 +1,4 @@
-#include "ftpserver.h"
+#include "ftpServer.h"
 #include "ftp_cmd.h"
 #include "main.h"
 

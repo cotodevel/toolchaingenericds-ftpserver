@@ -72,7 +72,7 @@ using namespace std;
 #include "nds_cp15_misc.h"
 #include "notifierProcessor.h"
 #include "limitsTGDS.h"
-#include "ftpserver.h" //#include "ftpServer.h"
+#include "ftpServer.h"
 #include "wifi_arm9.h"
 #include "dswnifi_lib.h"
 

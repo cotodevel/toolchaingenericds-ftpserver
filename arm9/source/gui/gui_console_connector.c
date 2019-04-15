@@ -24,11 +24,11 @@ USA
 
 ////////[For custom Console implementation]:////////
 //You need to override :
-	//vramSetup * getProjectSpecificVRAMSetup()
+	//ConsoleInstance * getProjectSpecificVRAMSetup()
 	//Which provides a proper custom 2D VRAM setup
 
 //Then override :
-	//bool InitProjectSpecificConsole()
+	//bool InitProjectSpecificConsole(ConsoleInstance * ConsoleInstanceInst)
 	//Which provides the console init code, example not available here, checkout projects that support Custom console implementation.
 
 //After that you can call :
@@ -48,14 +48,13 @@ USA
 
 
 //Definition that overrides the weaksymbol expected from toolchain to init console video subsystem
-vramSetup * getProjectSpecificVRAMSetup(){
+ConsoleInstance * getProjectSpecificVRAMSetup(){
 	return NULL;
 }
 
 
 //2) Uses subEngine: VRAM Layout -> Console Setup
-bool InitProjectSpecificConsole(){
-	DefaultSessionConsole = (ConsoleInstance *)(&CustomConsole);
-	InitializeConsole(DefaultSessionConsole);
+bool InitProjectSpecificConsole(ConsoleInstance * ConsoleInstanceInst){
+	UpdateConsoleSettings(ConsoleInstanceInst);
 	return true;
 }

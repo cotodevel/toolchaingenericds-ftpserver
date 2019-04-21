@@ -80,6 +80,7 @@ export DIRS_ARM9_HEADER = include/	\
 			source/gui/	\
 			../common/	\
 			../$(PosIndCodeDIR_FILENAME)/$(DIR_ARM9)/include/	\
+			source/	\
 			source/ftp/	\
 			source/ftp/library
 

@@ -14,17 +14,21 @@
 
 servercore::servercore(uint port, std::string dir, unsigned short commandOffset) : dir(dir), commandOffset(commandOffset), shutdown(false), connId(0) {
 	
-	printf("inside servercore(uint port, std::string dir, unsigned short commandOffset) : dir(dir), commandOffset(commandOffset), shutdown(false), connId(0)");
-	
-	while (1){
-		IRQVBlankWait();
+    if (chdir(dir.c_str())){
+        printf("Directory could not be changed to %s",dir.c_str());
+		while (1){
+			IRQVBlankWait();
+		}
 	}
+	else{
+		printf("Directory change success: %s",dir.c_str());
+	}
+	this->initSockets(port);
+    
+	printf("inside servercore() -> initSockets OK");
 	
 	
-    if (chdir(dir.c_str()))
-        std::cerr << "Directory could not be changed to '" << dir << "'!" << std::endl;
-    this->initSockets(port);
-    this->start();
+	this->start();
 }
 
 // Free up used memory by cleaning up all the object variables;
@@ -86,7 +90,7 @@ int servercore::handleNewConnection() {
     }
 
     // Gets the socket fd flags and add the non-blocking flag to the sfd
-    this->setNonBlocking(fd);
+    this->setNonBlocking(&fd);
 
     // Something (?) went wrong, new connection could not be handled
     if (fd == -1) {
@@ -162,7 +166,8 @@ int servercore::start() {
 }
 
 // Sets the given socket to non-blocking mode
-void servercore::setNonBlocking(int &sock) {
+void servercore::setNonBlocking(int *sock) {
+	/*
     this->sflags = fcntl(sock, F_GETFL); // Get socket flags
     int opts = fcntl(sock,F_GETFL, 0);
     if (opts < 0) {
@@ -174,37 +179,52 @@ void servercore::setNonBlocking(int &sock) {
         std::cerr << "Error setting socket to non-blocking" << std::endl;
         return;
     }
+	*/
+	
+	int i=1;
+	i=ioctl(*sock,FIONBIO,&i); // set non-blocking port
+	
 }
 
 // Initialization of sockets / socket list with options and error checking
 void servercore::initSockets(int port) {
-    int reuseAllowed = 1;
+    
+	int reuseAllowed = 1;
     this->maxConnectionsInQuery = 50;
     this->addr.sin_family = AF_INET; // PF_INET;
     this->addr.sin_port = htons(port);
     this->addr.sin_addr.s_addr = INADDR_ANY; // Server can be connected to from any host
-    // PF_INET: domain, Internet; SOCK_STREAM: datastream, TCP / SOCK_DGRAM = UDP => WARNING, this can change the byte order!; for 3rd parameter==0: TCP preferred
+    
+	if(connectDSWIFIAP(DSWNIFI_ENTER_WIFIMODE) == true){
+		printf("Wifi connect OK");
+	}
+	else{
+		printf("Wifi connect ERROR");
+	}
+	
+	// PF_INET: domain, Internet; SOCK_STREAM: datastream, TCP / SOCK_DGRAM = UDP => WARNING, this can change the byte order!; for 3rd parameter==0: TCP preferred
     this->s = socket(PF_INET, SOCK_STREAM, 0);
-    if (this->s == -1) {
-        std::cerr << "socket() failed" << std::endl;
+	if (this->s == -1) {
+        printf("socket() failed");
         return;
     }
     else if (setsockopt(this->s, SOL_SOCKET, SO_REUSEADDR, &reuseAllowed, sizeof(reuseAllowed)) < 0) { //  enable reuse of socket, even when it is still occupied
-        std::cerr << "setsockopt() failed" << std::endl;
+        printf("setsockopt() failed");
         close (this->s);
         return;
     }
-    this->setNonBlocking(this->s);
+	
+    this->setNonBlocking(&this->s);
     if (bind(this->s, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
-        std::cerr << ("bind() failed (do you have the apropriate rights? is the port unused?)") << std::endl;
-        close (this->s);
+        printf("bind() failed (do you have the apropriate rights? is the port unused?)");
+		close (this->s);
         return;
     } // 2nd parameter (backlog): number of connections in query, can be also set SOMAXCONN
     else if (listen(this->s, this->maxConnectionsInQuery) == -1) {
-        std::cerr << ("listen () failed") << std::endl;
-        close (this->s);
+        printf("listen() failed");
+		close (this->s);
         return;
     }
     this->highSock = this->s; // This is the first (and the main listening) socket
-    std::cout << "Server started and listening at port " << port << ", default server directory '" << this->dir << "'" << ((this->commandOffset == 3) ? ", for use with telnet" : "")  << std::endl;
+    printf("Server started and listening at port %d , default server directory %s - %s ",port, this->dir.c_str(), ((this->commandOffset == 3) ? ", for use with telnet" : ""));
 }

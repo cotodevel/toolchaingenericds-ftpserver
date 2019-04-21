@@ -10,7 +10,7 @@
 
 // Destructor, clean up all the mess
 serverconnection::~serverconnection() {
-    std::cout << "Connection terminated to client (connection id " << this->connectionId << ")" << std::endl;
+    printf("Connection terminated to client (connection id %d)", this->connectionId);
     delete this->fo;
     close(this->fd);
     this->directories.clear();
@@ -21,7 +21,7 @@ serverconnection::~serverconnection() {
 serverconnection::serverconnection(int filedescriptor, unsigned int connId, std::string defaultDir, std::string hostId, unsigned short commandOffset) : fd(filedescriptor), connectionId(connId), dir(defaultDir), hostAddress(hostId), commandOffset(commandOffset), closureRequested(false), uploadCommand(false), downloadCommand(false),  receivedPart(0), parameter("") {
 //    this->files = std::vector<std::string>();
     this->fo = new fileoperator(this->dir); // File and directory browser
-    std::cout << "Connection to client '" << this->hostAddress << "' established" << std::endl;
+    printf("Connection to client %s established", this->hostAddress.c_str());
 }
 
 // Check for matching (commands/strings) with compare method
@@ -40,16 +40,16 @@ std::string serverconnection::commandParser(std::string command) {
     struct stat Status;
     // Commands can have either 0 or 1 parameters, e.g. 'browse' or 'browse ./'
     std::vector<std::string> commandAndParameter = this->extractParameters(command);
-//    for (int i = 0; i < parameters.size(); i++) std::cout << "P " << i << ":" << parameters.at(i) << ":" << std::endl;
-    std::cout << "Connection " << this->connectionId << ": ";
+//    for (int i = 0; i < parameters.size(); i++) printf("P %d : %s ", i, parameters.at(i).c_str());
+    printf("Connection %d: ", this->connectionId);
 
     /// @TODO: Test if prone to DOS-attacks (if loads of garbage is submitted)???
     // If command with no argument was issued
     if (commandAndParameter.size() == 1) {
         if (this->commandEquals(commandAndParameter.at(0), "list")) {
             // dir to browse
-            std::string curDir = "./";
-            std::cout << "Browsing files of the current working dir" << std::endl;
+            std::string curDir = "/";
+			printf("Browsing files of the current working dir");
             this->directories.clear();
             this->files.clear();
             this->fo->browse(curDir,directories,files);
@@ -61,21 +61,21 @@ std::string serverconnection::commandParser(std::string command) {
             }
         } else
         if (this->commandEquals(commandAndParameter.at(0), "pwd")) { // Returns the current working directory on the server
-            std::cout << "Working dir requested" << std::endl;
+            printf("Working dir requested");
             res = this->fo->getCurrentWorkingDir(false);
         } else
         if (this->commandEquals(commandAndParameter.at(0), "getparentdir")) { // Returns the parent directory of the current working directory on the server
-            std::cout << "Parent dir of working dir requested" << std::endl;
-            res = this->fo->getParentDir();
+            printf("Parent dir of working dir requested");
+			res = this->fo->getParentDir();
         } else
         if (this->commandEquals(commandAndParameter.at(0), "bye") || this->commandEquals(commandAndParameter.at(0), "quit")) {
-            std::cout << "Shutdown of connection requested" << std::endl;
+            printf("Shutdown of connection requested");
             this->closureRequested = true;
     //        close (this->fd);
         } else {
         // Unknown / no command / enter
-            std::cout << "Unknown command encountered!" << std::endl;
-            commandAndParameter.clear();
+            printf("Unknown command encountered!");
+			commandAndParameter.clear();
         }
     } else // end of commands with no arguments
     // Command with a parameter received
@@ -85,8 +85,8 @@ std::string serverconnection::commandParser(std::string command) {
         if (this->commandEquals(commandAndParameter.at(0), "ls")) {
             // read out dir to browse
             std::string curDir = std::string(commandAndParameter.at(1));
-            std::cout << "Browsing files of directory '" << curDir << "'" << std::endl;
-            this->directories.clear();
+            printf("Browsing files of directory %s", curDir.c_str());
+			this->directories.clear();
             this->files.clear();
             this->fo->browse(curDir,directories,files);
             for (unsigned int j = 0; j < directories.size(); j++) {
@@ -98,7 +98,7 @@ std::string serverconnection::commandParser(std::string command) {
         } else
         if (this->commandEquals(commandAndParameter.at(0), "download")) {
             this->downloadCommand = true;
-            std::cout << "Preparing download of file '" << this->parameter << "'" << std::endl;
+            printf("Preparing download of file  %s", this->parameter.c_str());
             unsigned long lengthInBytes = 0;
             char* fileBlock;
             unsigned long readBytes = 0;
@@ -120,23 +120,23 @@ std::string serverconnection::commandParser(std::string command) {
         } else
         if (this->commandEquals(commandAndParameter.at(0), "upload")) {
             this->uploadCommand = true; // upload hit!
-            std::cout << "Preparing download of file '" << this->parameter << "'" << std::endl;
-            // all bytes (=parameters[2]) after the upload <file> command belong to the file
+            printf("Preparing download of file  %s", this->parameter.c_str());
+			// all bytes (=parameters[2]) after the upload <file> command belong to the file
             res = this->fo->beginWriteFile(this->parameter);
 //            res = (this->fo->beginWriteFile(this->parameter) ? "Upload failed" : "Upload successful");
         } else
         if (this->commandEquals(commandAndParameter.at(0), "cd")) { // Changes the current working directory on the server
-            std::cout << "Change of working dir to '" << this->parameter << "' requested" << std::endl;
-            // Test if dir exists
+            printf("Change of working dir to %s requested", this->parameter.c_str());
+			// Test if dir exists
             if (!this->fo->changeDir(this->parameter)) {
-                std::cout << "Directory change to '" << this->parameter << "' successful!" << std::endl;
-            }
+                printf("Directory change to  %s successful!", this->parameter.c_str());
+			}
             res = this->fo->getCurrentWorkingDir(false); // Return current directory on the server to the client (same as pwd)
         } else
         if (this->commandEquals(commandAndParameter.at(0), "rmdir")) {
-            std::cout << "Deletion of dir '" << this->parameter << "' requested" << std::endl;
-            if (this->fo->dirIsBelowServerRoot(this->parameter)) {
-                std::cerr << "Attempt to delete directory beyond server root (prohibited)" << std::endl;
+            printf("Deletion of dir  %s requested ", this->parameter.c_str());
+			if (this->fo->dirIsBelowServerRoot(this->parameter)) {
+                printf("Attempt to delete directory beyond server root (prohibited)");
                 res = "//"; // Return some garbage as error indication :)
             } else {
                 this->directories.clear(); // Reuse directories to spare memory
@@ -144,7 +144,7 @@ std::string serverconnection::commandParser(std::string command) {
                 this->files.clear(); // Reuse files to spare memory
                 this->fo->clearListOfDeletedFiles();
                 if (this->fo->deleteDirectory(this->parameter)) {
-                    std::cerr << "Error when trying to delete directory '" << this->parameter << "'" << std::endl;
+                    printf("Error when trying to delete directory %s ", this->parameter.c_str());
                 }
                 this->directories = this->fo->getListOfDeletedDirectories();
                 this->files = this->fo->getListOfDeletedFiles();
@@ -157,8 +157,8 @@ std::string serverconnection::commandParser(std::string command) {
             }
         } else
         if (this->commandEquals(commandAndParameter.at(0), "delete")) {
-            std::cout << "Deletion of file '" << this->parameter << "' requested" << std::endl;
-            this->fo->clearListOfDeletedFiles();
+            printf("Deletion of file %s requested ", this->parameter.c_str());
+			this->fo->clearListOfDeletedFiles();
             if (this->fo->deleteFile(this->parameter)) {
                 res = "//";
             } else {
@@ -168,49 +168,48 @@ std::string serverconnection::commandParser(std::string command) {
             }
         } else
         if (this->commandEquals(commandAndParameter.at(0), "getsize")) {
-            std::cout << "Size of file '" << this->parameter << "' requested" << std::endl;
-            std::vector<std::string> fileStats = this->fo->getStats(this->parameter, Status);
+            printf("Size of file %s requested ", this->parameter.c_str());
+			std::vector<std::string> fileStats = this->fo->getStats(this->parameter, Status);
             res = fileStats.at(4); // file size or content count of directory
         } else
         if (this->commandEquals(commandAndParameter.at(0), "getaccessright")) {
-            std::cout << "Access rights of file '" << this->parameter << "' requested" << std::endl;
-            std::vector<std::string> fileStats = this->fo->getStats(this->parameter, Status);
+            printf("Access rights of file %s requested ", this->parameter.c_str());
+			std::vector<std::string> fileStats = this->fo->getStats(this->parameter, Status);
             res = fileStats.at(0); // unix file / directory permissions
         } else
         if (this->commandEquals(commandAndParameter.at(0), "getlastmodificationtime")) {
-            std::cout << "Last modification time of file '" << this->parameter << "' requested" << std::endl;
-            std::vector<std::string> fileStats = this->fo->getStats(this->parameter, Status);
+            printf("Last modification time of file %s requested ", this->parameter.c_str());
+			std::vector<std::string> fileStats = this->fo->getStats(this->parameter, Status);
             res = fileStats.at(3); // unix file / directory permissions
         } else
         if (this->commandEquals(commandAndParameter.at(0), "getowner")) {
-            std::cout << "Owner of file '" << this->parameter << "' requested" << std::endl;
-            std::vector<std::string> fileStats = this->fo->getStats(this->parameter, Status);
+            printf("Owner of file %s requested ", this->parameter.c_str());
+			std::vector<std::string> fileStats = this->fo->getStats(this->parameter, Status);
             res = fileStats.at(2); // owner
         } else
         if (this->commandEquals(commandAndParameter.at(0), "getgroup")) {
-            std::cout << "Group of file '" << this->parameter << "' requested" << std::endl;
-            std::vector<std::string> fileStats = this->fo->getStats(this->parameter, Status);
+            printf("Group of file %s requested ", this->parameter.c_str());
+			std::vector<std::string> fileStats = this->fo->getStats(this->parameter, Status);
             res = fileStats.at(1); // group
         } else
         if (this->commandEquals(commandAndParameter.at(0), "mkdir")) { // Creates a directory of the specified name in the current server working dir
-            std::cout << "Creating of dir '" << this->parameter << "' requested" << std::endl;
-            res = (this->fo->createDirectory(this->parameter) ? "//" : this->parameter); // return "//" in case of failure
+            printf("Creating of dir %s requested ", this->parameter.c_str());
+			res = (this->fo->createDirectory(this->parameter) ? "//" : this->parameter); // return "//" in case of failure
         } else
         if (this->commandEquals(commandAndParameter.at(0), "touch")) { // Creates an empty file of the specified name in the current server working dir
-            std::cout << "Creating of empty file '" << this->parameter << "' requested" << std::endl;
-            res = (this->fo->createFile(this->parameter) ? "//" : this->parameter);  // return "//" in case of failure
+            printf("Creating of empty file %s requested", this->parameter.c_str());
+			res = (this->fo->createFile(this->parameter) ? "//" : this->parameter);  // return "//" in case of failure
         } else {
         // Unknown / no command
-            std::cout << "Unknown command encountered!" << std::endl;
-            commandAndParameter.clear();
+            printf("Unknown command encountered!");
+			commandAndParameter.clear();
             command = "";
             res = "ERROR: Unknown command!";
         }
     } else // end of command with one parameter
     // No command / enter
     if (!commandAndParameter.at(0).empty()) {
-        std::cout << "Unknown command encountered!" << std::endl;
-        std::cout << std::endl;
+        printf("Unknown command encountered!");
         commandAndParameter.clear();
     }
     res += "\n";
@@ -225,13 +224,13 @@ std::vector<std::string> serverconnection::extractParameters(std::string command
     // First get the command by taking the string and walking from beginning to the first blank
     if ((pos = command.find(SEPARATOR, previouspos)) != std::string::npos) { // No empty string
         res.push_back(command.substr(int(previouspos),int(pos-previouspos))); // The command
-//        std::cout << "Command: " << res.back();
+//        printf("command %s!",res.back().c_str());
     }
     if (command.length() > (pos+1)) {
         //For telnet testing commandOffset = 3 because of the enter control sequence at the end of the telnet command (otherwise = 1)
         res.push_back(command.substr(int(pos+1),int(command.length()-(pos+(this->commandOffset))))); // The parameter (if existent)
 //        res.push_back(command.substr(int(pos+1),int(command.length()-(pos+3)))); // The parameter (if existent)
-//        std::cout << " - Parameter: '" << res.back() << "'" << std::endl;
+//        printf("- Parameter: %s",res.back().c_str());
     }
     return res;
 }
@@ -244,11 +243,11 @@ void serverconnection::respondToQuery() {
     // In non-blocking mode, bytes <= 0 does not mean a connection closure!
     if (bytes > 0) {
         std::string clientCommand = std::string(buffer, bytes);
-//        std::cout << command << std::endl;
+		//        printf(" %s", command);
         if (this->uploadCommand) { // (Previous) upload command
-//            std::cout << "Schreibe block" << std::endl;
+		//        printf("Schreibe block ");
             /// Previous (upload) command continuation, store incoming data to the file
-            std::cout << "Part " << ++(this->receivedPart) << ": ";
+            printf("Part %d :", ++(this->receivedPart));
             this->fo->writeFileBlock(clientCommand);
         } else {
             // If not upload command issued, parse the incoming data for command and parameters

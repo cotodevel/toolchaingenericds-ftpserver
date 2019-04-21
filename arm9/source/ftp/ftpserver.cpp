@@ -9,9 +9,9 @@
 int main(int argc, char** argv) {
     unsigned short commandOffset = 1; // For telnet, we need 3 because of the enter control sequence at the end of command (+2 characters)
     unsigned int port = 4242; // Port to listen on (>1024 for no root permissions required)
-    std::string dir = "./"; // Default dir
+    std::string dir = "/"; // Default dir
     if (argc < 2) {
-        std::cout << "Usage: ftpserver <dir> <port> [telnetmode=no], using default dir '" << dir << "' , port " << port << std::endl;
+        printf("Usage: ftpserver <dir> <port> [telnetmode=no], using default dir %s %d", dir.c_str(), port);
     } else {
         switch (argc) {
             case 4:
@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
                     dir = argv[1]; // set default server directory
                     db->changeDir(dir, false); // Assume the server side is allowed to change any directory as server root (thus the false for no strict mode)
                 } else {
-                    std::cout << "Invalid path specified ('" << argv[1] << "'), falling back to '" << dir << "'" << std::endl;
+                    printf("Invalid path specified (%s), falling back to %s", argv[1], dir.c_str());
                 }
                 break;
         }

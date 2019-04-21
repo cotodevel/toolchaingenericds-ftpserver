@@ -172,8 +172,8 @@ int main(int _argc, sint8 **_argv) {
     std::string dir = "/"; // Default dir
     /*
 	if (argc < 2) {
-        //std::cout << "Usage: ftpserver <dir> <port> [telnetmode=no], using default dir '" << dir << "' , port " << port << std::endl;
-    } else {
+        printf("Usage: ftpserver <dir> <port> [telnetmode=no], using default dir %s port %d", dir, port);
+	} else {
         switch (argc) {
             case 4:
                 commandOffset = 3; // If any 3rd parameter is given, the server is started for use with telnet as client
@@ -186,7 +186,7 @@ int main(int _argc, sint8 **_argv) {
                     dir = argv[1]; // set default server directory
                     db->changeDir(dir, false); // Assume the server side is allowed to change any directory as server root (thus the false for no strict mode)
                 } else {
-                    std::cout << "Invalid path specified ('" << argv[1] << "'), falling back to '" << dir << "'" << std::endl;
+                    printf("Invalid path specified (%s), falling back to %s", argv[1], dir);
                 }
                 break;
         }

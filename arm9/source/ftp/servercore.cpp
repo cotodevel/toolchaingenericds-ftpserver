@@ -33,8 +33,8 @@ servercore::servercore(uint port, std::string dir, unsigned short commandOffset)
 
 // Free up used memory by cleaning up all the object variables;
 servercore::~servercore() {
-    std::cout << "Server shutdown" << std::endl;
-    close(this->s);
+    printf("Server shutdown");
+	close(this->s);
     this->freeAllConnections(); // Deletes all connection objects and frees their memory
 }
 
@@ -52,8 +52,8 @@ void servercore::buildSelectList() {
     std::vector<serverconnection*>::iterator iter = this->connections.begin();
     while( iter != this->connections.end() ) {
         if ((*iter)->getCloseRequestStatus() == true) { // This connection was closed, flag is set -> remove its corresponding object and free the memory
-            std::cout << "Connection with Id " << (*iter)->getConnectionId() << " closed! " << std::endl;
-            delete (*iter); // Clean up
+            printf("Connection with Id %d closed", (int)(*iter)->getConnectionId() );
+			delete (*iter); // Clean up
             this->connections.erase(iter); // Delete it from our vector
             if (this->connections.empty() || (iter == this->connections.end()))
                 return; // Don't increment the iterator when there is nothing to iterate over - avoids crash
@@ -85,7 +85,7 @@ int servercore::handleNewConnection() {
     this->cli_size = sizeof(this->cli);
     fd = accept(this->s, (struct sockaddr*) &cli, (int*)&cli_size);
     if (fd < 0) {
-        std::cerr << "Error while accepting client" << std::endl;
+        printf("Error while accepting client");
         return (EXIT_FAILURE);
     }
 
@@ -94,11 +94,11 @@ int servercore::handleNewConnection() {
 
     // Something (?) went wrong, new connection could not be handled
     if (fd == -1) {
-        std::cerr << "Something went wrong, new connection could not be handled (Maybe server too busy, too many connections?)" << std::endl;
-        try {
+        printf("Something went wrong, new connection could not be handled (Maybe server too busy, too many connections?)");
+		try {
             close(fd);
         } catch (std::exception e) {
-            std::cerr << e.what() << std::endl;
+            printf(" %s ", e.what());
         }
         return (EXIT_FAILURE); // Return at this point
     }
@@ -156,8 +156,8 @@ int servercore::start() {
         readsocks = select(this->highSock+1, &(this->socks), (fd_set*)0, (fd_set*)0, &timeout);
 
         if (readsocks < 0) {
-            std::cerr << "Error calling select" << std::endl;
-            return (EXIT_FAILURE);
+            printf("Error calling select");
+			return (EXIT_FAILURE);
         }
 
         this->readSockets(); // Handle the sockets (accept new connections or handle incoming data or do nothing [if no data])
@@ -171,13 +171,13 @@ void servercore::setNonBlocking(int *sock) {
     this->sflags = fcntl(sock, F_GETFL); // Get socket flags
     int opts = fcntl(sock,F_GETFL, 0);
     if (opts < 0) {
-        std::cerr << "Error getting socket flags" << std::endl;
-        return;
+        printf("Error getting socket flags");
+		return;
     }
     opts = (opts | O_NONBLOCK);
     if (fcntl(sock,F_SETFL,opts) < 0) {
-        std::cerr << "Error setting socket to non-blocking" << std::endl;
-        return;
+        printf("Error setting socket to non-blocking");
+		return;
     }
 	*/
 	
@@ -197,6 +197,7 @@ void servercore::initSockets(int port) {
     
 	if(connectDSWIFIAP(DSWNIFI_ENTER_WIFIMODE) == true){
 		printf("Wifi connect OK");
+		printf("FTP IP:%s",(char*)print_ip((uint32)Wifi_GetIP()));
 	}
 	else{
 		printf("Wifi connect ERROR");

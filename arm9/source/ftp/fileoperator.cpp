@@ -24,7 +24,7 @@ bool fileoperator::changeDir(std::string newPath, bool strict) {
     if ( (newPath.compare("..") == 0) || (newPath.compare("../") == 0) ) {
         // If we are already in the server root dir, prohibit the change to a higher directory
         if (this->completePath.size() <= 1) {
-            std::cerr << "Error: Change beyond server root requested (prohibited)!" << std::endl;
+            printf("Error: Change beyond server root requested (prohibited)!");
             return (EXIT_FAILURE); // 1
         } else { // change is permitted, now do it!
             this->completePath.pop_back(); // Remove the last dir we were in and return to the lower one
@@ -32,11 +32,12 @@ bool fileoperator::changeDir(std::string newPath, bool strict) {
         }
     }
     // The change is the local directory !?
-    if ( (newPath.compare(".") == 0) || (newPath.compare("./") == 0)) {
-        std::cout << "Change to same dir requested (nothing done)!" << std::endl;
+    if ( (newPath.compare(".") == 0) || (newPath.compare("/") == 0)) {
+		printf("Change to same dir requested (nothing done)!");
         return (EXIT_SUCCESS); // 0 (?)
     }
-// std::cout << "dir " << this->getCurrentWorkingDir().append(newPath) << std::endl;
+// printf("dir: %s", this->getCurrentWorkingDir().append(newPath));
+      
     // Normal (sub-)directory given
     if (this->dirCanBeOpenend(this->getCurrentWorkingDir().append(newPath))) {
         this->completePath.push_back(newPath); // Add the new working dir to our path list
@@ -51,7 +52,7 @@ void fileoperator::getValidDir(std::string &dirName) {
     std::string slash = "/";
     size_t foundSlash = 0;
     while ( (foundSlash = dirName.find_first_of(slash),(foundSlash)) != std::string::npos) {
-//        std::cout << " / @ " << foundSlash << std::endl;
+//        printf("/ @ %d", foundSlash); 
         dirName.erase(foundSlash++,1); // Remove all slashs
     }
     dirName.append(slash); // Trailing slash is good and required, append it
@@ -62,7 +63,7 @@ void fileoperator::getValidFile(std::string &fileName) {
     std::string slash = "/";
     size_t foundSlash = 0;
     while ( (foundSlash = fileName.find_first_of(slash),(foundSlash)) != std::string::npos) {
-//        std::cout << " / @ " << foundSlash << std::endl;
+//        printf("/ @ %d", foundSlash); 
         fileName.erase(foundSlash++,1); // Remove all slashs
     }
 }
@@ -82,9 +83,9 @@ bool fileoperator::createDirectory(std::string &dirName, bool strict) {
         getValidDir(dirName); // check error cases, e.g. newPath = '..//' , '/home/user/' , 'subdir' (without trailing slash), etc...
     // Prohibit deletion of dir ../ beyond server root
     if ((dirName.compare("../") == 0) && (this->completePath.size() < 2)) {
-        dirName = "./";
-        std::cerr << "Error: Deletion of dir beyond server root requested (prohibited)!" << std::endl;
-        return true;
+        dirName = "/";
+        printf("Error: Deletion of dir beyond server root requested (prohibited)!!");
+		return true;
     }
 
     umask(0);
@@ -105,8 +106,8 @@ char* fileoperator::readFileBlock(unsigned long &sizeInBytes) {
     this->currentOpenReadFile.read (memblock,size);
 
     // delete[] memblock;
-    std::cout << "Reading " << size << " Bytes" << std::endl;
-    this->currentOpenReadFile.close();
+    printf("Reading %d Bytes", int(size)); 
+	this->currentOpenReadFile.close();
     return memblock;
 }
 
@@ -115,13 +116,13 @@ int fileoperator::readFile(std::string fileName) {
     stripServerRootString(fileName);
     this->currentOpenReadFile.open(fileName.c_str(), std::ios::in|std::ios::binary); // modes for binary file  |std::ios::ate
     if (this->currentOpenReadFile.fail()) {
-        std::cout << "Reading file '" << fileName << "' failed!" << std::endl; //  strerror(errno) <<
-        return (EXIT_FAILURE);
+        printf("Reading file %s failed!", fileName.c_str());	//strerror(errno) <<
+		return (EXIT_FAILURE);
     }
     if (this->currentOpenReadFile.is_open()) {
         return (EXIT_SUCCESS);
     }
-    std::cerr << "Unable to open file '" << fileName << " '" << std::endl; // << strerror(errno)
+    printf("Unable to open file %s ",fileName.c_str());
     return (EXIT_FAILURE);
 }
 
@@ -129,29 +130,29 @@ int fileoperator::beginWriteFile(std::string fileName) {
     stripServerRootString(fileName);
     this->currentOpenFile.open(fileName.c_str(), std::ios::out|std::ios::binary|std::ios::app); // output file
     if(!this->currentOpenFile) {
-        std::cerr << "Cannot open output file '" << fileName << "'" << std::endl;
-        return (EXIT_FAILURE);
+        printf("Cannot open output file %s", fileName.c_str());
+		return (EXIT_FAILURE);
     }
-    std::cout << "Beginning writing to file '" << fileName << "'" << std::endl;
-    return (EXIT_SUCCESS);
+    printf("Beginning writing to file  %s failed!", fileName.c_str());
+	return (EXIT_SUCCESS);
 }
 
 /// @WARNING, @KLUDGE: Concurrent file access not catched
 int fileoperator::writeFileBlock(std::string content) {
     if(!this->currentOpenFile) {
-        std::cerr << "Cannot write to output file" << std::endl;
+        printf("Cannot write to output file");
         return (EXIT_FAILURE);
     }
-    std::cout << "Appending to file" << std::endl;
-    (this->currentOpenFile) << content;
+    printf("Appending to file");
+	(this->currentOpenFile) << content;
     return (EXIT_SUCCESS);
 }
 
 // File is closed when disconnecting
 int fileoperator::closeWriteFile() {
     if (this->currentOpenFile.is_open()) {
-        std::cout << "Closing open file" << std::endl;
-        this->currentOpenFile.close();
+        printf("Closing open file");
+		this->currentOpenFile.close();
     }
 }
 
@@ -159,8 +160,8 @@ int fileoperator::writeFileAtOnce(std::string fileName, char* content) {
     stripServerRootString(fileName);
     std::ofstream myFile(fileName.c_str(), std::ios::out|std::ios::binary); // output file |std::ios::app
     if(!myFile) {
-        std::cerr << "Cannot open output file '" << fileName << "'" << std::endl;
-        return (EXIT_FAILURE);
+        printf("Cannot open output file %s ", fileName.c_str());
+		return (EXIT_FAILURE);
     }
     myFile << content;
     myFile.close();
@@ -177,8 +178,8 @@ bool fileoperator::createFile(std::string &fileName, bool strict) {
         fileout.open(this->getCurrentWorkingDir().append(fileName).c_str(), std::ios::out|std::ios::binary|std::ios::app);
         fileout.close();
     } catch (std::exception e) {
-        std::cerr << e.what() << std::endl;
-        return (EXIT_FAILURE);
+        printf(" %s ", e.what());
+		return (EXIT_FAILURE);
     }
     return (EXIT_SUCCESS);
 }
@@ -193,11 +194,11 @@ bool fileoperator::deleteFile(std::string fileName, bool strict) {
     if (strict)
         this->getValidFile(fileName); // Avoid rm ../file beyond server root!
     if (remove(this->getCurrentWorkingDir().append(fileName).c_str()) != 0 ) {
-        std::cerr << "Error deleting file '" << fileName << "'" << std::endl;
+        printf("Error deleting file %s ", fileName.c_str());
         return (EXIT_FAILURE);
     } else {
-        std::cout << "File '" << fileName << "' deleted" << std::endl;
-        this->deletedFiles.push_back(fileName);
+        printf("File %s deleted", fileName.c_str());
+		this->deletedFiles.push_back(fileName);
         return (EXIT_SUCCESS);
     }
 }
@@ -224,25 +225,25 @@ bool fileoperator::deleteDirectory(std::string dirName, bool cancel, std::string
     
     pathToDir.append(dirName);
 
-// std::cout << "Browse " << pathToDir << std::endl;
+// printf("Browse %s", pathToDir);
     this->browse(pathToDir,*directories,*files,false);
 
     // Now walk over all files in the current directory and delete them
     fileIterator = files->begin();
     while(fileIterator != files->end() ) {
-// std::cout << "Removing file " << pathToDir + (*fileIterator) << std::endl;
+// printf("Removing file %s%s", pathToDir.c_str(), (*fileIterator).c_str());
         cancel = (this->deleteFile(pathToDir + (*fileIterator++), false) || cancel);
     }
 
     // Now delete all subdirectories in the current directory
     dirIterator = directories->begin();
     while( dirIterator != directories->end() ) {
-        // If not ./ and ../
+        // If not / and ../
         if ( ((*(dirIterator)).compare(".") == 0) || ((*(dirIterator)).compare("..") == 0) ) {
             dirIterator++;
             continue;
         }
-// std::cout << "Recursive Call rmdir("<< (*dirIterator).append("/") << "," << pathToDir << ")" << std::endl;
+// printf("Recursive Call rmdir(%s%s), (*dirIterator).append("/").c_str(), pathToDir.c_str() );
         // Only one error must occur and the cancel becomes true and aborts the deletions
         cancel = (this->deleteDirectory((*(dirIterator++)).append("/"), cancel, pathToDir) || cancel);
     }
@@ -250,10 +251,10 @@ bool fileoperator::deleteDirectory(std::string dirName, bool cancel, std::string
     // If there are no subdirectories and files (which should not be there anymore since we deleted them previously), delete the directory
     if ( (pathToDir.compare(".") != 0) && (pathToDir.compare("..") != 0) ) {
         if ( rmdir(this->getCurrentWorkingDir().append(pathToDir).c_str()) < 0 ) { // The actual delete command
-            std::cerr << "Failed deleting directory '" << this->getCurrentWorkingDir(false).append(pathToDir) << "'" << std::endl; // 0 == success, -1 == error (errno-> EACCES access denies, ENOENT path not found)
+            printf("Failed deleting directory %s ", this->getCurrentWorkingDir(false).append(pathToDir).c_str());	// 0 == success, -1 == error (errno-> EACCES access denies, ENOENT path not found)
         } else {
-            std::cout << "Directory '" << pathToDir << "' deleted" << std::endl;
-            this->deletedDirectories.push_back(pathToDir);
+            printf("Directory %s deleted ", pathToDir.c_str());
+			this->deletedDirectories.push_back(pathToDir);
         }
     }
     return cancel; // false = no error, true = error
@@ -292,7 +293,7 @@ std::vector<std::string> fileoperator::getStats(std::string fileName, struct sta
     std::vector<std::string> result;
     // Check if existent, accessible
     if (stat(this->getCurrentWorkingDir().append(fileName).c_str(), &Status) != 0) {
-        std::cerr << "Error when issuing stat() on '" << fileName << "'!" << std::endl;
+        printf("Error when issuing stat() on %s ", fileName.c_str());
         return result; // Bail out with no results
     }
     struct passwd *pwd;
@@ -374,7 +375,7 @@ std::string fileoperator::getParentDir() {
             return ((++lastDirs == this->completePath.rend()) ? SERVERROOTPATHSTRING : (*(--lastDirs))); // Avoid divulging the real server root path
         }
     }
-    return SERVERROOTPATHSTRING; // Otherwise, the server root dir is the parent directory (e.g. "./")
+    return SERVERROOTPATHSTRING; // Otherwise, the server root dir is the parent directory (e.g. "/")
 //    return this->completePath.front(); // Otherwise, the server root dir is the parent directory (e.g. "./")
 }
 
@@ -404,14 +405,14 @@ std::string fileoperator::getCurrentWorkingDir(bool showRootPath) {
                 fullpath.append(SERVERROOTPATHSTRING);                
             } else { // If server root path should be shown (server-internal)
                 // The lowest path already is chdir()'d into, so we do not need it
-//                fullpath.append("./");
+//                fullpath.append("/");
 //                fullpath.append(*(singleDir));
             }
         } else {
             fullpath.append(*(singleDir));
         }
     }
-//    std::cout << "Path '" << fullpath << "'" << std::endl;
+//    printf("Path %s", fullpath);
     return fullpath;
 }
 
@@ -420,17 +421,17 @@ void fileoperator::browse(std::string dir, std::vector<std::string> &directories
     if (strict) {// When using strict mode, the function only allows one subdirectory and not several subdirectories, e.g. like sub/subsub/dir/ ...
         getValidDir(dir);
         if ((dir.compare("../") == 0) && (this->completePath.size() < 2)) { // Prohibit ../ beyond server root
-            dir = "./";
-            std::cerr << "Error: Change beyond server root requested (prohibited)!" << std::endl;
+            dir = "/";
+            printf("Error: Change beyond server root requested (prohibited)!");
         }
     }
-    if (dir.compare("./") != 0) {
+    if (dir.compare("/") != 0) {
         dir = this->getCurrentWorkingDir().append(dir);
     } else {
         dir = this->getCurrentWorkingDir(true);
-//        std::cout << "Yes" << std::endl;
+//        printf("Yes");
     }
-    std::cout << "Browsing '" << dir << "'" << std::endl;
+    printf("Browsing %s ", dir.c_str());
     DIR *dp;
     struct dirent *dirp;
     if (this->dirCanBeOpenend(dir)) {
@@ -450,10 +451,10 @@ void fileoperator::browse(std::string dir, std::vector<std::string> &directories
             }
             closedir(dp);
         } catch (std::exception e) {
-            std::cerr << "Error (" << e.what() << ") opening '" << dir << "'" << std::endl;
+            printf("Error: (%s) opening %s ", e.what(), dir.c_str());
         }
     } else {
-        std::cout << "Error: Directory '" << dir << "' could not be opened!" << std::endl;
+        printf("Error: Directory %s could not be opened!", dir.c_str());
     }
 }
 

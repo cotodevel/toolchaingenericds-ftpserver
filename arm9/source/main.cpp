@@ -18,7 +18,6 @@ USA
 
 */
 
-#include "ftpserver.h"
 //C++ part
 #include <iostream>
 #include <fstream>
@@ -73,6 +72,7 @@ using namespace std;
 #include "nds_cp15_misc.h"
 #include "notifierProcessor.h"
 #include "limitsTGDS.h"
+#include "ftpServer.h"
 #include "wifi_arm9.h"
 #include "dswnifi_lib.h"
 
@@ -80,6 +80,13 @@ char curChosenBrowseFile[MAX_TGDSFILENAME_LENGTH+1];
 
 string ToStr( char c ) {
    return string( 1, c );
+}
+
+
+void menuShow(){
+	clrscr();
+	printf("                              ");
+	printf("A: start FTP server. An IP and Port will be drawn shortly.");
 }
 
 
@@ -163,44 +170,27 @@ int main(int _argc, sint8 **_argv) {
 	
 	
 	//custom Handler
-	printf("A: start FTP server. An IP and Port will be drawn shortly.");
-	
-	
-	//FTP Server start
-	unsigned short commandOffset = 1; // For telnet, we need 3 because of the enter control sequence at the end of command (+2 characters)
-    unsigned int port = 4242; // Port to listen on (>1024 for no root permissions required)
-    std::string dir = "/"; // Default dir
-    /*
-	if (argc < 2) {
-        printf("Usage: ftpserver <dir> <port> [telnetmode=no], using default dir %s port %d", dir, port);
-	} else {
-        switch (argc) {
-            case 4:
-                commandOffset = 3; // If any 3rd parameter is given, the server is started for use with telnet as client
-            case 3:
-                port = atoi(argv[2]); // Cast str to int, set port
-            case 2:
-                fileoperator* db = new fileoperator(dir);
-                // Test if dir exists
-                if (db->dirCanBeOpenend(argv[1])) {
-                    dir = argv[1]; // set default server directory
-                    db->changeDir(dir, false); // Assume the server side is allowed to change any directory as server root (thus the false for no strict mode)
-                } else {
-                    printf("Invalid path specified (%s), falling back to %s", argv[1], dir);
-                }
-                break;
-        }
-    }
-	*/
-	
-    servercore* myServer = new servercore(port, dir, commandOffset);
-
-    /// @TODO: some sort of server shutdown command??
-    delete myServer; // Close connection, for the good tone
-	
+	menuShow();
+	setFTPState(FTP_SERVER_IDLE);
 	
 	while (1){
-		IRQVBlankWait();
+		
+		sint32 FTP_STATUS = do_ftp_server();
+		if(FTP_STATUS == FTP_SERVER_PROC_RUNNING){
+			//Server Running
+		}
+		else if(FTP_STATUS == FTP_SERVER_PROC_FAILED){
+			//Server Disconnected/Idle!
+			setFTPState(FTP_SERVER_IDLE);
+			printf("Client disconnected!. Press A to retry.");
+			scanKeys();
+			while(!(keysPressed() & KEY_A)){
+				scanKeys();
+				IRQVBlankWait();
+			}
+			main(0, (sint8**)"");
+			
+		}
 	}
 
 }

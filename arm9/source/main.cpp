@@ -44,6 +44,8 @@ using namespace std;
 #include <string.h>
 #include <fcntl.h>
 
+#include "fileoperator.h"
+
 #include "main.h"
 #include "InterruptsARMCores_h.h"
 #include "specific_shared.h"
@@ -140,6 +142,81 @@ std::string parsefileNameTGDS(std::string fileName){
 		}
 	}
 	return fileName;
+}
+
+// check error cases, e.g. newPath = '..//' , '/home/user/' , 'subdir' (without trailing slash), etc... and return a clean, valid string in the form 'subdir/'
+void getValidDir(std::string &dirName) {
+    std::string slash = "/";
+    size_t foundSlash = 0;
+    while ( (foundSlash = dirName.find_first_of(slash),(foundSlash)) != std::string::npos) {
+//        std::cout << " / @ " << foundSlash << std::endl;
+        dirName.erase(foundSlash++,1); // Remove all slashs
+    }
+    dirName.append(slash); // Trailing slash is good and required, append it
+}
+
+// Returns the path to the current working dir starting from the server root dir
+std::string getCurrentWorkingDir(bool showRootPath) {
+	return string(getTGDSCurrentWorkingDirectory());
+}
+
+char ListPathPrint[256];
+char * buildList(){
+	std::string res = "";
+	// dir to browse
+	std::string curDir = "/";
+	printf("Browsing files of the current working dir");
+	directories.clear();
+	fileString.clear();
+	browse(curDir,directories,fileString, false);
+	for (unsigned int j = 0; j < directories.size(); j++) {
+		res += directories.at(j) + "/\n";
+	}
+	for (unsigned int i = 0; i < fileString.size(); i++) {
+		res += fileString.at(i) + "\n";
+	}
+	res += "\n";
+	strcpy((char*)&ListPathPrint[0], res.c_str());
+	return (char*)&ListPathPrint[0];
+}
+
+std::vector<std::string> directories;
+std::vector<std::string> fileString;
+
+// Lists all files and directories in the specified directory and returns them in a string vector
+void browse(std::string dir, std::vector<std::string> &directories, std::vector<std::string> &files, bool strict) {
+    if (strict) {// When using strict mode, the function only allows one subdirectory and not several subdirectories, e.g. like sub/subsub/dir/ ...
+        getValidDir(dir);
+    }
+    if (dir.compare("/") != 0) {
+        dir = getCurrentWorkingDir(true).append(dir);
+    } else {
+        dir = getCurrentWorkingDir(true);
+//        std::cout << "Yes" << std::endl;
+    }
+    
+	char fname[256];
+	sprintf(fname,"%s",dir.c_str());
+	
+	int retf = FAT_FindFirstFile(fname);
+	while(retf != FT_NONE){
+		struct FileClass * fileClassInst = NULL;
+		//directory?
+		if(retf == FT_DIR){
+			fileClassInst = getFileClassFromList(LastDirEntry);
+			directories.push_back(std::string(fileClassInst->fd_namefullPath));
+		}
+		//file?
+		else if(retf == FT_FILE){
+			fileClassInst = getFileClassFromList(LastFileEntry); 
+			fileString.push_back(std::string(fileClassInst->fd_namefullPath));
+		}
+		
+		//more file/dir objects?
+		retf = FAT_FindNextFile(fname);
+	}
+	
+	printf("Browsing End. %d files - %d dir(s)", fileString.size(), directories.size());
 }
 
 int main(int _argc, sint8 **_argv) {

@@ -56,7 +56,12 @@ extern int do_ftp_server();
 int ftp_openCommandChannel();
 int ftp_getConnection();
 extern bool globaldatasocketEnabled;
-extern struct sockaddr_in server, client, server_datasck;
+
+//server ctx for sock1
+//client ctx for sock2
+//server_datasck_sain ctx for FTP PASSIVE Mode DataPort ran from Server (DS). (Client only connects to it)
+//client_datasck_sain ctx for FTP ACTIVE Mode Dataport ran from Client. (Server DS only connects to it)
+extern struct sockaddr_in server, client, server_datasck_sain, client_datasck_sain;
 extern struct stat obj;
 
 //sock1 = Initial FTP port opened by Server (DS). Basic FTP commands are served through this port.

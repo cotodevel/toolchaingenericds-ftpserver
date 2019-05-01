@@ -49,10 +49,21 @@
 #include <stdbool.h>
 #include <assert.h>
 
+bool FTPActiveMode = false;
 
 struct sockaddr_in server, client, server_datasck;
 struct stat obj;
-int sock1 = -1, sock2 = -1, server_datasocket = -1;
+
+//sock1 = Initial FTP port opened by Server (DS). Basic FTP commands are served through this port.
+//sock2 = incoming connection context from the Client. Basically where to send cmds received from sock1.
+int sock1 = -1, sock2 = -1;
+
+//server_datasocket == the DATA port open by the Server (DS) whose commands are processed and sent to Client. Server generates and listens cmds through that port.
+int server_datasocket = -1;
+
+//client_datasocket == the DATA port open by the Client whose commands are processed and sent to Server (DS). Client generates and listens cmds through that port.
+int client_datasocket = -1;
+
 char buf[100], command[5], filename[20];
 int k, size, srv_len, cli_len = 0, c;
 int filehandle;
@@ -243,7 +254,7 @@ int do_ftp_server(){
 					
 					//PASV: mode that opens a data port aside the current server port, so binary data can be transfered through it.
 					else if(!strcmp(command, "PASV")){
-						
+						//FTPActiveMode = false;	//enter FTP passive mode
 						bool datasocketEnabled = true;
 						if(globaldatasocketEnabled == false){
 							//set server PASV data socket
@@ -305,6 +316,24 @@ int do_ftp_server(){
 						}
 						sendResponse = ftp_cmd_USER(sock2, 200, buf);
 						isValidcmd = true;
+					}
+					
+					else if(!strcmp(command, "PORT"))
+					{
+						
+						//printf("PORT RECV: [%s]",buffer);
+						char clientIP[256] = {0};
+						char *theIpAndPort;
+						int ipAddressBytes[4];
+						int portBytes[2];
+						theIpAndPort = getFtpCommandArg("PORT", buffer, 0);    
+						sscanf(theIpAndPort, "%d,%d,%d,%d,%d,%d", &ipAddressBytes[0], &ipAddressBytes[1], &ipAddressBytes[2], &ipAddressBytes[3], &portBytes[0], &portBytes[1]);
+						int ClientConnectionDataPort = (portBytes[0]*256)+portBytes[1];
+						sprintf(clientIP, "%d.%d.%d.%d", ipAddressBytes[0],ipAddressBytes[1],ipAddressBytes[2],ipAddressBytes[3]);
+						
+						FTPActiveMode = true;	//enter FTP active mode // //data->clients[socketId].workerData.passiveModeOn = 0; //data->clients[socketId].workerData.activeModeOn = 1;
+						printf("ClientIP:[%s]-Port:[%d]",clientIP, ClientConnectionDataPort);
+						//isValidcmd = true;	//todo
 					}
 					
 					if(isValidcmd == false){
@@ -446,83 +475,37 @@ int do_ftp_server(){
 	//close(sock2); //close ftp server
 }
 
-/*
-int ftp_openCommandChannel()
+
+char *getFtpCommandArg(char * theCommand, char *theCommandString, int skipArgs)
 {
-	if(sock1<0)
-	{
-		//struct sockaddr_in serv_addr; //struct server
+    char *toReturn = theCommandString + strlen(theCommand);
 
-		sock1 = socket(AF_INET, SOCK_STREAM, 0);
-		memset(&server, '0', sizeof(server));
-		
-		server.sin_family = AF_INET;
-		server.sin_addr.s_addr = htonl("192.168.43.108");
-		server.sin_port = htons(FTP_PORT); 
+   /* Pass spaces */ 
+    while (toReturn[0] == ' ')
+    {
+        toReturn += 1;
+    }
 
-		bind(sock1, (struct sockaddr*)&server, sizeof(server)); 
-		fcntl(sock1, F_SETFL, O_NONBLOCK);
+    /* Skip eventual secondary arguments */
+    if(skipArgs == 1)
+    {
+        if (toReturn[0] == '-')
+        {
+            while (toReturn[0] != ' ' &&
+                   toReturn[0] != '\r' &&
+                   toReturn[0] != '\n' &&
+                   toReturn[0] != 0)
+                {
+                    toReturn += 1;
+                }
+        }
 
-		listen(sock1, 10); 
-		
-	}
-	
-	printf("Waiting for connection from Client. ");
-	
-	int ret  = accept(sock1,(struct sockaddr*)&client, &cli_len);
-	
-	
-	//free up server since we recv commands from client
-	if(ret>=0)
-	{
-		sock2 = ret;
-		//client part
-		memset(&client, '0', sizeof(client));
-		cli_len = sizeof(client);
-		client.sin_addr.s_addr = htonl(INADDR_ANY);	//ACCEPT CONN FROM ANY CLIENT
-		client.sin_port = htons((int)FTP_PORT);
-		
-		//closesocket(sock1);
-		//sock1=-1;
-		//fcntl(ret, F_SETFL, O_NONBLOCK);
-		
-		//will print once client is connected
-		//printf(" Client Connected ");
-		//printf("client address: %s ", inet_ntoa( client.sin_addr));
-		//printf("client port: %d ", (int) ntohs(client.sin_port));
-		
-	}
+        /* Pass spaces */ 
+        while (toReturn[0] == ' ')
+        {
+            toReturn += 1;
+        }
+    }
 
-	return ret;
+    return toReturn;
 }
-*/
-/*
-int updateclient_ftp_conn(){
-	printf("Waiting for connection. ");
-	sock2 = accept(sock1,(struct sockaddr*)&client, &cli_len);
-	i = 1;
-	
-	//will print once client is connected
-	printf("Client Connected. ");
-	printf("client address: %s ", inet_ntoa( client.sin_addr));
-	printf("client port: %d ", (int) ntohs(client.sin_port));
-	
-
-}
-*/
-
-/*
-int ftp_getConnection()
-{
-	int connfd = ftp_openCommandChannel();
-	//Do we have Client activity?
-	if(connfd>=0)
-	{
-		printf("received connection! Socket: %d welcome! ",connfd);
-		ftpResponseSender(connfd, 200, "hello");
-	}
-	return connfd;
-}
-*/
-
-

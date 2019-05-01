@@ -16,14 +16,14 @@
 
 
 /*FTP server*/
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include <socket.h>
+#include <in.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
  
 /*for getting file size using stat()*/
-#include<sys/stat.h>
+#include <sys/stat.h>
 
 /*for O_RDONLY*/
 #include<fcntl.h>
@@ -37,7 +37,7 @@
 #include "memoryHandleTGDS.h"
 #include "fsfatlayerTGDS.h"
 
-#include "netdb_dswifi.h"
+#include "netdb.h"
 #include <ctype.h>
 #include <string.h>
 #include <unistd.h>
@@ -47,7 +47,6 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <stdbool.h>
-#include <socket_dswifi.h>
 #include <assert.h>
 
 

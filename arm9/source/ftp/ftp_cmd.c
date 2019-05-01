@@ -14,8 +14,8 @@
 
 
 /*FTP server*/
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include <socket.h>
+#include <in.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

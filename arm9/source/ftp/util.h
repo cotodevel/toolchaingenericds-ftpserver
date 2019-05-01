@@ -30,8 +30,6 @@ extern uint32 CurFTPState;
 extern u32 getFTPState();
 extern void setFTPState(uint32 FTPState);
 
-extern bool send_all(int socket, void *buffer, size_t length);
-
 int ftpResponseSender(int s, int n, char* mes);
 extern const char * getpwd(const char *cwd);
 

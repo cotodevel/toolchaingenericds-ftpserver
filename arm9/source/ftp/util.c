@@ -19,8 +19,8 @@
 
 
 /*FTP server*/
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include <socket.h>
+#include <in.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,24 +45,11 @@ void setFTPState(uint32 FTPState){
 	CurFTPState = FTPState;
 } 
 
-bool send_all(int socket, void *buffer, size_t length)
-{
-    char *ptr = (char*) buffer;
-    while (length > 0)
-    {
-        int i = send(socket, ptr, length);
-        if (i < 1) return false;
-        ptr += i;
-        length -= i;
-    }
-    return true;
-}
-
 
 int ftpResponseSender(int s, int n, char* mes){
 	volatile char data[256];
 	sprintf(data, "%d %s \n", n, mes);
-	return send(s, (char*)&data[0], strlen((char*)&data[0]));
+	return send(s, (char*)&data[0], strlen((char*)&data[0]), 0);
 }
 
 

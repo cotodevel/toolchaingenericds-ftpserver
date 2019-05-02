@@ -67,6 +67,9 @@ int server_datasocket = -1;
 
 //client_datasocket == the DATA port open by the Client whose commands are processed and sent to Server (DS). Client generates and listens cmds through that port.
 int client_datasocket = -1;
+int client_datasocketPortNumber = -1;
+char client_datasocketIP[256];
+
 
 char buf[100], command[5], filename[20];
 int k, size, srv_len, cli_len = 0, c;
@@ -327,74 +330,69 @@ int do_ftp_server(){
 						int portBytes[2];
 						theIpAndPort = getFtpCommandArg("PORT", buffer, 0);    
 						sscanf(theIpAndPort, "%d,%d,%d,%d,%d,%d", &ipAddressBytes[0], &ipAddressBytes[1], &ipAddressBytes[2], &ipAddressBytes[3], &portBytes[0], &portBytes[1]);
-						int ClientConnectionDataPort = ((portBytes[0]*256)+portBytes[1]) - 1;
+						int ClientConnectionDataPort = ((portBytes[0]*256)+portBytes[1]);
 						sprintf(clientIP, "%d.%d.%d.%d", ipAddressBytes[0],ipAddressBytes[1],ipAddressBytes[2],ipAddressBytes[3]);
 						
-						clrscr();
-						
-						printf(" ");
-						printf(" ");
-						printf(" ");
-						printf(" aaaa ");
-						
 						FTPActiveMode = true;	//enter FTP active mode // //data->clients[socketId].workerData.passiveModeOn = 0; //data->clients[socketId].workerData.activeModeOn = 1;
-						printf("ClientIP:[%s]-Port:[%d]",clientIP, ClientConnectionDataPort);
 						
-						// Create a TCP socket so we connect to DATA Port published by Server
-						if(client_datasocket != -1){
-							close(client_datasocket);
-						}
-						
-						client_datasocket = socket( AF_INET, SOCK_STREAM, 0 );
-						
-						if(client_datasocket == -1){
-							printf("Socket creation failed");
-							while(1==1){}
-						}
-						else{
-							printf("Created Client DataPort Socket! ");
-						}
-						int enable = 1;
-						if (setsockopt(client_datasocket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0){	//socket can be respawned ASAP if it's dropped
-							printf("client: setsockopt(SO_REUSEADDR) failed");
-							while(1==1){}
-						}
-						
-						// Tell the socket to connect to the IP address we found, on port 80 (HTTP)
-						memset(&client_datasck_sain, 0, sizeof(client_datasck_sain)); 
-						
-						//int i=1;
-						//i=ioctl(client_datasocket, FIONBIO,&i);	//set non-blocking
-						
-						client_datasck_sain.sin_family = AF_INET;
-						client_datasck_sain.sin_port = htons(ClientConnectionDataPort);
-						client_datasck_sain.sin_addr.s_addr = inet_addr((char*)clientIP);	//htonl(INADDR_ANY);		//Data port will only take commands from clientIP
-						
-						
-						if(bind(client_datasocket,(struct sockaddr *)&client_datasck_sain,sizeof(struct sockaddr_in))) {
-							printf("bind failed.");
-						}
-						else{
-							printf("bind OK.");
-						}
+						//prepare client socket (IP/port) for later access
+						client_datasocketPortNumber = ClientConnectionDataPort;
+						strcpy(client_datasocketIP , clientIP);
 						
 						sendResponse = ftp_cmd_USER(sock2, 200, "PORT command successful.");
 						isValidcmd = true;
 					}
 					
 					else if(!strcmp(command, "LIST")){
-						printf("LIST command");
+						
 						sendResponse = ftpResponseSender(sock2, 150, "Opening ASCII mode data connection for file list.");
 						char * listOut = buildList(); //todo: transfer over the data port
 						
-						printf("LIST: connecting ...");
 						
-						if(connect( client_datasocket, (struct sockaddr *)&client_datasck_sain, sizeof(client_datasck_sain) ) < 0){
-							printf("Could not connect to Client ");
+						
+						clrscr();
+						printf("  ");
+						printf("  ");
+						printf("  ");
+						
+						// Create a TCP socket so we connect to DATA Port published by Server
+						if(client_datasocket != -1){
+							close(client_datasocket);
 						}
-						printf("Connected to Client DataPort ");
+						client_datasocket = socket( AF_INET, SOCK_STREAM, 0 );
+						if(client_datasocket < 0){
+							printf("error Creating Socket");
+							while(1==1){}
+						}
 						
+						int i=1;
+						i=ioctl(client_datasocket, FIONBIO,&i);	//set non-blocking
+						
+						// Find the IP address of the server, with gethostbyname
+						struct hostent * myhost = gethostbyname(client_datasocketIP);	//returns sgIP_DNS_isipaddress == true since we directly pass an IP address
+
+						struct in_addr **address_list = (struct in_addr **)myhost->h_addr_list;
+						for(int i = 0; address_list[i] != NULL; i++)
+						{
+							// use *(address_list[i]) as needed...
+							printf("Server WAN IP Address! %s", inet_ntoa(*address_list[i]));
+						}
+						
+						// Tell the socket to connect to the IP address we found, on port 80 (HTTP)
+						memset(&client_datasck_sain, 0, sizeof(struct sockaddr_in)); 
+						
+						client_datasck_sain.sin_family = AF_INET;
+						client_datasck_sain.sin_port = htons(client_datasocketPortNumber);
+						client_datasck_sain.sin_addr.s_addr= *( (unsigned long *)(myhost->h_addr_list[0]) );
+						
+						printf("LIST: Created Sock. ClientIP:[%s]-Port:[%d]",client_datasocketIP, client_datasocketPortNumber);
+						
+						connect( client_datasocket,(struct sockaddr *)&client_datasck_sain, sizeof(client_datasck_sain) );
+						printf("LIST: Connected to Client DataPort ");
+						
+						// send our request
 						send(client_datasocket, listOut, strlen(listOut), 0);
+						printf("Sent our request! ");
 						
 						sendResponse = ftpResponseSender(sock2, 226, "Transfer complete.");
 						isValidcmd = true;

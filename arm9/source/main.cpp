@@ -160,15 +160,15 @@ std::string getCurrentWorkingDir(bool showRootPath) {
 	return string(getTGDSCurrentWorkingDirectory());
 }
 
-char ListPathPrint[256];
+char ListPathPrint[2048];
 char * buildList(){
 	std::string res = "";
 	// dir to browse
 	std::string curDir = "/";
-	printf("Browsing files of the current working dir");
 	directories.clear();
 	fileString.clear();
 	browse(curDir,directories,fileString, false);
+	
 	for (unsigned int j = 0; j < directories.size(); j++) {
 		res += directories.at(j) + "/\n";
 	}
@@ -176,7 +176,13 @@ char * buildList(){
 		res += fileString.at(i) + "\n";
 	}
 	res += "\n";
-	strcpy((char*)&ListPathPrint[0], res.c_str());
+	
+	printf("Dir: %s Browsing End. %d files - %d dir(s)", curDir.c_str(), fileString.size(), directories.size());
+	int sizeList = strlen(res.c_str());
+	if((int)sizeList > (int)sizeof(ListPathPrint)){
+		sizeList = sizeof(ListPathPrint);
+	}
+	strncpy( (char*)&ListPathPrint[0], (const char *) res.c_str(), sizeList);
 	return (char*)&ListPathPrint[0];
 }
 
@@ -184,8 +190,9 @@ std::vector<std::string> directories;
 std::vector<std::string> fileString;
 
 // Lists all files and directories in the specified directory and returns them in a string vector
-void browse(std::string dir, std::vector<std::string> &directories, std::vector<std::string> &files, bool strict) {
-    if (strict) {// When using strict mode, the function only allows one subdirectory and not several subdirectories, e.g. like sub/subsub/dir/ ...
+void browse(std::string dir, std::vector<std::string> &dirs, std::vector<std::string> &fils, bool strict) {
+    /*
+	if (strict) {// When using strict mode, the function only allows one subdirectory and not several subdirectories, e.g. like sub/subsub/dir/ ...
         getValidDir(dir);
     }
     if (dir.compare("/") != 0) {
@@ -194,7 +201,7 @@ void browse(std::string dir, std::vector<std::string> &directories, std::vector<
         dir = getCurrentWorkingDir(true);
 //        std::cout << "Yes" << std::endl;
     }
-    
+    */
 	char fname[256];
 	sprintf(fname,"%s",dir.c_str());
 	
@@ -204,19 +211,17 @@ void browse(std::string dir, std::vector<std::string> &directories, std::vector<
 		//directory?
 		if(retf == FT_DIR){
 			fileClassInst = getFileClassFromList(LastDirEntry);
-			directories.push_back(std::string(fileClassInst->fd_namefullPath));
+			dirs.push_back(std::string(fileClassInst->fd_namefullPath));
 		}
 		//file?
 		else if(retf == FT_FILE){
 			fileClassInst = getFileClassFromList(LastFileEntry); 
-			fileString.push_back(std::string(fileClassInst->fd_namefullPath));
+			fils.push_back(std::string(fileClassInst->fd_namefullPath));
 		}
 		
 		//more file/dir objects?
 		retf = FAT_FindNextFile(fname);
 	}
-	
-	printf("Browsing End. %d files - %d dir(s)", fileString.size(), directories.size());
 }
 
 int main(int _argc, sint8 **_argv) {

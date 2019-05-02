@@ -51,7 +51,7 @@ extern void menuShow();
 extern char curChosenBrowseFile[MAX_TGDSFILENAME_LENGTH+1];
 extern bool ShowBrowser(char * Path);
 
-extern char ListPathPrint[256];
+extern char ListPathPrint[2048];
 extern char * buildList();	//C++ <- C
 
 #ifdef __cplusplus
@@ -60,7 +60,7 @@ extern std::vector<std::string> fileString;
 extern std::list<std::string> completePath;
 extern void getValidDir(std::string &dirName);
 extern std::string getCurrentWorkingDir(bool showRootPath);
-extern void browse(std::string dir, std::vector<std::string> &directories, std::vector<std::string> &files, bool strict);
+extern void browse(std::string dir, std::vector<std::string> &dirs, std::vector<std::string> &fils, bool strict);
 extern std::string getDldiDefaultPath();
 extern std::string parseDirNameTGDS(std::string dirName);
 extern std::string parsefileNameTGDS(std::string fileName);

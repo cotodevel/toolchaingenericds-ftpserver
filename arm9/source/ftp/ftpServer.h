@@ -73,6 +73,8 @@ extern int server_datasocket;
 
 //client_datasocket == the DATA port open by the Client whose commands are processed and sent to Server (DS). Client generates and listens cmds through that port.
 extern int client_datasocket;
+extern int client_datasocketPortNumber;
+extern char client_datasocketIP[256];
 
 extern char buf[100], command[5], filename[20];
 extern int k, i, size, srv_len,cli_len, c;

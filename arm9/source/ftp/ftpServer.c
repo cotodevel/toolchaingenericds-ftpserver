@@ -86,68 +86,18 @@ int do_ftp_server(){
 	//handle FTP Server handshake internal cases
 	switch(getFTPState()){
 		case(FTP_SERVER_IDLE):{
-			
 			switch_dswnifi_mode(dswifi_idlemode);
 			connectDSWIFIAP(DSWNIFI_ENTER_WIFIMODE);
-			
 			if(sock1 != -1){
-				close(sock1);
+				disconnectAsync(sock1);
 			}
-			
 			if(server_datasocket != -1){
-				close(server_datasocket);
+				disconnectAsync(server_datasocket);
 			}
-			
 			globaldatasocketEnabled = false;
-			//set server
-			memset(&server, 0, sizeof(struct sockaddr_in));
-			
-			srv_len = sizeof(struct sockaddr_in);
-			server.sin_port = htons((int)FTP_PORT);//default listening port
-			server.sin_addr.s_addr = INADDR_ANY;	//the socket will be bound to all local interfaces (and we just have one up to this point, being the DS Client IP acquired from the DHCP server).
-			
-			//prepare socket (server)
-			sock1 = socket(AF_INET, SOCK_STREAM, 0);
-			int enable = 1;
-			if (setsockopt(sock1, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0){	//socket can be respawned ASAP if it's dropped
-				printf("setsockopt(SO_REUSEADDR) failed");
-				return FTP_SERVER_PROC_FAILED;
-			}
-			if(sock1 == -1){
-				printf("Socket creation failed");
-				return FTP_SERVER_PROC_FAILED;
-			}
-			k = bind(sock1,(struct sockaddr*)&server,srv_len);
-			if(k == -1){
-				close(sock1);
-				printf("Binding error");
-				return FTP_SERVER_PROC_FAILED;
-			}
-			int MAXCONN = 20;
-			k = listen(sock1,MAXCONN);
-			if(k == -1){
-				close(sock1);
-				printf("Listen failed");
-				return FTP_SERVER_PROC_FAILED;
-			}
-			
-			printf("FTP Server Begins");
-			printf("server address: %s ", (char*)print_ip((uint32)Wifi_GetIP()));
-			printf("local port: %d ", (int) ntohs(server.sin_port));
+			sock1 = openServerSyncConn("", FTP_PORT, &server);	//DS Server: listens at port FTP_PORT now. Further access() through this port will come from a client.
+			printf("[FTP Server:%s:%d]", print_ip((uint32)Wifi_GetIP()), FTP_PORT);
 			printf("Waiting for connection:");
-			/*
-			The accept() system call is used with connection-based socket types
-			   (SOCK_STREAM, SOCK_SEQPACKET).  It extracts the first connection
-			   request on the queue of pending connections for the listening socket,
-			   sockfd, creates a new connected socket, and returns a new file
-			   descriptor referring to that socket.  The newly created socket is not
-			   in the listening state.  The original socket sockfd is unaffected by
-			   this call.
-			*/
-			
-			//int i=1;
-			//i=ioctl(sock2, FIONBIO,&i);
-			
 			setFTPState(FTP_SERVER_CONNECTING);
 			curFTPStatus = FTP_SERVER_PROC_RUNNING;
 		}
@@ -167,10 +117,7 @@ int do_ftp_server(){
 			//ioctl(sock1, FIONBIO,&j); // Server socket is non blocking
 			
 			//wait for client
-			printf("[Client Connected]");
-			printf("Address: %s ", inet_ntoa(client.sin_addr));
-			//printf("Port: %d ", (int) ntohs(client.sin_port));
-			
+			printf("[Client Connected:%s:%d]",inet_ntoa(client.sin_addr), ntohs(client.sin_port));
 			setFTPState(FTP_SERVER_CONNECTED_IDLE);
 			curFTPStatus = FTP_SERVER_PROC_RUNNING;
 		}
@@ -352,48 +299,19 @@ int do_ftp_server(){
 						
 						// Create a TCP socket so we connect to DATA Port published by Server
 						if(client_datasocket != -1){
-							close(client_datasocket);
-						}
-						client_datasocket = socket( AF_INET, SOCK_STREAM, 0 );
-						if(client_datasocket < 0){
-							printf("error Creating Socket");
-							while(1==1){}
+							disconnectAsync(client_datasocket);
 						}
 						
-						int i=1;
-						i=ioctl(client_datasocket, FIONBIO,&i);	//set non-blocking
-	
-						// Find the IP address of the server, with gethostbyname
-						struct hostent * myhost = gethostbyname(client_datasocketIP);	//returns sgIP_DNS_isipaddress == true since we directly pass an IP address
-
-						struct in_addr **address_list = (struct in_addr **)myhost->h_addr_list;
-						for(int i = 0; address_list[i] != NULL; i++)
-						{
-							// use *(address_list[i]) as needed...
-							printf("[DataPort Enable] Client IP Address! %s", inet_ntoa(*address_list[i]));
-						}
+						client_datasocket = openAsyncConn(client_datasocketIP, client_datasocketPortNumber, &client_datasck_sain);
+						bool connStatus = connectAsync(client_datasocket, &client_datasck_sain);
 						
-						// Tell the socket to connect to the IP address we found, on port 80 (HTTP)
-						memset(&client_datasck_sain, 0, sizeof(struct sockaddr_in)); 
-						
-						client_datasck_sain.sin_family = AF_INET;
-						client_datasck_sain.sin_port = htons(client_datasocketPortNumber);
-						client_datasck_sain.sin_addr.s_addr= *( (unsigned long *)(myhost->h_addr_list[0]) );
-						
-						
-						/*
-						if(bind(client_datasocket,(struct sockaddr *)&client_datasck_sain,sizeof(client_datasck_sain))) {
-							//binding ERROR
-							close(client_datasocket);
-							printf("error binding. ");
+						if((client_datasocket >= 0) && (connStatus ==true)){
+							printf("LIST: Created Sock. ClientIP:[%s]-Port:[%d]",client_datasocketIP, client_datasocketPortNumber);
 						}
 						else{
-							printf("binding OK. ");
+							printf("LIST: Could not connect to Client Data Port.");
+							while(1==1);
 						}
-						*/
-						printf("LIST: Created Sock. ClientIP:[%s]-Port:[%d]",client_datasocketIP, client_datasocketPortNumber);
-						connect( client_datasocket,(struct sockaddr *)&client_datasck_sain, sizeof(client_datasck_sain));
-						printf("LIST: Connected to Client DataPort ");
 						
 						sendResponse = ftp_cmd_USER(sock2, 200, "PORT command successful.");
 						isValidcmd = true;
@@ -414,11 +332,8 @@ int do_ftp_server(){
 								//printf(incoming_buffer);
 							}
 						}
-
-						printf("[Data Socket] Other side closed connection!");
-						shutdown(client_datasocket,0); // good practice to shutdown the socket.
-						closesocket(client_datasocket); // remove the socket.
 						
+						disconnectAsync(client_datasocket);
 						sendResponse = ftpResponseSender(sock2, 226, "Transfer complete.");
 						isValidcmd = true;
 					}
@@ -536,22 +451,6 @@ int do_ftp_server(){
 						printf("unhandled command: [%s]",Debugcommand);
 						sendResponse = ftpResponseSender(sock2, 502, "invalid command");
 					}
-				}
-				
-				if(sendResponse < 0){
-					/*
-					close(sock2);
-					close(sock1);
-					setFTPState(FTP_SERVER_IDLE);
-					printf("Client disconnected!. Press A to retry.");
-					scanKeys();
-					while(!(keysPressed() & KEY_A)){
-						scanKeys();
-						IRQVBlankWait();
-					}
-					main(0, (sint8**)"");
-					*/
-					curFTPStatus = FTP_SERVER_PROC_FAILED;	//WIFI connected but FTP client disconnected
 				}
 			}
 		}

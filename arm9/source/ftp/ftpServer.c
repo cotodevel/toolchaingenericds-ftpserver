@@ -395,15 +395,34 @@ int do_ftp_server(){
 							isValidcmd = true;
 						}
 						else if(!strcmp(command, "CWD")){
+							
 							char * CurrentWorkingDirectory = (char*)&TGDSCurrentWorkingDirectory[0];
 							char buf[256] = {0};
-							if (chdir(CurrentWorkingDirectory)) {
-								sprintf(buf, "%s", "Directory successfully changed.");
+							
+							char *pathToEnter;
+							pathToEnter = getFtpCommandArg("CWD", buffer, 0);
+							
+							if(strlen(pathToEnter) > 1){
+								if(chdir((char*)pathToEnter) != 0) {
+									printf(" CWD fail => %s ", pathToEnter);
+									return ftpResponseSender(sock2, 550, "Error changing directory");
+								}
+								else{
+									printf("CWD OK => %s ", pathToEnter);
+									return ftpResponseSender(sock2, 250, "Directory successfully changed.");
+								}
 							}
 							else{
-								sprintf(buf, "%s", "Error changing directory");
+								if (chdir(CurrentWorkingDirectory) != 0) {
+									printf(" CWD fail => %s ", CurrentWorkingDirectory);
+									return ftpResponseSender(sock2, 550, "Error changing directory");
+								}
+								else{
+									printf(" CWD OK => %s ", CurrentWorkingDirectory);
+									return ftpResponseSender(sock2, 250, "Directory successfully changed.");
+								}
 							}
-							sendResponse = ftp_cmd_CWD(sock2, 250, buf);
+							
 							isValidcmd = true;
 						}
 						

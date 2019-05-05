@@ -18,7 +18,6 @@ extern int ftp_cmd_PASS(int s, int cmd, char* arg);
 extern int ftp_cmd_PWD(int s, int cmd, char* arg);
 extern int ftp_cmd_SYST(int s, int cmd, char* arg);
 extern int ftp_cmd_FEAT(int s, int cmd, char* arg);
-extern int ftp_cmd_CWD(int s, int cmd, char* arg);
 extern int ftp_cmd_TYPE(int s, int cmd, char* arg);
 extern int ftp_cmd_default(int s, int cmd, char* arg);
 extern int ftp_cmd_PASV(int s, int cmd, char* arg);

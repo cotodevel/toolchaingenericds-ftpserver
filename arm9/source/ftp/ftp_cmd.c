@@ -62,28 +62,6 @@ int ftp_cmd_PASV(int s, int cmd, char* arg){
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_CWD(int s, int cmd, char* arg){
-	//if(arg[0]=='/')strcpy(currentPath,arg);
-	//else strcat(currentPath,arg);
-	//int l=strlen(currentPath);
-	//if(!l || currentPath[l-1]!='/')strcat(currentPath,"/");
-	
-	if (chdir(currentPath)) {
-		//memset(tempBuf, 0, sizeof(tempBuf));
-		//otherwise return 500/550
-		//sprintf(tempBuf,"%s: No such file or directory.",currentPath);
-		printf("CWD FAIL => %s ", currentPath);
-		return ftpResponseSender(sock2, 550, currentPath);
-	}
-	else{
-		//if dir/file exists then ret: 250 or 200.
-		printf(" CWD OK => %s ", currentPath);
-		return ftpResponseSender(sock2, 250, "ok");
-	}
-	
-	//while(1==1){}	//ok so far
-}
-
 int ftp_cmd_default(int s, int cmd, char* arg){
 	return ftpResponseSender(s, cmd, arg);
 }

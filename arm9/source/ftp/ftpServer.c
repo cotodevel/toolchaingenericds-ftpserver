@@ -95,7 +95,7 @@ int do_ftp_server(){
 				disconnectAsync(server_datasocket);
 			}
 			globaldatasocketEnabled = false;
-			sock1 = openServerSyncConn("", FTP_PORT, &server);	//DS Server: listens at port FTP_PORT now. Further access() through this port will come from a client.
+			sock1 = openServerSyncConn(FTP_PORT, &server);	//DS Server: listens at port FTP_PORT now. Further access() through this port will come from a client.
 			printf("[FTP Server:%s:%d]", print_ip((uint32)Wifi_GetIP()), FTP_PORT);
 			printf("Waiting for connection:");
 			setFTPState(FTP_SERVER_CONNECTING);
@@ -201,9 +201,69 @@ int do_ftp_server(){
 						isValidcmd = true;
 					}
 					
+					else if(!strcmp(command, "CDUP"))
+					{
+						char tempnewDir[MAX_TGDSFILENAME_LENGTH+1] = {0};
+						char * CurrentWorkingDirectory = (char*)&TGDSCurrentWorkingDirectory[0];
+						strcpy (tempnewDir, CurrentWorkingDirectory);
+						bool cdupStatus = leaveDir(tempnewDir);
+						char buf[256] = {0};
+						if(cdupStatus == true){
+							sprintf(buf,"%s","OK");
+						}
+						else{
+							sprintf(buf,"%s","ERROR");
+						}
+						sendResponse = ftp_cmd_USER(sock2, 200, buf);
+						isValidcmd = true;
+					}
+					
+					else if(!strcmp(command, "PORT"))
+					{
+						//Connect to Client IP/Port here (DS is Client @ Client Data Port)
+						char clientIP[256] = {0};
+						char *theIpAndPort;
+						int ipAddressBytes[4];
+						int portBytes[2];
+						theIpAndPort = getFtpCommandArg("PORT", buffer, 0);    
+						sscanf(theIpAndPort, "%d,%d,%d,%d,%d,%d", &ipAddressBytes[0], &ipAddressBytes[1], &ipAddressBytes[2], &ipAddressBytes[3], &portBytes[0], &portBytes[1]);
+						int ClientConnectionDataPort = ((portBytes[0]*256)+portBytes[1]);
+						sprintf(clientIP, "%d.%d.%d.%d", ipAddressBytes[0],ipAddressBytes[1],ipAddressBytes[2],ipAddressBytes[3]);
+						
+						FTPActiveMode = true;	//enter FTP active mode // //data->clients[socketId].workerData.passiveModeOn = 0; //data->clients[socketId].workerData.activeModeOn = 1;
+						
+						//prepare client socket (IP/port) for later access
+						client_datasocketPortNumber = ClientConnectionDataPort;
+						strcpy(client_datasocketIP , clientIP);
+						
+						clrscr();
+						printf("  ");
+						printf("  ");
+						printf("  ");
+						
+						// Create a TCP socket so we connect to DATA Port published by Server
+						/*
+						if(client_datasocket != -1){
+							disconnectAsync(client_datasocket);
+						}
+						client_datasocket = openAsyncConn(client_datasocketIP, client_datasocketPortNumber, &client_datasck_sain);
+						bool connStatus = connectAsync(client_datasocket, &client_datasck_sain);
+						
+						if((client_datasocket >= 0) && (connStatus ==true)){
+							printf("LIST: Created Sock. ClientIP:[%s]-Port:[%d]",client_datasocketIP, client_datasocketPortNumber);
+						}
+						else{
+							printf("LIST: Could not connect to Client Data Port.");
+							while(1==1);
+						}
+						*/
+						sendResponse = ftp_cmd_USER(sock2, 200, "PORT command successful.");
+						isValidcmd = true;
+					}
+					
 					//PASV: mode that opens a data port aside the current server port, so binary data can be transfered through it.
 					else if(!strcmp(command, "PASV")){
-						//FTPActiveMode = false;	//enter FTP passive mode
+						FTPActiveMode = false;	//enter FTP passive mode
 						/*
 						bool datasocketEnabled = true;
 						if(globaldatasocketEnabled == false){
@@ -233,6 +293,7 @@ int do_ftp_server(){
 								printf("Binding error");
 								datasocketEnabled = false;
 							}
+							
 							int MAXCONNSOCKDATASERV = 10;
 							if(listen(server_datasocket,MAXCONNSOCKDATASERV) == -1){
 								close(server_datasocket);
@@ -241,91 +302,80 @@ int do_ftp_server(){
 							}
 							globaldatasocketEnabled = true;
 						}
+						if( (globaldatasocketEnabled == true) || (datasocketEnabled == true) ){
 						*/
-						//if( (globaldatasocketEnabled == true) || (datasocketEnabled == true) ){
-							//printf("PASV > set data transfer port @ %d", FTP_PASV_DATA_TRANSFER_PORT);
+							printf("PASV > set data transfer port @ %d", FTP_PASV_DATA_TRANSFER_PORT);
 							char buf[256] = {0};
 							//sprintf(buf, "Entering Passive Mode (%d).",FTP_PASV_DATA_TRANSFER_PORT);
-							//sendResponse = ftp_cmd_PASV(sock2, 227, buf);	//default to active mode always
-							printf("PASV cmd: unsupported");
-							sprintf(buf, "Unknown command");
-							sendResponse = ftp_cmd_PASV(sock2, 500, buf);
 							
+							int currentIP = (int)Wifi_GetIP();
+							int dataPort = (int)FTP_PASV_DATA_TRANSFER_PORT;
+							
+							sprintf(buf, "Entering Passive Mode (%d,%d,%d,%d,%d,%d).", (int)(currentIP&0xFF), (int)((currentIP>>8)&0xFF), (int)((currentIP>>16)&0xFF), (int)(currentIP>>24) + 256, dataPort>>8, dataPort&0xFF);
+							
+							sendResponse = ftp_cmd_PASV(sock2, 227, buf);	//default to active mode always
 						//}
 						//else{
-						//	sendResponse = ftp_cmd_PASV(sock2, 425, "Cannot open data connection");
+							//sendResponse = ftp_cmd_PASV(sock2, 425, "Cannot open data connection");
 						//}
-						isValidcmd = true;
-					}
-					
-					else if(!strcmp(command, "CDUP"))
-					{
-						char tempnewDir[MAX_TGDSFILENAME_LENGTH+1] = {0};
-						char * CurrentWorkingDirectory = (char*)&TGDSCurrentWorkingDirectory[0];
-						strcpy (tempnewDir, CurrentWorkingDirectory);
-						bool cdupStatus = leaveDir(tempnewDir);
-						char buf[256] = {0};
-						if(cdupStatus == true){
-							sprintf(buf,"%s","OK");
-						}
-						else{
-							sprintf(buf,"%s","ERROR");
-						}
-						sendResponse = ftp_cmd_USER(sock2, 200, buf);
-						isValidcmd = true;
-					}
-					else if(!strcmp(command, "PORT"))
-					{
-						//Connect to Client IP/Port here (DS is Client @ Client Data Port)
-						char clientIP[256] = {0};
-						char *theIpAndPort;
-						int ipAddressBytes[4];
-						int portBytes[2];
-						theIpAndPort = getFtpCommandArg("PORT", buffer, 0);    
-						sscanf(theIpAndPort, "%d,%d,%d,%d,%d,%d", &ipAddressBytes[0], &ipAddressBytes[1], &ipAddressBytes[2], &ipAddressBytes[3], &portBytes[0], &portBytes[1]);
-						int ClientConnectionDataPort = ((portBytes[0]*256)+portBytes[1]);
-						sprintf(clientIP, "%d.%d.%d.%d", ipAddressBytes[0],ipAddressBytes[1],ipAddressBytes[2],ipAddressBytes[3]);
-						
-						FTPActiveMode = true;	//enter FTP active mode // //data->clients[socketId].workerData.passiveModeOn = 0; //data->clients[socketId].workerData.activeModeOn = 1;
-						
-						//prepare client socket (IP/port) for later access
-						client_datasocketPortNumber = ClientConnectionDataPort;
-						strcpy(client_datasocketIP , clientIP);
-						
-						clrscr();
-						printf("  ");
-						printf("  ");
-						printf("  ");
-						
-						// Create a TCP socket so we connect to DATA Port published by Server
-						if(client_datasocket != -1){
-							disconnectAsync(client_datasocket);
-						}
-						
-						client_datasocket = openAsyncConn(client_datasocketIP, client_datasocketPortNumber, &client_datasck_sain);
-						bool connStatus = connectAsync(client_datasocket, &client_datasck_sain);
-						
-						if((client_datasocket >= 0) && (connStatus ==true)){
-							printf("LIST: Created Sock. ClientIP:[%s]-Port:[%d]",client_datasocketIP, client_datasocketPortNumber);
-						}
-						else{
-							printf("LIST: Could not connect to Client Data Port.");
-							while(1==1);
-						}
-						
-						sendResponse = ftp_cmd_USER(sock2, 200, "PORT command successful.");
 						isValidcmd = true;
 					}
 					
 					else if(!strcmp(command, "LIST")){
+						//works fine in DS environment: Server port listener accepting incoming connections from Clients.
+						/*
+						int s = socket(PF_INET, SOCK_STREAM, 0);
+						if(s < 0) {
+							//printf("Error opening socket ");
+							while(1==1){}
+						}
+						int tmp = 1;
+						setsockopt (s, SOL_SOCKET, SO_REUSEADDR, (char *) &tmp, sizeof (tmp));
+					
+						//    char hostname[MAX_TGDSFILENAME_LENGTH+1];
+						//    gethostname(hostname, MAX_TGDSFILENAME_LENGTH+1);
+
+						//    hostent *ent = gethostbyname(hostname);
+						//    unsigned long a = *((unsigned long *)ent->h_addr);
+
+						struct sockaddr_in addr;
+						addr.sin_family = AF_INET;
+						addr.sin_port = htons(FTP_PASV_DATA_TRANSFER_PORT);
+						addr.sin_addr.s_addr = htonl(0);
+						
+						bind(s, (struct sockaddr *)&addr, sizeof(addr));
+						
+						//printf("Listening for a connection at port %d ",ntohs(addr.sin_port));
+						if(listen(s, 1)) {
+							printf("Error listening ");
+							while(1==1){}
+						}
+						int len = sizeof(addr);	//socklen_t
+
+						int clisock = accept(s, (struct sockaddr *)&addr, &len);
+						if(clisock > 0) {
+							printf("Got a connection from %s %d ",inet_ntoa(addr.sin_addr),ntohs(addr.sin_port));
+							//while(1==1);
+						}
+						*/
+						
+						struct sockaddr_in clientAddr;
+						int cliLen = sizeof(struct sockaddr_in);
+						int serverDataListenerSock = openServerSyncConn(FTP_PASV_DATA_TRANSFER_PORT, &clientAddr);
+						int clisock = accept(serverDataListenerSock, (struct sockaddr *)&clientAddr, &cliLen);
+						if(clisock > 0) {
+							printf("Got a connection from %s %d ",inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+						}
+						
 						sendResponse = ftpResponseSender(sock2, 150, "Opening BINARY mode data connection for file list.");
 						
+						//todo: filter different LIST args here
 						// send LIST through DATA Port.
 						char * listOut = buildList();
-						send(client_datasocket, listOut, strlen(listOut) + 1, 0);
+						send(clisock, listOut, strlen(listOut) + 1, 0);
 						u8 endByte=0x0;
-						send(client_datasocket, &endByte, 1, 0);
-						disconnectAsync(client_datasocket);
+						send(clisock, &endByte, 1, 0);
+						disconnectAsync(clisock);
 						
 						sendResponse = ftpResponseSender(sock2, 226, "Transfer complete.");
 						isValidcmd = true;
@@ -338,6 +388,8 @@ int do_ftp_server(){
 						if(!strcmp(command,"GET"))
 						{
 							printf("get command!");
+							sendResponse = ftpResponseSender(sock2, 502, "invalid command");//todo
+							/*
 							sscanf(buf, "%s%s", filename, filename);
 							stat(filename, &obj);
 							filehandle = open(filename, O_RDONLY);
@@ -348,12 +400,14 @@ int do_ftp_server(){
 							if(size){
 								//sendfile(sock2, filehandle, NULL, size);
 							}
-							
+							*/
 							isValidcmd = true;
 						}
 						else if(!strcmp(command, "PUT"))
 						{
 							printf("put command! ");
+							sendResponse = ftpResponseSender(sock2, 502, "invalid command");//todo
+							/*
 							int c = 0;
 							char *f;
 							sscanf(buf+strlen(command), "%s", filename);
@@ -374,6 +428,7 @@ int do_ftp_server(){
 							c = write(filehandle, f, size);
 							close(filehandle);
 							sendResponse = send(sock2, &c, sizeof(int), 0);
+							*/
 							isValidcmd = true;
 						}
 						else if(!strcmp(command, "CWD")){

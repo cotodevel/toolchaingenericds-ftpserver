@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include "util.h"
+#include "ftpServer.h"
 
 #include <stdarg.h>
 #include <string.h>

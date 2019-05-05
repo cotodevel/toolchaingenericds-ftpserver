@@ -16,7 +16,7 @@
 #define FTP_SERVER_PROC_RUNNING (sint32)(0)
 #define FTP_SERVER_PROC_FAILED (sint32)(-1)
 
-#define FTP_PASV_DATA_TRANSFER_PORT (sint32)(1024)
+#define FTP_PASV_DATA_TRANSFER_PORT (sint32)(20)
 
 
 
@@ -30,7 +30,7 @@ extern uint32 CurFTPState;
 extern u32 getFTPState();
 extern void setFTPState(uint32 FTPState);
 
-int ftpResponseSender(int s, int n, char* mes);
+extern int ftpResponseSender(int s, int n, char* mes);
 extern const char * getpwd(const char *cwd);
 
 #ifdef __cplusplus

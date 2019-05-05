@@ -78,6 +78,16 @@ using namespace std;
 #include "wifi_arm9.h"
 #include "dswnifi_lib.h"
 
+#include <sstream>
+
+template <class T>
+inline std::string to_string (const T& t)
+{
+   std::stringstream ss;
+   ss << t;
+   return ss.str();
+}
+
 char curChosenBrowseFile[MAX_TGDSFILENAME_LENGTH+1];
 
 string ToStr( char c ) {
@@ -165,19 +175,23 @@ char * buildList(){
 	std::string res = "";
 	// dir to browse
 	std::string curDir = "/";
-	directories.clear();
-	fileString.clear();
-	browse(curDir,directories,fileString, false);
+	std::vector<class FileDirEntry> filedirEntries = browse(curDir, false);
 	
-	for (unsigned int j = 0; j < directories.size(); j++) {
-		res += parseDirNameTGDS(directories.at(j)) + "/\n";
+	int listFiles = 0;
+	int listDirs = 0;
+	for(int i = 0; i < (int)filedirEntries.size() ; i++){
+		if(filedirEntries.at(i).gettype() == FT_FILE){
+			int fSize = FS_getFileSize((char*)filedirEntries.at(i).getfilePathFilename().c_str());
+			res += (std::string("-rwxrwxrwx   2 DS        " + to_string(fSize) + " Feb  1  2009 " +filedirEntries.at(i).getfilePathFilename() +" \r\n"));
+			listFiles++;
+		}
+		else if(filedirEntries.at(i).gettype() == FT_DIR){
+			//res +=  "%crwxrwxrwx   2 DS        %d Feb  1  2009 %s\r\n" + "d" << 0 << filedirEntries.at(i));
+			res += (std::string("drwxrwxrwx   2 DS        " + to_string(0) + " Feb  1  2009 " +filedirEntries.at(i).getfilePathFilename() +" \r\n"));
+			listDirs++;
+		}
 	}
-	for (unsigned int i = 0; i < fileString.size(); i++) {
-		res += parsefileNameTGDS(fileString.at(i)) + "\n";
-	}
-	res += "\n";
-	
-	printf("Dir: %s Browsing End. %d files - %d dir(s)", curDir.c_str(), fileString.size(), directories.size());
+	//printf("Dir: %s Browsing End. %d files - %d dir(s)", curDir.c_str(), listFiles, listDirs);
 	int sizeList = strlen(res.c_str());
 	if((int)sizeList > (int)sizeof(ListPathPrint)){
 		sizeList = sizeof(ListPathPrint);
@@ -186,12 +200,10 @@ char * buildList(){
 	return (char*)&ListPathPrint[0];
 }
 
-std::vector<std::string> directories;
-std::vector<std::string> fileString;
-
 // Lists all files and directories in the specified directory and returns them in a string vector
-void browse(std::string dir, std::vector<std::string> &dirs, std::vector<std::string> &fils, bool strict) {
-    /*
+std::vector<class FileDirEntry> browse(std::string dir, bool strict){
+    std::vector<class FileDirEntry> fdirEnt;
+	/*
 	if (strict) {// When using strict mode, the function only allows one subdirectory and not several subdirectories, e.g. like sub/subsub/dir/ ...
         getValidDir(dir);
     }
@@ -205,23 +217,34 @@ void browse(std::string dir, std::vector<std::string> &dirs, std::vector<std::st
 	char fname[256];
 	sprintf(fname,"%s",dir.c_str());
 	
+	int curFileDirIndx = 0;
 	int retf = FAT_FindFirstFile(fname);
 	while(retf != FT_NONE){
 		struct FileClass * fileClassInst = NULL;
+		
 		//directory?
 		if(retf == FT_DIR){
 			fileClassInst = getFileClassFromList(LastDirEntry);
-			dirs.push_back(std::string(fileClassInst->fd_namefullPath));
+			std::string newCurDirEntry = parseDirNameTGDS(std::string(fileClassInst->fd_namefullPath));
+			//printf("dir: %s", newCurDirEntry.c_str());
+			FileDirEntry fent = FileDirEntry(curFileDirIndx, newCurDirEntry, retf);
+			fdirEnt.push_back(fent);
 		}
 		//file?
 		else if(retf == FT_FILE){
-			fileClassInst = getFileClassFromList(LastFileEntry); 
-			fils.push_back(std::string(fileClassInst->fd_namefullPath));
+			fileClassInst = getFileClassFromList(LastFileEntry);
+			std::string newCurFileEntry = parsefileNameTGDS(std::string(fileClassInst->fd_namefullPath));
+			//printf("file: %s", newCurFileEntry.c_str());
+			FileDirEntry fent = FileDirEntry(curFileDirIndx, newCurFileEntry, retf);
+			fdirEnt.push_back(fent);
 		}
 		
 		//more file/dir objects?
 		retf = FAT_FindNextFile(fname);
+		curFileDirIndx++;
 	}
+	
+	return fdirEnt;
 }
 
 int main(int _argc, sint8 **_argv) {

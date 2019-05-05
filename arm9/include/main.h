@@ -26,6 +26,7 @@ USA
 #include "limitsTGDS.h"
 
 #ifdef __cplusplus
+
 //C++ part
 using namespace std;
 #include <iostream>
@@ -37,6 +38,46 @@ using namespace std;
 #include <cstdio>
 #endif
 
+#ifdef __cplusplus
+class FileDirEntry
+{
+  public:
+    int Index;
+	std::string filePathFilename;
+    int type;	//FT_DIR / FT_FILE / FT_NONE	//  setup on Constructor / updated by getFileFILINFOfromPath(); / must be init from the outside 
+    // Constructor
+    FileDirEntry(int indexInst, std::string filePathFilenameInst, int typeInst)
+	{
+		Index = indexInst;
+		filePathFilename = filePathFilenameInst;
+		type = typeInst;
+	}
+	
+	//helpers if/when Constructor is not available
+	int getIndex()
+    {
+		return Index;
+    }
+    std::string getfilePathFilename()
+    {
+		return filePathFilename;
+    }
+	int gettype()
+    {
+		return type;
+    }
+	
+	void setIndex(int IndexInst){
+		Index = IndexInst;
+	}
+	void setfilename(std::string filePathFilenameInst){
+		filePathFilename = filePathFilenameInst;
+	}
+	void settype(int typeInst){
+		type = typeInst;
+	}
+};
+#endif
 
 #endif
 
@@ -55,12 +96,10 @@ extern char ListPathPrint[2048];
 extern char * buildList();	//C++ <- C
 
 #ifdef __cplusplus
-extern std::vector<std::string> directories;
-extern std::vector<std::string> fileString;
 extern std::list<std::string> completePath;
 extern void getValidDir(std::string &dirName);
 extern std::string getCurrentWorkingDir(bool showRootPath);
-extern void browse(std::string dir, std::vector<std::string> &dirs, std::vector<std::string> &fils, bool strict);
+extern std::vector<class FileDirEntry> browse(std::string dir, bool strict);
 extern std::string getDldiDefaultPath();
 extern std::string parseDirNameTGDS(std::string dirName);
 extern std::string parsefileNameTGDS(std::string fileName);

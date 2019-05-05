@@ -318,22 +318,15 @@ int do_ftp_server(){
 					}
 					
 					else if(!strcmp(command, "LIST")){
-						
 						sendResponse = ftpResponseSender(sock2, 150, "Opening BINARY mode data connection for file list.");
-						char * listOut = buildList(); //todo: transfer over the data port	// replacement : char * listDummy = "drwxrwxr-x   2 adm      gueftp      2048 Nov 10  1999 test \n";
 						
-						// send our request
-						send(client_datasocket, listOut, strlen(listOut), 0);
-						int recvd_len = 0;
-						char incoming_buffer[256];
-						while( ( recvd_len = recv( client_datasocket, incoming_buffer, 255, 0 ) ) != 0 ) { // if recv returns 0, the socket has been closed.
-							if(recvd_len>0) { // data was received!
-								incoming_buffer[recvd_len] = 0; // null-terminate
-								//printf(incoming_buffer);
-							}
-						}
-						
+						// send LIST through DATA Port.
+						char * listOut = buildList();
+						send(client_datasocket, listOut, strlen(listOut) + 1, 0);
+						u8 endByte=0x0;
+						send(client_datasocket, &endByte, 1, 0);
 						disconnectAsync(client_datasocket);
+						
 						sendResponse = ftpResponseSender(sock2, 226, "Transfer complete.");
 						isValidcmd = true;
 					}

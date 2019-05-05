@@ -7,6 +7,18 @@
 #include "dsregs.h"
 #include "dsregs_asm.h"
 
+#include <dswifi9.h>
+#include <netdb.h>
+
+//FTP server
+#include "dswnifi_lib.h"
+
+#include <socket.h>
+#include <in.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #define FTP_SERVER_IDLE (uint32)(0xffff1010)				//idle -> connect FTP Client (FTP_SERVER_CONNECTING_PHASE1)
 #define FTP_SERVER_CONNECTING (uint32)(0xffff1011)	//FTP Server <--> FTP Client Initial Handshake (FTP_SERVER_CONNECTING_PHASE2)
 #define FTP_SERVER_CONNECTED_IDLE (uint32)(0xffff1012)	//FTP Server <--> FTP Client Initial Handshake (FTP_SERVER_CONNECTING_PHASE3)
@@ -29,9 +41,11 @@ extern "C" {
 extern uint32 CurFTPState;
 extern u32 getFTPState();
 extern void setFTPState(uint32 FTPState);
-
 extern int ftpResponseSender(int s, int n, char* mes);
-extern const char * getpwd(const char *cwd);
+
+//These two open/close a new FTP Server Data Port (Passive Mode)
+extern int openAndListenFTPDataPort(struct sockaddr_in * sain);
+extern void closeFTPDataPort(int sock);
 
 #ifdef __cplusplus
 }

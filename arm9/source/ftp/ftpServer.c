@@ -322,62 +322,25 @@ int do_ftp_server(){
 					}
 					
 					else if(!strcmp(command, "LIST")){
-						//works fine in DS environment: Server port listener accepting incoming connections from Clients.
-						/*
-						int s = socket(PF_INET, SOCK_STREAM, 0);
-						if(s < 0) {
-							//printf("Error opening socket ");
-							while(1==1){}
-						}
-						int tmp = 1;
-						setsockopt (s, SOL_SOCKET, SO_REUSEADDR, (char *) &tmp, sizeof (tmp));
-					
-						//    char hostname[MAX_TGDSFILENAME_LENGTH+1];
-						//    gethostname(hostname, MAX_TGDSFILENAME_LENGTH+1);
-
-						//    hostent *ent = gethostbyname(hostname);
-						//    unsigned long a = *((unsigned long *)ent->h_addr);
-
-						struct sockaddr_in addr;
-						addr.sin_family = AF_INET;
-						addr.sin_port = htons(FTP_PASV_DATA_TRANSFER_PORT);
-						addr.sin_addr.s_addr = htonl(0);
-						
-						bind(s, (struct sockaddr *)&addr, sizeof(addr));
-						
-						//printf("Listening for a connection at port %d ",ntohs(addr.sin_port));
-						if(listen(s, 1)) {
-							printf("Error listening ");
-							while(1==1){}
-						}
-						int len = sizeof(addr);	//socklen_t
-
-						int clisock = accept(s, (struct sockaddr *)&addr, &len);
-						if(clisock > 0) {
-							printf("Got a connection from %s %d ",inet_ntoa(addr.sin_addr),ntohs(addr.sin_port));
-							//while(1==1);
-						}
-						*/
-						
+						//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
 						struct sockaddr_in clientAddr;
-						int cliLen = sizeof(struct sockaddr_in);
-						int serverDataListenerSock = openServerSyncConn(FTP_PASV_DATA_TRANSFER_PORT, &clientAddr);
-						int clisock = accept(serverDataListenerSock, (struct sockaddr *)&clientAddr, &cliLen);
-						if(clisock > 0) {
-							printf("Got a connection from %s %d ",inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
-						}
-						
+						int clisock = openAndListenFTPDataPort(&clientAddr);
 						sendResponse = ftpResponseSender(sock2, 150, "Opening BINARY mode data connection for file list.");
 						
-						//todo: filter different LIST args here
-						// send LIST through DATA Port.
-						char * listOut = buildList();
-						send(clisock, listOut, strlen(listOut) + 1, 0);
-						u8 endByte=0x0;
-						send(clisock, &endByte, 1, 0);
-						disconnectAsync(clisock);
-						
-						sendResponse = ftpResponseSender(sock2, 226, "Transfer complete.");
+						if(clisock >= 0){
+							//todo: filter different LIST args here
+							// send LIST through DATA Port.
+							char * listOut = buildList();
+							send(clisock, listOut, strlen(listOut) + 1, 0);
+							u8 endByte=0x0;
+							send(clisock, &endByte, 1, 0);
+							closeFTPDataPort(clisock);
+							
+							sendResponse = ftpResponseSender(sock2, 226, "Transfer complete.");
+						}
+						else{
+							sendResponse = ftpResponseSender(sock2, 426, "Connection closed; transfer aborted.");
+						}
 						isValidcmd = true;
 					}
 					

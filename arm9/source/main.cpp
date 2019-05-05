@@ -170,10 +170,10 @@ char * buildList(){
 	browse(curDir,directories,fileString, false);
 	
 	for (unsigned int j = 0; j < directories.size(); j++) {
-		res += directories.at(j) + "/\n";
+		res += parseDirNameTGDS(directories.at(j)) + "/\n";
 	}
 	for (unsigned int i = 0; i < fileString.size(); i++) {
-		res += fileString.at(i) + "\n";
+		res += parsefileNameTGDS(fileString.at(i)) + "\n";
 	}
 	res += "\n";
 	

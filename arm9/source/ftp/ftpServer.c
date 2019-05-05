@@ -437,22 +437,25 @@ int do_ftp_server(){
 						if(!strcmp(command, "LS"))
 						{
 							printf("ls command!");
+							/*
 							system("ls >temps.txt");
 							stat("temps.txt",&obj);
 							size = obj.st_size;
 							sendResponse = send(sock2, &size, sizeof(int),0);
 							filehandle = open("temps.txt", O_RDONLY);
 							//sendfile(sock2,filehandle,NULL,size);
-							
+							*/
 							sendResponse = ftpResponseSender(sock2, 502, "invalid command");//todo
 							isValidcmd = true;
 						}
 						else if(!strcmp(command, "CD"))
 						{
-							if(chdir(buf+3) == 0)
+							if(chdir((buffer+3)) == 0){
 								c = 1;
-							else
+							}
+							else{
 								c = 0;
+							}
 							sendResponse = send(sock2, &c, sizeof(int), 0);
 							isValidcmd = true;
 						}

@@ -86,6 +86,8 @@ class FileDirEntry
 extern "C" {
 #endif
 
+extern char CWDFTP[512];
+
 extern int main(int _argc, sint8 **_argv);
 extern void menuShow();
 

@@ -80,6 +80,8 @@ using namespace std;
 
 #include <sstream>
 
+char CWDFTP[512];
+
 template <class T>
 inline std::string to_string (const T& t)
 {
@@ -174,7 +176,7 @@ char ListPathPrint[2048];
 char * buildList(){
 	std::string res = "";
 	// dir to browse
-	std::string curDir = "/";
+	std::string curDir = string(CWDFTP);
 	std::vector<class FileDirEntry> filedirEntries = browse(curDir, false);
 	
 	int listFiles = 0;

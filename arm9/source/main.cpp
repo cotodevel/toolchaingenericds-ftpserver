@@ -174,6 +174,7 @@ std::string getCurrentWorkingDir(bool showRootPath) {
 
 char ListPathPrint[2048];
 char * buildList(){
+	memset(ListPathPrint, 0, sizeof(ListPathPrint));
 	std::string res = "";
 	// dir to browse
 	std::string curDir = string(CWDFTP);
@@ -193,7 +194,8 @@ char * buildList(){
 			listDirs++;
 		}
 	}
-	//printf("Dir: %s Browsing End. %d files - %d dir(s)", curDir.c_str(), listFiles, listDirs);
+	printf(" >> browse(%s)", curDir.c_str());
+	printf("Dir: %s Browsing End. %d files - %d dir(s)", curDir.c_str(), listFiles, listDirs);
 	int sizeList = strlen(res.c_str());
 	if((int)sizeList > (int)sizeof(ListPathPrint)){
 		sizeList = sizeof(ListPathPrint);
@@ -218,6 +220,14 @@ std::vector<class FileDirEntry> browse(std::string dir, bool strict){
     */
 	char fname[256];
 	sprintf(fname,"%s",dir.c_str());
+	
+	//strcpy(TGDSCurrentWorkingDirectory, fname);	//update tgds cwd 
+	if(chdir(fname) == 0){
+		printf("change to dir %s OK",fname);
+	}
+	else{
+		printf("change to dir %s ERROR",fname);
+	}
 	
 	int curFileDirIndx = 0;
 	int retf = FAT_FindFirstFile(fname);

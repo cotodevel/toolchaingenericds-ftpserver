@@ -178,8 +178,61 @@ int do_ftp_server(){
 						isValidcmd = true;
 					}
 					else if(!strcmp(command, "RETR")){
-						printf("STOR command! ");
-						sendResponse = ftpResponseSender(sock2, 502, "invalid command");//todo
+						char * fname = getFtpCommandArg("RETR", buffer, 0); 
+						printf("RETR cmd: %s",fname);
+						
+						//retr
+						//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
+						struct sockaddr_in clientAddr;
+						int clisock = openAndListenFTPDataPort(&clientAddr);
+						sendResponse = ftpResponseSender(sock2, 150, "Opening BINARY mode data connection for retrieve file from server.");
+						
+						if(clisock >= 0){
+							std::string fileToRetr = string(string("0:") + fname);
+							FILE * fh = fopen(fileToRetr.c_str(), "r");
+							
+							if(fh != NULL){
+								printf("RETR file %s open OK",fileToRetr.c_str());
+						
+								//retrieve from server, to client.
+								const char * message;
+								char server_reply[10000];
+								int total_len = FS_getFileSize((char*)fileToRetr.c_str());
+								int sent_len = 0;
+								while(total_len > 0) { // if recv returns 0, the socket has been closed.
+									
+									int read_len = fread(server_reply, 1, sizeof(server_reply), fh);
+									int sent_len = send(clisock, server_reply, sizeof(server_reply), 0);
+									
+									if(read_len != sent_len){
+										printf("fatal error");
+										while(1==1){}
+									}
+									total_len -= read_len;
+								}
+								
+								disconnectAsync(clisock);
+								fclose(fh);
+								
+								/*
+								send(clisock, listOut, strlen(listOut) + 1, 0);
+								u8 endByte=0x0;
+								send(clisock, &endByte, 1, 0);
+								closeFTPDataPort(clisock);
+								*/
+								sendResponse = ftpResponseSender(sock2, 226, "Transfer complete.");
+							}
+							//could not open file
+							else{
+								printf("RETR file %s open ERROR",fileToRetr.c_str());
+								sendResponse = ftpResponseSender(sock2, 451, "Could not open file.");
+							}
+						}
+						else{
+							sendResponse = ftpResponseSender(sock2, 425, "Connection closed; transfer aborted.");
+						}
+						
+						
 						isValidcmd = true;
 					}
 					//default unsupported, accordingly by: https://tools.ietf.org/html/rfc2389

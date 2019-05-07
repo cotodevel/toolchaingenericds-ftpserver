@@ -33,11 +33,30 @@ int ftpResponseSender(int s, int n, char* mes){
 	return send(s, (char*)&data[0], strlen((char*)&data[0]), 0);
 }
 
+int currserverDataListenerSock = -1;
 //These two open/close a FTP Server (Passive Mode) Data Port
 int openAndListenFTPDataPort(struct sockaddr_in * sain){
+
+	if(currserverDataListenerSock != 0){
+		disconnectAsync(currserverDataListenerSock);
+		currserverDataListenerSock = -1;
+	}
+	
 	int cliLen = sizeof(struct sockaddr_in);
 	int serverDataListenerSock = openServerSyncConn(FTP_PASV_DATA_TRANSFER_PORT, sain);
+	currserverDataListenerSock = serverDataListenerSock;
+	
+	if(serverDataListenerSock == -1){
+		printf("failed allocing serverDataListener");
+		while(1==1){}
+	}
+	
 	int clisock = accept(serverDataListenerSock, (struct sockaddr *)sain, &cliLen);
+	
+	if(clisock == -1){
+		printf("failed allocing incoming client");
+		while(1==1){}
+	}
 	
 	if(clisock > 0) {
 		printf("FTP Server (DataPort): Got a connection from:");
@@ -48,4 +67,8 @@ int openAndListenFTPDataPort(struct sockaddr_in * sain){
 
 void closeFTPDataPort(int sock){
 	disconnectAsync(sock);
+	if(currserverDataListenerSock != 0){
+		disconnectAsync(currserverDataListenerSock);
+		currserverDataListenerSock = -1;
+	}
 }

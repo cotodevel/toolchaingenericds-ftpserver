@@ -46,6 +46,7 @@ extern int ftpResponseSender(int s, int n, char* mes);
 //These two open/close a new FTP Server Data Port (Passive Mode)
 extern int openAndListenFTPDataPort(struct sockaddr_in * sain);
 extern void closeFTPDataPort(int sock);
+extern int currserverDataListenerSock;
 
 #ifdef __cplusplus
 }

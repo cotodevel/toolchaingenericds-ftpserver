@@ -236,11 +236,6 @@ int do_ftp_server(){
 						client_datasocketPortNumber = ClientConnectionDataPort;
 						strcpy(client_datasocketIP , clientIP);
 						
-						clrscr();
-						printf("  ");
-						printf("  ");
-						printf("  ");
-						
 						// Create a TCP socket so we connect to DATA Port published by Server
 						/*
 						if(client_datasocket != -1){
@@ -304,6 +299,13 @@ int do_ftp_server(){
 						}
 						if( (globaldatasocketEnabled == true) || (datasocketEnabled == true) ){
 						*/
+						
+						clrscr();
+						printf("  ");
+						printf("  ");
+						printf("  ");
+						
+						
 							printf("PASV > set data transfer port @ %d", FTP_PASV_DATA_TRANSFER_PORT);
 							char buf[256] = {0};
 							//sprintf(buf, "Entering Passive Mode (%d).",FTP_PASV_DATA_TRANSFER_PORT);

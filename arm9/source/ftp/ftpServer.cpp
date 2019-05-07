@@ -6,6 +6,7 @@
 #include "dsregs.h"
 #include "dsregs_asm.h"
 #include "dswnifi_lib.h"
+#include "filehandleTGDS.h"
 
 #include <stdarg.h>
 #include <string.h>
@@ -189,26 +190,42 @@ int do_ftp_server(){
 						
 						if(clisock >= 0){
 							std::string fileToRetr = parsefileNameTGDS(string(fname));
+							int total_len = FS_getFileSize((char*)fileToRetr.c_str());
 							FILE * fh = fopen(fileToRetr.c_str(), "r");
 							
 							if(fh != NULL){
-								printf("RETR file %s open OK",fileToRetr.c_str());
-						
 								//retrieve from server, to client.
 								const char * message;
 								char server_reply[10000];
-								int total_len = FS_getFileSize((char*)fileToRetr.c_str());
+								printf("RETR file %s open OK: size: %d ",fileToRetr.c_str(), total_len);
+								
 								int sent_len = 0;
+								int readLen = total_len;
+								if(sizeof(server_reply) > total_len){
+									readLen = total_len;
+								}
+								else{
+									readLen = sizeof(server_reply);
+								}
 								while(total_len > 0) { // if recv returns 0, the socket has been closed.
 									
-									int read_len = fread(server_reply, 1, sizeof(server_reply), fh);
-									int sent_len = send(clisock, server_reply, sizeof(server_reply), 0);
+									//printf("fetch before: %d bytes", readLen);
 									
-									if(read_len != sent_len){
-										printf("fatal error");
-										while(1==1){}
+									readLen = fread(server_reply, 1, readLen, fh);
+									
+									int read_len2 = readLen;
+									
+									//printf("fetch after: %d bytes", readLen);
+									//while(1==1);
+									
+									int sent_len = 0;
+									int ptr = 0;
+									while((sent_len = send(clisock, server_reply+ptr, readLen, 0)) > 0){
+										readLen=-sent_len;
+										ptr+=sent_len;
 									}
-									total_len -= read_len;
+									
+									total_len -= read_len2;
 								}
 								
 								disconnectAsync(clisock);

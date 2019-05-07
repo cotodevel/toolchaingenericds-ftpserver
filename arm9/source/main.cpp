@@ -139,18 +139,27 @@ vector<string> splitCustom(string str, string token){
 
 
 std::string parseDirNameTGDS(std::string dirName){
-	if ((dirName.at(0) == '/') && (dirName.at(1) == '/')) {
-		dirName.erase(0,1);	//trim the starting / if it has one
+	int dirlen = strlen(dirName.c_str());
+	if(dirlen > 2){
+		if ((dirName.at(0) == '/') && (dirName.at(1) == '/')) {
+			dirName.erase(0,1);	//trim the starting / if it has one
+		}
+		dirName.erase(dirName.length());	//trim the leading "/"
 	}
-	dirName.erase(dirName.length());	//trim the leading "/"
 	return dirName;
 }
 
 std::string parsefileNameTGDS(std::string fileName){
-	if ((fileName.at(2) == '/') && (fileName.at(3) == '/')) {
-		fileName.erase(2,2);	//trim the starting // if it has one (since getfspath appends 0:/)
-		if(fileName.at(2) != '/'){	//if we trimmed by accident the only leading / such as 0:filename instead of 0:/filename, restore it so it becomes the latter
-			fileName.insert(2, ToStr('/') );
+	int filelen = strlen(fileName.c_str());
+	if(filelen > 4){
+		if (fileName.at(0) == '/') {
+			fileName.erase(0,1);	//trim the starting / if it has one
+		}
+		if ((fileName.at(2) == '/') && (fileName.at(3) == '/')) {
+			fileName.erase(2,2);	//trim the starting // if it has one (since getfspath appends 0:/)
+			if(fileName.at(2) != '/'){	//if we trimmed by accident the only leading / such as 0:filename instead of 0:/filename, restore it so it becomes the latter
+				fileName.insert(2, ToStr('/') );
+			}
 		}
 	}
 	return fileName;

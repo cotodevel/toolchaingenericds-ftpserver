@@ -37,11 +37,6 @@ int currserverDataListenerSock = -1;
 //These two open/close a FTP Server (Passive Mode) Data Port
 int openAndListenFTPDataPort(struct sockaddr_in * sain){
 
-	if(currserverDataListenerSock != 0){
-		disconnectAsync(currserverDataListenerSock);
-		currserverDataListenerSock = -1;
-	}
-	
 	int cliLen = sizeof(struct sockaddr_in);
 	int serverDataListenerSock = openServerSyncConn(FTP_PASV_DATA_TRANSFER_PORT, sain);
 	currserverDataListenerSock = serverDataListenerSock;

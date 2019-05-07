@@ -188,7 +188,7 @@ int do_ftp_server(){
 						sendResponse = ftpResponseSender(sock2, 150, "Opening BINARY mode data connection for retrieve file from server.");
 						
 						if(clisock >= 0){
-							std::string fileToRetr = string(string("0:") + fname);
+							std::string fileToRetr = parsefileNameTGDS(string(fname));
 							FILE * fh = fopen(fileToRetr.c_str(), "r");
 							
 							if(fh != NULL){

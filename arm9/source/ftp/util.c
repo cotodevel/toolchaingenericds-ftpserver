@@ -67,3 +67,28 @@ void closeFTPDataPort(int sock){
 		currserverDataListenerSock = -1;
 	}
 }
+
+
+/**
+ * -1 error, 0 ok
+ */
+int send_file(int peer, FILE *f, int fileSize) {
+    char filebuf[BUF_SIZE+1];
+    int written = 0;
+    while(fileSize > 0) {
+		int readSofar=fread(filebuf, 1, BUF_SIZE, f);
+		int n = readSofar;
+		int st = 0; 	//sent physically
+		int ofst = 0;	//internal offset			
+		while(n > 0){
+			st = send(peer, filebuf + ofst, n, 0);
+			//printf(" %d bytes sent", st);
+			n=n-st;
+			fileSize-=st;
+			ofst+=st;
+			written+=st;
+		}
+		memset(filebuf, 0, sizeof(filebuf));
+    }
+    return written;
+}

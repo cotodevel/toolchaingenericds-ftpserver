@@ -180,7 +180,8 @@ int do_ftp_server(){
 					}
 					else if(!strcmp(command, "RETR")){
 						char * fname = getFtpCommandArg("RETR", buffer, 0); 
-						printf("RETR cmd: %s",fname);
+						string fnameRemote = parsefileNameTGDS(string("0:/") + string(fname));
+						printf("RETR cmd: %s",fnameRemote.c_str());
 						
 						//retr
 						//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
@@ -189,54 +190,17 @@ int do_ftp_server(){
 						sendResponse = ftpResponseSender(sock2, 150, "Opening BINARY mode data connection for retrieve file from server.");
 						
 						if(clisock >= 0){
-							std::string fileToRetr = parsefileNameTGDS(string(fname));
+							std::string fileToRetr = fnameRemote;
 							int total_len = FS_getFileSize((char*)fileToRetr.c_str());
 							FILE * fh = fopen(fileToRetr.c_str(), "r");
 							
 							if(fh != NULL){
 								//retrieve from server, to client.
-								const char * message;
-								char server_reply[10000];
-								printf("RETR file %s open OK: size: %d ",fileToRetr.c_str(), total_len);
-								
-								int sent_len = 0;
-								int readLen = total_len;
-								if(sizeof(server_reply) > total_len){
-									readLen = total_len;
-								}
-								else{
-									readLen = sizeof(server_reply);
-								}
-								while(total_len > 0) { // if recv returns 0, the socket has been closed.
-									
-									//printf("fetch before: %d bytes", readLen);
-									
-									readLen = fread(server_reply, 1, readLen, fh);
-									
-									int read_len2 = readLen;
-									
-									//printf("fetch after: %d bytes", readLen);
-									//while(1==1);
-									
-									int sent_len = 0;
-									int ptr = 0;
-									while((sent_len = send(clisock, server_reply+ptr, readLen, 0)) > 0){
-										readLen=-sent_len;
-										ptr+=sent_len;
-									}
-									
-									total_len -= read_len2;
-								}
-								
+								//printf("RETR file %s open OK: size: %d ",fileToRetr.c_str(), total_len);
+								int written = send_file(clisock, fh, total_len);
+								//printf("file written %d bytes", written);
 								disconnectAsync(clisock);
 								fclose(fh);
-								
-								/*
-								send(clisock, listOut, strlen(listOut) + 1, 0);
-								u8 endByte=0x0;
-								send(clisock, &endByte, 1, 0);
-								closeFTPDataPort(clisock);
-								*/
 								sendResponse = ftpResponseSender(sock2, 226, "Transfer complete.");
 							}
 							//could not open file

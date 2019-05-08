@@ -30,6 +30,7 @@
 
 #define FTP_PASV_DATA_TRANSFER_PORT (sint32)(20)
 
+#define BUF_SIZE (int)4096
 
 
 #endif
@@ -47,6 +48,7 @@ extern int ftpResponseSender(int s, int n, char* mes);
 extern int openAndListenFTPDataPort(struct sockaddr_in * sain);
 extern void closeFTPDataPort(int sock);
 extern int currserverDataListenerSock;
+extern int send_file(int peer, FILE *f, int fileSize);
 
 #ifdef __cplusplus
 }

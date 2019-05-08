@@ -25,8 +25,9 @@
 #define FTP_SERVER_WORKING (uint32)(0xffff1013)	//FTP Server <--> FTP Client Actual Session. If something fails it will disconnect here.
 
 //error codes
-#define FTP_SERVER_PROC_RUNNING (sint32)(0)
-#define FTP_SERVER_PROC_FAILED (sint32)(-1)
+#define FTP_SERVER_CLIENT_DISCONNECTED (sint32)(0)
+#define FTP_SERVER_PROC_RUNNING (sint32)(1)
+#define FTP_SERVER_PROC_FAILED (sint32)(2)
 
 #define FTP_PASV_DATA_TRANSFER_PORT (sint32)(20)
 

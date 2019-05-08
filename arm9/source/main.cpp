@@ -305,8 +305,9 @@ int main(int _argc, sint8 **_argv) {
 		if(FTP_STATUS == FTP_SERVER_PROC_RUNNING){
 			//Server Running
 		}
-		else if(FTP_STATUS == FTP_SERVER_PROC_FAILED){
+		else if(FTP_STATUS == FTP_SERVER_CLIENT_DISCONNECTED){
 			//Server Disconnected/Idle!
+			closeFTPDataPort(sock1);
 			setFTPState(FTP_SERVER_IDLE);
 			printf("Client disconnected!. Press A to retry.");
 			scanKeys();

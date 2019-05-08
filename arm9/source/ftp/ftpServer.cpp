@@ -135,7 +135,7 @@ int do_ftp_server(){
 			char buffer[256] = {0};
 			int res = recv(sock2, buffer, 256, 0);
 			int sendResponse = 0;
-			if(res >= 0){
+			if(res > 0){
 				int len = strlen(buffer);
 				if(len > 3){
 					char command[5] = {0};
@@ -143,10 +143,8 @@ int do_ftp_server(){
 					memcpy((uint8*)&command[0], buffer, 4);
 					command[4] = '\0';
 					strcpy (Debugcommand, command);
-					
-					//printf("CMD:[%s]",command);
-					
 					bool isValidcmd = false;
+					
 					//four or less cmds
 					if(!strcmp(command, "USER"))
 					{
@@ -509,7 +507,13 @@ int do_ftp_server(){
 						sendResponse = ftpResponseSender(sock2, 502, "invalid command");
 					}
 				}
+			}//endif res > 0 recv
+			else{
+				//sock2, client disconnected
+				closeFTPDataPort(sock2);
+				return FTP_SERVER_CLIENT_DISCONNECTED;
 			}
+			curFTPStatus = FTP_SERVER_PROC_RUNNING;
 		}
 		break;
 	}

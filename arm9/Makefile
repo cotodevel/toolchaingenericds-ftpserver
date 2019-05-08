@@ -39,8 +39,8 @@ d_objs_arm9:=	${file_arm9_src_c:.c=.d}	${file_arm9_src_s:.s=.d}	${file_arm9_src_
 #ARM9 specific definitions.	-fno-common so we force initialized data to rodata
 MAPFILE = $(DIR_ARM9).map
 AS_ASFLAGS		=	$(GLOBAL_SHARED_FLAGS_9)	$(SPECIFIC_AS_COMPILER_FLAGS_9)		$(GLOBAL_AS_COMPILER_FLAGS)
-CC_ASFLAGS		=	$(GLOBAL_SHARED_FLAGS_9)	$(SPECIFIC_CC_COMPILER_FLAGS_9)		-Wall	-marm	-Os	-Dreadvertoolchain='$(TOOLCHAIN_GENERIC_DS_VER)'	-fomit-frame-pointer	-ffast-math	-DNDS	-std=c99	-shared	-D_POSIX_THREADS
-CPP_FLAGS		=	$(GLOBAL_SHARED_FLAGS_9)	$(SPECIFIC_CXX_COMPILER_FLAGS_9)	-Wall	-marm	-Os	-Dreadvertoolchain='$(TOOLCHAIN_GENERIC_DS_VER)'	-fomit-frame-pointer	-ffast-math	-DNDS	-std=c++11	-shared	-D_POSIX_THREADS
+CC_ASFLAGS		=	$(GLOBAL_SHARED_FLAGS_9)	$(SPECIFIC_CC_COMPILER_FLAGS_9)		-Wall	-marm	-O2	-Dreadvertoolchain='$(TOOLCHAIN_GENERIC_DS_VER)'	-fomit-frame-pointer	-ffast-math	-DNDS	-std=c99	-shared	-D_POSIX_THREADS
+CPP_FLAGS		=	$(GLOBAL_SHARED_FLAGS_9)	$(SPECIFIC_CXX_COMPILER_FLAGS_9)	-Wall	-marm	-O2	-Dreadvertoolchain='$(TOOLCHAIN_GENERIC_DS_VER)'	-fomit-frame-pointer	-ffast-math	-DNDS	-std=c++11	-shared	-D_POSIX_THREADS
 BUILD			= 	$(BUILD_ARM9)
 DIR_SRC			=	$(DIRS_ARM9_SRC)
 

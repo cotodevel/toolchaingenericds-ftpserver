@@ -21,6 +21,7 @@ extern int ftp_cmd_FEAT(int s, int cmd, char* arg);
 extern int ftp_cmd_TYPE(int s, int cmd, char* arg);
 extern int ftp_cmd_default(int s, int cmd, char* arg);
 extern int ftp_cmd_PASV(int s, int cmd, char* arg);
+extern int ftp_cmd_STOR(int s, int cmd, char* arg);
 
 #ifdef __cplusplus
 }

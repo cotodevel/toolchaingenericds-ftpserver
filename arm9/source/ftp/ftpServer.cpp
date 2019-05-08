@@ -173,11 +173,12 @@ int do_ftp_server(){
 						sendResponse = send(sock2, &i, sizeof(int), 0);
 						isValidcmd = true;
 					}
+					
 					else if(!strcmp(command, "STOR")){
-						printf("STOR command! ");
-						sendResponse = ftpResponseSender(sock2, 502, "invalid command");//todo
+						sendResponse = ftp_cmd_STOR(0, 0, buffer);
 						isValidcmd = true;
 					}
+					
 					else if(!strcmp(command, "RETR")){
 						char * fname = getFtpCommandArg("RETR", buffer, 0); 
 						string fnameRemote = parsefileNameTGDS(string("0:/") + string(fname));
@@ -212,7 +213,6 @@ int do_ftp_server(){
 						else{
 							sendResponse = ftpResponseSender(sock2, 425, "Connection closed; transfer aborted.");
 						}
-						
 						
 						isValidcmd = true;
 					}

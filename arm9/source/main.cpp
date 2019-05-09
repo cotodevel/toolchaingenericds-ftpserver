@@ -109,6 +109,7 @@ int main(int _argc, sint8 **_argv) {
 			closeFTPDataPort(sock1);
 			setFTPState(FTP_SERVER_IDLE);
 			printf("Client disconnected!. Press A to retry.");
+			switch_dswnifi_mode(dswifi_idlemode);
 			scanKeys();
 			while(!(keysPressed() & KEY_A)){
 				scanKeys();

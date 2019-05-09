@@ -25,60 +25,6 @@ USA
 #include "dsregs.h"
 #include "limitsTGDS.h"
 
-#ifdef __cplusplus
-
-//C++ part
-using namespace std;
-#include <iostream>
-#include <fstream>
-#include <list>
-#include <vector>
-#include <cmath>
-#include <cstdlib>
-#include <cstdio>
-#endif
-
-#ifdef __cplusplus
-class FileDirEntry
-{
-  public:
-    int Index;
-	std::string filePathFilename;
-    int type;	//FT_DIR / FT_FILE / FT_NONE	//  setup on Constructor / updated by getFileFILINFOfromPath(); / must be init from the outside 
-    // Constructor
-    FileDirEntry(int indexInst, std::string filePathFilenameInst, int typeInst)
-	{
-		Index = indexInst;
-		filePathFilename = filePathFilenameInst;
-		type = typeInst;
-	}
-	
-	//helpers if/when Constructor is not available
-	int getIndex()
-    {
-		return Index;
-    }
-    std::string getfilePathFilename()
-    {
-		return filePathFilename;
-    }
-	int gettype()
-    {
-		return type;
-    }
-	
-	void setIndex(int IndexInst){
-		Index = IndexInst;
-	}
-	void setfilename(std::string filePathFilenameInst){
-		filePathFilename = filePathFilenameInst;
-	}
-	void settype(int typeInst){
-		type = typeInst;
-	}
-};
-#endif
-
 #endif
 
 
@@ -86,26 +32,8 @@ class FileDirEntry
 extern "C" {
 #endif
 
-extern char CWDFTP[512];
-
 extern int main(int _argc, sint8 **_argv);
 extern void menuShow();
-
-extern char curChosenBrowseFile[MAX_TGDSFILENAME_LENGTH+1];
-extern bool ShowBrowser(char * Path);
-
-extern char ListPathPrint[2048];
-extern char * buildList();	//C++ <- C
-
-#ifdef __cplusplus
-extern std::list<std::string> completePath;
-extern void getValidDir(std::string &dirName);
-extern std::string getCurrentWorkingDir(bool showRootPath);
-extern std::vector<class FileDirEntry> browse(std::string dir, bool strict);
-extern std::string getDldiDefaultPath();
-extern std::string parseDirNameTGDS(std::string dirName);
-extern std::string parsefileNameTGDS(std::string fileName);
-#endif
 
 #ifdef __cplusplus
 }

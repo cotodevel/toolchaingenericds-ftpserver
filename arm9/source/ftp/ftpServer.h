@@ -1,7 +1,5 @@
-#ifndef FTP_SERVER_H
-#define FTP_SERVER_H
-
-#define FTP_PORT 21
+#ifndef __ftpServer_h__
+#define __ftpServer_h__
 
 #include "typedefsTGDS.h"
 #include "dsregs.h"
@@ -14,39 +12,18 @@
 #include <dswifi9.h>
 #include <netdb.h>
 
-
-/*FTP server*/
 #include <socket.h>
 #include <in.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
- 
-/*for getting file size using stat()*/
-#include<sys/stat.h>
- 
-/*for sendfile()*/
-//#include<sys/sendfile.h>
- 
-/*for O_RDONLY*/
-#include<fcntl.h>
-#include "util.h"
 #include "sgIP_Config.h"
+#include "fsfatlayerTGDS.h"
 
+#define FTP_SERVER_SERVICE_PORT 21
+#define FTP_SERVER_SERVICE_DATAPORT (sint32)(20)
 
 #endif
-
-#define MY_PORT_ID 6081
-#define MAXLINE 256
-#define MAXSIZE 512   
-
-#define ACK                   2
-#define NACK                  3
-#define REQUESTFILE           100
-#define COMMANDNOTSUPPORTED   150
-#define COMMANDSUPPORTED      160
-#define BADFILENAME           200
-#define FILENAMEOK            400
 
 #ifdef __cplusplus
 extern "C" {
@@ -74,12 +51,11 @@ extern int server_datasocket;
 //client_datasocket == the DATA port open by the Client whose commands are processed and sent to Server (DS). Client generates and listens cmds through that port.
 extern int client_datasocket;
 extern int client_datasocketPortNumber;
-extern char client_datasocketIP[256];
+extern char client_datasocketIP[MAX_TGDSFILENAME_LENGTH];
 
 extern char buf[100], command[5], filename[20];
 extern int k, i, size, srv_len,cli_len, c;
 extern int filehandle;
-extern char *getFtpCommandArg(char * theCommand, char *theCommandString, int skipArgs);
 extern bool FTPActiveMode;
 
 extern char currentPath[4096];

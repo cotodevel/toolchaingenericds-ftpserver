@@ -97,10 +97,10 @@ int main(int _argc, sint8 **_argv) {
 	
 	//custom Handler
 	menuShow();
-	setFTPState(FTP_SERVER_IDLE);
+	ftpInit();
 	
 	while (1){
-		sint32 FTP_STATUS = do_ftp_server();
+		sint32 FTP_STATUS = FTPServerService();
 		if(FTP_STATUS == FTP_SERVER_PROC_RUNNING){
 			//Server Running
 		}

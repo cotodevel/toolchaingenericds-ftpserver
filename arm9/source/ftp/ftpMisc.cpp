@@ -84,10 +84,10 @@ template <class T> std::string to_string (const T& t)
 
 char CWDFTP[512];
 char curChosenBrowseFile[MAX_TGDSFILENAME_LENGTH+1];
-char ListPathPrint[2048];
+char * ListPathPrint = NULL;
 
 char * buildList(){
-	memset(ListPathPrint, 0, sizeof(ListPathPrint));
+	memset(ListPathPrint, 0, LISTPATH_SIZE);
 	std::string res = "";
 	// dir to browse
 	std::string curDir = string(CWDFTP);
@@ -108,12 +108,9 @@ char * buildList(){
 	}
 	printf(" >> browse(%s)", curDir.c_str());
 	printf("Dir: %s Browsing End. %d files - %d dir(s)", curDir.c_str(), listFiles, listDirs);
-	int sizeList = strlen(res.c_str());
-	if((int)sizeList > (int)sizeof(ListPathPrint)){
-		sizeList = sizeof(ListPathPrint);
-	}
-	strncpy( (char*)&ListPathPrint[0], (const char *) res.c_str(), sizeList);
-	return (char*)&ListPathPrint[0];
+	int sizeList = strlen(res.c_str()) + 1;
+	strncpy((char*)ListPathPrint, (const char *) res.c_str(), sizeList);
+	return (char*)ListPathPrint;
 }
 
 //FTP Command implementation.
@@ -223,6 +220,22 @@ int ftp_cmd_STOR(int s, int cmd, char* arg){
 	}
 	else{
 		sendResponse = ftpResponseSender(s, 425, "Connection closed; transfer aborted.");
+	}
+	return sendResponse;
+}
+
+
+int ftp_cmd_CDUP(int s, int cmd, char* arg){	
+	char tempnewDir[MAX_TGDSFILENAME_LENGTH+1] = {0};
+	char * CurrentWorkingDirectory = (char*)&TGDSCurrentWorkingDirectory[0];
+	strcpy (tempnewDir, CurrentWorkingDirectory);
+	int sendResponse = 0;
+	bool cdupStatus = leaveDir(tempnewDir);
+	if(cdupStatus == true){
+		sendResponse = ftpResponseSender(s, 200, "OK");
+	}
+	else{
+		sendResponse = ftpResponseSender(s, 550, "ERROR");
 	}
 	return sendResponse;
 }
@@ -349,10 +362,11 @@ std::string parseDirNameTGDS(std::string dirName){
 }
 
 std::string parsefileNameTGDS(std::string fileName){
-	int filelen = strlen(fileName.c_str());
+	int filelen = fileName.length();
 	if(filelen > 4){
 		if (fileName.at(0) == '/') {
 			fileName.erase(0,1);	//trim the starting / if it has one
+			return parsefileNameTGDS(fileName);	//keep removing further slashes
 		}
 		if ((fileName.at(2) == '/') && (fileName.at(3) == '/')) {
 			fileName.erase(2,2);	//trim the starting // if it has one (since getfspath appends 0:/)

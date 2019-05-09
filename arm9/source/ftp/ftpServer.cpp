@@ -74,8 +74,14 @@ bool globaldatasocketEnabled = false;
 char currentPath[4096];
 char tempBuf[4096];
 
-
-int do_ftp_server(){
+void ftpInit(){
+	if(ListPathPrint==NULL){
+		ListPathPrint=(char*)malloc(LISTPATH_SIZE);
+	}
+	memset(ListPathPrint, 0, LISTPATH_SIZE);
+	setFTPState(FTP_SERVER_IDLE);
+}
+int FTPServerService(){
 	int curFTPStatus = 0;
 	//handle FTP Server handshake internal cases
 	switch(getFTPState()){
@@ -141,19 +147,16 @@ int do_ftp_server(){
 					//four or less cmds
 					if(!strcmp(command, "USER"))
 					{
-						printf("Sent user resp! ");
 						sendResponse = ftp_cmd_USER(sock2, 200, "password ?");
 						isValidcmd = true;
 					}
 					else if(!strcmp(command, "PASS"))
 					{
-						printf("Sent pass resp! ");
 						sendResponse = ftp_cmd_PASS(sock2, 200, "ok");
 						isValidcmd = true;
 					}
 					else if(!strcmp(command, "AUTH"))
 					{
-						printf("Sent AUTH resp! ");
 						sendResponse = ftpResponseSender(sock2, 504, "AUTH not supported");
 						isValidcmd = true;
 					}
@@ -181,30 +184,18 @@ int do_ftp_server(){
 					}
 					//default unsupported, accordingly by: https://cr.yp.to/ftp/syst.html
 					else if(!strcmp(command, "SYST")){
-						printf("sent SYST cmd ");
 						sendResponse = ftp_cmd_SYST(sock2, 215, "UNIX Type: L8");
 						isValidcmd = true;
 					}
 					//TYPE: I binary data by default
 					else if(!strcmp(command, "TYPE")){
-						//
-						printf("TYPE > Switching to Binary mode.");
 						sendResponse = ftp_cmd_TYPE(sock2, 200, "Switching to Binary mode.");
 						isValidcmd = true;
 					}
 					
 					else if(!strcmp(command, "CDUP"))
 					{
-						char tempnewDir[MAX_TGDSFILENAME_LENGTH+1] = {0};
-						char * CurrentWorkingDirectory = (char*)&TGDSCurrentWorkingDirectory[0];
-						strcpy (tempnewDir, CurrentWorkingDirectory);
-						bool cdupStatus = leaveDir(tempnewDir);
-						if(cdupStatus == true){
-							sendResponse = ftp_cmd_USER(sock2, 200, "OK");
-						}
-						else{
-							sendResponse = ftp_cmd_USER(sock2, 200, "ERROR");
-						}
+						ftp_cmd_CDUP(sock2, 0, "");
 						isValidcmd = true;
 					}
 					
@@ -258,7 +249,19 @@ int do_ftp_server(){
 							//todo: filter different LIST args here
 							// send LIST through DATA Port.
 							char * listOut = buildList();
-							send(clisock, listOut, strlen(listOut) + 1, 0);
+							
+							int totalListSize = strlen(listOut) + 1;
+							int written = 0;
+							int st = 0; 	//sent physically
+							int ofst = 0;	//internal offset			
+							while(totalListSize > 0){
+								st = send(clisock, listOut + ofst, totalListSize, 0);
+								//printf(" %d bytes sent", st);
+								totalListSize-=st;
+								ofst+=st;
+								written+=st;
+							}
+							
 							u8 endByte=0x0;
 							send(clisock, &endByte, 1, 0);
 							closeFTPDataPort(clisock);
@@ -268,6 +271,24 @@ int do_ftp_server(){
 						else{
 							sendResponse = ftpResponseSender(sock2, 426, "Connection closed; transfer aborted.");
 						}
+						isValidcmd = true;
+					}
+					
+					
+					else if(!strcmp(command, "DELE")){
+						char * fname = getFtpCommandArg("DELE", buffer, 0);  
+						string fnameRemote = parsefileNameTGDS(string(fname));
+						
+						int retVal = remove(fnameRemote.c_str());
+						if(retVal==0){
+							sendResponse = ftpResponseSender(sock2, 250, "Delete Command successful.");
+						}
+						else{
+							sendResponse = ftpResponseSender(sock2, 450, "Delete Command error.");
+						}
+						
+						printf("trying DELE: [%s] ret:[%d]", fnameRemote.c_str(),retVal);
+						
 						isValidcmd = true;
 					}
 					

@@ -84,6 +84,8 @@ class FileDirEntry
 
 #define BUF_SIZE (int)4096
 
+#define LISTPATH_SIZE (int)(64*1024)
+
 #endif
 
 #ifdef __cplusplus
@@ -99,6 +101,7 @@ extern int ftp_cmd_TYPE(int s, int cmd, char* arg);
 extern int ftp_cmd_PASV(int s, int cmd, char* arg);
 extern int ftp_cmd_STOR(int s, int cmd, char* arg);
 extern int ftp_cmd_RETR(int s, int cmd, char* arg);
+extern int ftp_cmd_CDUP(int s, int cmd, char* arg);
 
 extern uint32 CurFTPState;
 extern u32 getFTPState();
@@ -115,7 +118,7 @@ extern char CWDFTP[512];
 extern char curChosenBrowseFile[MAX_TGDSFILENAME_LENGTH+1];
 extern bool ShowBrowser(char * Path);
 
-extern char ListPathPrint[2048];
+extern char * ListPathPrint;
 extern char * buildList();	//C++ <- C
 
 #ifdef __cplusplus

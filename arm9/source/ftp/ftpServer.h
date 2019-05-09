@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-extern int do_ftp_server();
+extern int FTPServerService();
 int ftp_openCommandChannel();
 int ftp_getConnection();
 extern bool globaldatasocketEnabled;
@@ -60,7 +60,7 @@ extern bool FTPActiveMode;
 
 extern char currentPath[4096];
 extern char tempBuf[4096];
-
+extern void ftpInit();
 #ifdef __cplusplus
 }
 #endif

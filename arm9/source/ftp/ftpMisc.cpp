@@ -162,7 +162,7 @@ int ftp_cmd_RETR(int s, int cmd, char* arg){
 		if(fh != NULL){
 			//retrieve from server, to client.
 			int written = send_file(clisock, fh, total_len);
-			//printf("file written %d bytes", written);
+			//printf("To client: file written %d bytes", written);
 			disconnectAsync(clisock);
 			fclose(fh);
 			sendResponse = ftpResponseSender(s, 226, "Transfer complete.");
@@ -197,7 +197,7 @@ int ftp_cmd_STOR(int s, int cmd, char* arg){
 		
 		if(fh != NULL){
 			//retrieve data from client socket.
-			char client_reply[5000];
+			char * client_reply = (char*)malloc(SENDRECVBUF_SIZE);
 			int received_len = 0;
 			int total_len = 0;
 			while( ( received_len = recv(clisock, client_reply, sizeof(client_reply), 0 ) ) != 0 ) { // if recv returns 0, the socket has been closed.
@@ -207,7 +207,7 @@ int ftp_cmd_STOR(int s, int cmd, char* arg){
 					//printf("Received byte size = %d", received_len);
 				}
 			}
-			
+			free(client_reply);
 			disconnectAsync(clisock);
 			fclose(fh);
 			sendResponse = ftpResponseSender(s, 226, "Transfer complete.");
@@ -291,24 +291,41 @@ void closeFTPDataPort(int sock){
 	}
 }
 
-int send_file(int peer, FILE *f, int fileSize) {
-    char filebuf[BUF_SIZE+1];
-    int written = 0;
-    while(fileSize > 0) {
-		int readSofar=fread(filebuf, 1, BUF_SIZE, f);
-		int n = readSofar;
-		int st = 0; 	//sent physically
-		int ofst = 0;	//internal offset			
-		while(n > 0){
-			st = send(peer, filebuf + ofst, BUF_SIZE, 0);
-			//printf(" %d bytes sent", st);
-			n=n-st;
-			fileSize-=st;
-			ofst+=st;
-			written+=st;
-		}
-		memset(filebuf, 0, sizeof(filebuf));
+
+
+static inline bool send_all(int socket, void *buffer, size_t length, int * written)
+{
+    char *ptr = (char*) buffer;
+    while (length > 0)
+    {
+        int i = send(socket, ptr, length, 0);
+        if (i < 1) return false;
+        ptr += i;
+		(*written)+=i;
+        length -= i;
     }
+    return true;
+}
+
+int send_file(int peer, FILE *f, int fileSize) {
+	char * filebuf = (char*)malloc(SENDRECVBUF_SIZE);
+    int written = 0;
+	int readSofar= 0;
+    while((readSofar=fread(filebuf, 1, SENDRECVBUF_SIZE, f)) > 0) {
+		int write = 0;
+		if(send_all(peer, filebuf, readSofar, &write) == true){
+			//printf("written %d bytes", write);
+			written+=write;
+		}
+		else{
+			//printf("failed to write %d bytes", readSofar);
+		}
+    }
+	free(filebuf);
+	
+	u8 endByte=0x0;
+	send(peer, &endByte, 1, 0);	//finish connection so Client disconnects.
+	
     return written;
 }
 

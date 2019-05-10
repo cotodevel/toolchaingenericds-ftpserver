@@ -82,7 +82,7 @@ class FileDirEntry
 #define FTP_SERVER_PROC_RUNNING (sint32)(1)
 #define FTP_SERVER_PROC_FAILED (sint32)(2)
 
-#define BUF_SIZE (int)4096
+#define SENDRECVBUF_SIZE (int)(64*1024)
 
 #define LISTPATH_SIZE (int)(64*1024)
 

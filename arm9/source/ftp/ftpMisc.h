@@ -112,6 +112,7 @@ extern int ftpResponseSender(int s, int n, char* mes);
 extern int openAndListenFTPDataPort(struct sockaddr_in * sain);
 extern void closeFTPDataPort(int sock);
 extern int currserverDataListenerSock;
+extern bool send_all(int socket, void *buffer, size_t length, int * written);
 extern int send_file(int peer, FILE *f, int fileSize);
 
 extern char CWDFTP[512];

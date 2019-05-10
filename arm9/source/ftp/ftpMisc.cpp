@@ -293,7 +293,7 @@ void closeFTPDataPort(int sock){
 
 
 
-static inline bool send_all(int socket, void *buffer, size_t length, int * written)
+bool send_all(int socket, void *buffer, size_t length, int * written)
 {
     char *ptr = (char*) buffer;
     while (length > 0)

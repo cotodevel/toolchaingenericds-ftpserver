@@ -225,12 +225,7 @@ int FTPServerService(){
 					else if(!strcmp(command, "PASV")){
 						FTPActiveMode = false;	//enter FTP passive mode
 						
-						clrscr();
-						printf("  ");
-						printf("  ");
-						printf("  ");
-						
-						printf("PASV > set data transfer port @ %d", FTP_SERVER_SERVICE_DATAPORT);
+						//printf("PASV > set data transfer port @ %d", FTP_SERVER_SERVICE_DATAPORT);
 						char buf[MAX_TGDSFILENAME_LENGTH] = {0};
 						int currentIP = (int)Wifi_GetIP();
 						int dataPort = (int)FTP_SERVER_SERVICE_DATAPORT;
@@ -249,18 +244,10 @@ int FTPServerService(){
 							//todo: filter different LIST args here
 							// send LIST through DATA Port.
 							char * listOut = buildList();
-							
 							int totalListSize = strlen(listOut) + 1;
-							int written = 0;
-							int st = 0; 	//sent physically
-							int ofst = 0;	//internal offset			
-							while(totalListSize > 0){
-								st = send(clisock, listOut + ofst, totalListSize, 0);
-								//printf(" %d bytes sent", st);
-								totalListSize-=st;
-								ofst+=st;
-								written+=st;
-							}
+							int written_list = 0;
+							send_all(clisock, listOut, totalListSize, &written_list);
+							//printf("LIST written: %d bytes", written_list); //4K list is sent about 1.3K
 							
 							u8 endByte=0x0;
 							send(clisock, &endByte, 1, 0);

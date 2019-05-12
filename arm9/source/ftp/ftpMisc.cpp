@@ -299,8 +299,9 @@ bool send_all(int socket, void *buffer, size_t length, int * written)
     while (length > 0)
     {
         int i = send(socket, ptr, length, 0);
-        if (i < 1) return false;
-        ptr += i;
+		swiDelay(100);
+		if (i < 1) return false;
+		ptr += i;
 		(*written)+=i;
         length -= i;
     }
@@ -308,17 +309,29 @@ bool send_all(int socket, void *buffer, size_t length, int * written)
 }
 
 int send_file(int peer, FILE *f, int fileSize) {
-	char * filebuf = (char*)malloc(SENDRECVBUF_SIZE);
+	char * filebuf = (char*)malloc(SENDRECVBUF_SIZE + 1024);
     int written = 0;
 	int readSofar= 0;
+	int lastwritten = 0;
     while((readSofar=fread(filebuf, 1, SENDRECVBUF_SIZE, f)) > 0) {
 		int write = 0;
 		if(send_all(peer, filebuf, readSofar, &write) == true){
 			//printf("written %d bytes", write);
 			written+=write;
+			lastwritten = write;
 		}
 		else{
 			//printf("failed to write %d bytes", readSofar);
+		}
+
+		//the last part must be resent
+		if( (readSofar % SENDRECVBUF_SIZE) != 0 ){
+			write = 0;
+			int wtf = 5952 + 1024;	//wtf explanation: there is about 6K trimmed near the end of the end of the transfer regardless the complete binary was sent-checked byte by byte. Need to resend under a 1K buffer.
+			memset(filebuf + lastwritten, 0 , (SENDRECVBUF_SIZE + 1024 - lastwritten));
+			if(lastwritten > wtf){
+				send_all(peer, filebuf + lastwritten - wtf + 1024, wtf, &write);
+			}
 		}
     }
 	free(filebuf);

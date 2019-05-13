@@ -229,7 +229,28 @@ int FTPServerService(){
 						char buf[MAX_TGDSFILENAME_LENGTH] = {0};
 						int currentIP = (int)Wifi_GetIP();
 						int dataPort = (int)FTP_SERVER_SERVICE_DATAPORT;
-						sprintf(buf, "Entering Passive Mode (%d,%d,%d,%d,%d,%d).", (int)(currentIP&0xFF), (int)((currentIP>>8)&0xFF), (int)((currentIP>>16)&0xFF), (int)(currentIP>>24) + 256, dataPort>>8, dataPort&0xFF);
+						
+						int buggedOctet0 = (int)(currentIP&0xFF);
+						if(buggedOctet0 < 0){
+							buggedOctet0 +=256;
+						}
+						
+						int buggedOctet1 = (int)((currentIP>>8)&0xFF);
+						if(buggedOctet1 < 0){
+							buggedOctet1 +=256;
+						}
+						
+						int buggedOctet2 = (int)(((currentIP>>16)&0xFF));
+						if(buggedOctet2 < 0){
+							buggedOctet2 +=256;
+						}
+						
+						int buggedOctet3 = (int)(currentIP>>24);
+						if(buggedOctet3 < 0){
+							buggedOctet3 +=256;
+						}
+						
+						sprintf(buf, "Entering Passive Mode (%d,%d,%d,%d,%d,%d).", (int)buggedOctet0, (int)buggedOctet1, (int)buggedOctet2, (int)buggedOctet3, (int)(dataPort>>8), (int)(dataPort&0xFF));
 						sendResponse = ftp_cmd_PASV(sock2, 227, buf);
 						isValidcmd = true;
 					}

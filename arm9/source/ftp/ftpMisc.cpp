@@ -448,21 +448,18 @@ std::vector<class FileDirEntry> browse(std::string dir, bool strict){
     }
     */
 	char fname[MAX_TGDSFILENAME_LENGTH+1];
-	sprintf(fname,"%s",dir.c_str());
-	
-	/*
+	strcpy(fname,(dir).c_str());
+	printf(" >> browsing (%s)", fname);
 	if(chdir(fname) == 0){
 		printf("change to dir %s OK",fname);
 	}
 	else{
 		printf("change to dir %s ERROR",fname);
 	}
-	*/
-	
 	int fileList = 0;
 	int dirList = 0;
-	
 	int curFileDirIndx = 0;
+	
 	int retf = FAT_FindFirstFile(fname);
 	while(retf != FT_NONE){
 		struct FileClass * fileClassInst = NULL;
@@ -491,8 +488,6 @@ std::vector<class FileDirEntry> browse(std::string dir, bool strict){
 		curFileDirIndx++;
 	}
 	
-	
-	printf(" >> browsing (%s)", dir.c_str());
 	printf("Files:%d - Dirs:%d",fileList, dirList);
 	return fdirEnt;
 }

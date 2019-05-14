@@ -74,7 +74,7 @@ bool globaldatasocketEnabled = false;
 char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
 
 void ftpInit(){
-	strcpy(CWDFTP,"");
+	strcpy(CWDFTP,TGDSDirectorySeparator);
 	setFTPState(FTP_SERVER_IDLE);
 }
 int FTPServerService(){
@@ -341,13 +341,7 @@ int FTPServerService(){
 						//print working directory
 						else if(!strcmp(command, "PWD")){
 							char * CurrentWorkingDirectory = (char*)CWDFTP;
-							if(strlen(CurrentWorkingDirectory) >0 ){
-								sendResponse = ftp_cmd_PWD(sock2, 257, CurrentWorkingDirectory);
-							}
-							else{
-								sprintf(CurrentWorkingDirectory,"%s","/");
-								sendResponse = ftp_cmd_PWD(sock2, 257, CurrentWorkingDirectory);
-							}
+							sendResponse = ftp_cmd_PWD(sock2, 257, CurrentWorkingDirectory);
 							isValidcmd = true;
 						}
 						else if(!strcmp(command, "MKD")){

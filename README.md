@@ -14,13 +14,17 @@ user: anonymous
 pass:
 port: 21
 
-Currently it works with WinSCP. On filezilla I have no idea why it doesn't work, we'll see what I can do about it.
+Current version :
+Alpha 0.1
 
-Notes: Opening/closing data sockets in DSWIFI is very unstable. That means there could be hangs between directory listing and/or receiving or sending files.
-
-
-Sending files to FTP Server is not so slow! I mean I can upload a 800K file in about 30 seconds. On the other hand, retrieving files from FTP Server is painfully slow.
+Sending files to FTP Server is not so slow! I mean I can upload a 800K file in about 20 seconds. On the other hand, retrieving files from FTP Server is painfully slow.
 This has actually sped up most DS development I am doing. Since I can now just use FTP to transfer binaries to DS!
+
+Bugs/Notes:
+- It only lists the root directory. Usually the TGDS FS calls work fine in other projects, but here it behaves weirdly. Other FTP operations are working fine, though.
+- Currently it works with WinSCP. On filezilla I have no idea why it doesn't work, we'll see what I can do about it.
+- Opening/closing data sockets in DSWIFI is very unstable. That means there could be hangs between directory listing and/or receiving or sending files. Run again the binary if this happens.
+
 
 Enjoy.
 

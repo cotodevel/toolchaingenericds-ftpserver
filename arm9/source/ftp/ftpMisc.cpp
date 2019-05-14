@@ -72,8 +72,11 @@
 #include <iterator>
 #include <sstream>
 
-using namespace std;
+//current working directory
+volatile char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
 
+
+using namespace std;
 
 template <class T> std::string to_string (const T& t)
 {
@@ -149,45 +152,7 @@ int ftp_cmd_RETR(int s, int cmd, char* arg){
 	return sendResponse;
 }
 
-int ftp_cmd_LIST(int s, int cmd, char* arg){	
-	//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
-	struct sockaddr_in clientAddr;
-	int clisock = openAndListenFTPDataPort(&clientAddr);
-	int sendResponse = ftpResponseSender(s, 150, "Opening BINARY mode data connection for file list.");
-	
-	if(clisock >= 0){
-		//todo: filter different LIST args here
-		char * LISTargs = getFtpCommandArg("LIST", arg, 0);  
-		string fnameRemote = parsefileNameTGDS(string(LISTargs));
-		
-		// send LIST through DATA Port.
-		// dir to browse
-		std::string curDir = string(CWDFTP);
-		std::vector<class FileDirEntry> filedirEntries = browse(curDir, false);
-		
-		for(int i = 0; i < (int)filedirEntries.size() ; i++){
-			if(filedirEntries.at(i).gettype() == FT_FILE){
-				int fSize = FS_getFileSize((char*)filedirEntries.at(i).getfilePathFilename().c_str());
-				std::string fileStr = (std::string("-rwxrwxrwx   2 DS        " + to_string(fSize) + " Feb  1  2009 " +filedirEntries.at(i).getfilePathFilename() +" \r\n"));
-				send(clisock, (char*)fileStr.c_str(), strlen(fileStr.c_str()), 0);
-			}
-			else if(filedirEntries.at(i).gettype() == FT_DIR){
-				std::string dirStr = (std::string("drwxrwxrwx   2 DS        " + to_string(0) + " Feb  1  2009 " +filedirEntries.at(i).getfilePathFilename() +" \r\n"));
-				send(clisock, (char*)dirStr.c_str(), strlen(dirStr.c_str()), 0);
-			}
-		}
-		
-		u8 endByte=0x0;
-		send(clisock, &endByte, 1, 0);
-		closeFTPDataPort(clisock);
-		
-		sendResponse = ftpResponseSender(s, 226, "Transfer complete.");
-	}
-	else{
-		sendResponse = ftpResponseSender(s, 426, "Connection closed; transfer aborted.");
-	}
-	return sendResponse;
-}
+
 
 int ftp_cmd_STOR(int s, int cmd, char* arg){
 	char * fname = getFtpCommandArg("STOR", arg, 0); 
@@ -433,65 +398,6 @@ std::string getCurrentWorkingDir(bool showRootPath) {
 	return string(getTGDSCurrentWorkingDirectory());
 }
 
-// Lists all files and directories in the specified directory and returns them in a string vector
-std::vector<class FileDirEntry> browse(std::string dir, bool strict){
-    std::vector<class FileDirEntry> fdirEnt;
-	/*
-	if (strict) {// When using strict mode, the function only allows one subdirectory and not several subdirectories, e.g. like sub/subsub/dir/ ...
-        getValidDir(dir);
-    }
-    if (dir.compare("/") != 0) {
-        dir = getCurrentWorkingDir(true).append(dir);
-    } else {
-        dir = getCurrentWorkingDir(true);
-//        std::cout << "Yes" << std::endl;
-    }
-    */
-	char fname[MAX_TGDSFILENAME_LENGTH+1];
-	strcpy(fname,(dir).c_str());
-	printf(" >> browsing (%s)", fname);
-	if(chdir(fname) == 0){
-		printf("change to dir %s OK",fname);
-	}
-	else{
-		printf("change to dir %s ERROR",fname);
-	}
-	int fileList = 0;
-	int dirList = 0;
-	int curFileDirIndx = 0;
-	
-	int retf = FAT_FindFirstFile(fname);
-	while(retf != FT_NONE){
-		struct FileClass * fileClassInst = NULL;
-		
-		//directory?
-		if(retf == FT_DIR){
-			fileClassInst = getFileClassFromList(LastDirEntry);
-			std::string newCurDirEntry = parseDirNameTGDS(std::string(fileClassInst->fd_namefullPath));
-			//printf("dir: %s", newCurDirEntry.c_str());
-			FileDirEntry fent = FileDirEntry(curFileDirIndx, newCurDirEntry, retf);
-			fdirEnt.push_back(fent);
-			dirList++;
-		}
-		//file?
-		else if(retf == FT_FILE){
-			fileClassInst = getFileClassFromList(LastFileEntry);
-			std::string newCurFileEntry = parsefileNameTGDS(std::string(fileClassInst->fd_namefullPath));
-			//printf("file: %s", newCurFileEntry.c_str());
-			FileDirEntry fent = FileDirEntry(curFileDirIndx, newCurFileEntry, retf);
-			fdirEnt.push_back(fent);
-			fileList++;
-		}
-		
-		//more file/dir objects?
-		retf = FAT_FindNextFile(fname);
-		curFileDirIndx++;
-	}
-	
-	printf("Files:%d - Dirs:%d",fileList, dirList);
-	return fdirEnt;
-}
-
 char *getFtpCommandArg(char * theCommand, char *theCommandString, int skipArgs)
 {
     char *toReturn = theCommandString + strlen(theCommand);
@@ -524,4 +430,84 @@ char *getFtpCommandArg(char * theCommand, char *theCommandString, int skipArgs)
     }
 
     return toReturn;
+}
+
+
+
+
+int ftp_cmd_LIST(int s, int cmd, char* arg){	
+	char * CurrentWorkingDirectory = (char*)CWDFTP;
+	
+	char curtgdswd[257];
+	strcpy(curtgdswd, TGDSCurrentWorkingDirectory);
+	
+	//bugged
+	/*
+	if(enterDir(CurrentWorkingDirectory) == true){
+		printf("dir loaded correctly:[%s]",CurrentWorkingDirectory);
+	}
+	else{
+		printf("failed to load dir:[%s]",CurrentWorkingDirectory);
+	}
+	*/
+	//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
+	struct sockaddr_in clientAddr;
+	int clisock = openAndListenFTPDataPort(&clientAddr);
+	int sendResponse = 0;
+	if(clisock >= 0){
+		sendResponse = ftpResponseSender(s, 150, "Opening BINARY mode data connection for file list.");
+		
+		//todo: filter different LIST args here
+		char * LISTargs = getFtpCommandArg("LIST", arg, 0);  
+		
+		int fileList = 0;
+		int dirList = 0;
+		int curFileDirIndx = 0;
+		
+		char fname[MAX_TGDSFILENAME_LENGTH+1];
+		strcpy(fname, CurrentWorkingDirectory);	// /DSOrganize works, / works, CWDFTP doesn`t
+		
+		int retf = FAT_FindFirstFile(fname);
+		while(retf != FT_NONE){
+			struct FileClass * fileClassInst = NULL;
+			
+			//directory?
+			if(retf == FT_DIR){
+				fileClassInst = getFileClassFromList(LastDirEntry);
+				std::string newCurDirEntry = parseDirNameTGDS(std::string(fileClassInst->fd_namefullPath));
+				int fSize = strlen(newCurDirEntry.c_str());
+				std::string fileStr = (std::string("drw-r--r-- 1 DS group          "+to_string(fSize)+" Feb  1  2009 " + newCurDirEntry.c_str() +" \r\n"));
+				send(clisock, (char*)fileStr.c_str(), strlen(fileStr.c_str()), 0);
+				dirList++;
+			}
+			//file?
+			else if(retf == FT_FILE){
+				fileClassInst = getFileClassFromList(LastFileEntry);
+				std::string newCurFileEntry = parsefileNameTGDS(std::string(fileClassInst->fd_namefullPath));
+				int fSize = FS_getFileSize((char*)newCurFileEntry.c_str());
+				std::string fileStr = (std::string("-rw-r--r-- 1 DS group          "+to_string(fSize)+" Feb  1  2009 " + newCurFileEntry.c_str() +" \r\n"));
+				send(clisock, (char*)fileStr.c_str(), strlen(fileStr.c_str()), 0);
+				fileList++;
+			}
+			
+			//more file/dir objects?
+			retf = FAT_FindNextFile(fname);
+			curFileDirIndx++;
+		}
+	
+		printf("Files:%d - Dirs:%d",fileList, dirList);
+		
+		u8 endByte=0x0;
+		send(clisock, &endByte, 1, 0);
+		
+		closeFTPDataPort(clisock);
+		
+		sendResponse = ftpResponseSender(s, 226, "Transfer complete.");
+		
+	}
+	else{
+		sendResponse = ftpResponseSender(s, 426, "Connection closed; transfer aborted.");
+	}
+	
+	return sendResponse;
 }

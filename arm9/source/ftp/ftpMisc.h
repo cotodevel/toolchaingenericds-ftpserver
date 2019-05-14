@@ -97,7 +97,6 @@ extern int ftp_cmd_PASV(int s, int cmd, char* arg);
 extern int ftp_cmd_STOR(int s, int cmd, char* arg);
 extern int ftp_cmd_RETR(int s, int cmd, char* arg);
 extern int ftp_cmd_CDUP(int s, int cmd, char* arg);
-extern int ftp_cmd_LIST(int s, int cmd, char* arg);
 
 extern uint32 CurFTPState;
 extern u32 getFTPState();
@@ -125,6 +124,10 @@ extern std::string parsefileNameTGDS(std::string fileName);
 #endif
 
 extern char *getFtpCommandArg(char * theCommand, char *theCommandString, int skipArgs);
+extern int ftp_cmd_LIST(int s, int cmd, char* arg);
+
+//current working directory
+extern volatile char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
 
 #ifdef __cplusplus
 }

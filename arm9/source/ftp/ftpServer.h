@@ -58,9 +58,6 @@ extern bool FTPActiveMode;
 
 extern void ftpInit();
 
-//current working directory
-extern char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
-
 #ifdef __cplusplus
 }
 #endif

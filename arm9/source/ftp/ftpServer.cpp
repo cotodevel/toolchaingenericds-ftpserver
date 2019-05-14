@@ -1,5 +1,4 @@
 #include "ftpServer.h"
-#include "ftpMisc.h"
 #include "main.h"
 
 #include "typedefsTGDS.h"
@@ -43,6 +42,8 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#include "ftpMisc.h"
+
 bool FTPActiveMode = false;
 
 //server ctx for sock1
@@ -70,11 +71,8 @@ int k, size, srv_len, cli_len = 0, c;
 int filehandle;
 bool globaldatasocketEnabled = false;
 
-//current working directory
-char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
-
 void ftpInit(){
-	strcpy(CWDFTP,TGDSDirectorySeparator);
+	strcpy((char*)CWDFTP,TGDSDirectorySeparator);
 	setFTPState(FTP_SERVER_IDLE);
 }
 int FTPServerService(){

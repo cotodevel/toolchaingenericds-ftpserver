@@ -82,8 +82,6 @@ template <class T> std::string to_string (const T& t)
    return ss.str();
 }
 
-char CWDFTP[512];
-char curChosenBrowseFile[MAX_TGDSFILENAME_LENGTH+1];
 
 //FTP Command implementation.
 int ftp_cmd_USER(int s, int cmd, char* arg)
@@ -178,7 +176,6 @@ int ftp_cmd_LIST(int s, int cmd, char* arg){
 				send(clisock, (char*)dirStr.c_str(), strlen(dirStr.c_str()), 0);
 			}
 		}
-		//printf(" >> browse(%s)", curDir.c_str());
 		
 		u8 endByte=0x0;
 		send(clisock, &endByte, 1, 0);
@@ -450,16 +447,20 @@ std::vector<class FileDirEntry> browse(std::string dir, bool strict){
 //        std::cout << "Yes" << std::endl;
     }
     */
-	char fname[MAX_TGDSFILENAME_LENGTH];
+	char fname[MAX_TGDSFILENAME_LENGTH+1];
 	sprintf(fname,"%s",dir.c_str());
 	
-	//strcpy(TGDSCurrentWorkingDirectory, fname);	//update tgds cwd 
+	/*
 	if(chdir(fname) == 0){
 		printf("change to dir %s OK",fname);
 	}
 	else{
 		printf("change to dir %s ERROR",fname);
 	}
+	*/
+	
+	int fileList = 0;
+	int dirList = 0;
 	
 	int curFileDirIndx = 0;
 	int retf = FAT_FindFirstFile(fname);
@@ -473,6 +474,7 @@ std::vector<class FileDirEntry> browse(std::string dir, bool strict){
 			//printf("dir: %s", newCurDirEntry.c_str());
 			FileDirEntry fent = FileDirEntry(curFileDirIndx, newCurDirEntry, retf);
 			fdirEnt.push_back(fent);
+			dirList++;
 		}
 		//file?
 		else if(retf == FT_FILE){
@@ -481,6 +483,7 @@ std::vector<class FileDirEntry> browse(std::string dir, bool strict){
 			//printf("file: %s", newCurFileEntry.c_str());
 			FileDirEntry fent = FileDirEntry(curFileDirIndx, newCurFileEntry, retf);
 			fdirEnt.push_back(fent);
+			fileList++;
 		}
 		
 		//more file/dir objects?
@@ -488,6 +491,9 @@ std::vector<class FileDirEntry> browse(std::string dir, bool strict){
 		curFileDirIndx++;
 	}
 	
+	
+	printf(" >> browsing (%s)", dir.c_str());
+	printf("Files:%d - Dirs:%d",fileList, dirList);
 	return fdirEnt;
 }
 

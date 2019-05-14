@@ -62,7 +62,7 @@ int server_datasocket = -1;
 //client_datasocket == the DATA port open by the Client whose commands are processed and sent to Server (DS). Client generates and listens cmds through that port.
 int client_datasocket = -1;
 int client_datasocketPortNumber = -1;
-char client_datasocketIP[MAX_TGDSFILENAME_LENGTH];
+char client_datasocketIP[MAX_TGDSFILENAME_LENGTH+1];
 
 
 char buf[100], command[5], filename[20];
@@ -71,10 +71,10 @@ int filehandle;
 bool globaldatasocketEnabled = false;
 
 //current working directory
-char currentPath[4096];
-char tempBuf[4096];
+char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
 
 void ftpInit(){
+	strcpy(CWDFTP,"");
 	setFTPState(FTP_SERVER_IDLE);
 }
 int FTPServerService(){
@@ -322,8 +322,6 @@ int FTPServerService(){
 						else if(!strcmp(command, "CWD")){
 							
 							char * CurrentWorkingDirectory = (char*)CWDFTP;
-							char buf[MAX_TGDSFILENAME_LENGTH] = {0};
-							
 							char *pathToEnter;
 							pathToEnter = getFtpCommandArg("CWD", buffer, 0);
 							

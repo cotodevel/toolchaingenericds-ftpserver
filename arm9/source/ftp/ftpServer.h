@@ -49,16 +49,18 @@ extern int server_datasocket;
 //client_datasocket == the DATA port open by the Client whose commands are processed and sent to Server (DS). Client generates and listens cmds through that port.
 extern int client_datasocket;
 extern int client_datasocketPortNumber;
-extern char client_datasocketIP[MAX_TGDSFILENAME_LENGTH];
+extern char client_datasocketIP[MAX_TGDSFILENAME_LENGTH+1];
 
 extern char buf[100], command[5], filename[20];
 extern int k, i, size, srv_len,cli_len, c;
 extern int filehandle;
 extern bool FTPActiveMode;
 
-extern char currentPath[4096];
-extern char tempBuf[4096];
 extern void ftpInit();
+
+//current working directory
+extern char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
+
 #ifdef __cplusplus
 }
 #endif

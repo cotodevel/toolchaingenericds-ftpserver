@@ -111,8 +111,6 @@ extern int currserverDataListenerSock;
 extern bool send_all(int socket, void *buffer, size_t length, int * written);
 extern int send_file(int peer, FILE *f, int fileSize);
 
-extern char CWDFTP[512];
-extern char curChosenBrowseFile[MAX_TGDSFILENAME_LENGTH+1];
 extern bool ShowBrowser(char * Path);
 
 #ifdef __cplusplus

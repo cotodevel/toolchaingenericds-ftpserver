@@ -98,7 +98,7 @@ int main(int _argc, sint8 **_argv) {
 		sint32 FTP_SERVER_STATUS = FTPServerService();
 		switch(FTP_SERVER_STATUS){
 			//Server Running
-			case(FTP_SERVER_PROC_RUNNING):{
+			case(FTP_SERVER_ACTIVE):{
 				
 			}
 			break;

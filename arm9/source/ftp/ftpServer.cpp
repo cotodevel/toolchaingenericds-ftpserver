@@ -95,7 +95,7 @@ int FTPServerService(){
 			printf("[FTP Server:%s:%d]", print_ip((uint32)Wifi_GetIP()), FTP_SERVER_SERVICE_PORT);
 			printf("Waiting for connection:");
 			setFTPState(FTP_SERVER_CONNECTING);
-			curFTPStatus = FTP_SERVER_PROC_RUNNING;
+			curFTPStatus = FTP_SERVER_ACTIVE;
 		}
 		break;
 	
@@ -112,19 +112,14 @@ int FTPServerService(){
 			//int j=1;
 			//ioctl(sock1, FIONBIO,&j); // Server socket is non blocking
 			
-			//wait for client
+			//Wait for client: FTP Server -> FTP Client Init session.
 			printf("[Client Connected:%s:%d]",inet_ntoa(client.sin_addr), ntohs(client.sin_port));
-			setFTPState(FTP_SERVER_CONNECTED_IDLE);
-			curFTPStatus = FTP_SERVER_PROC_RUNNING;
-		}
-		case(FTP_SERVER_CONNECTED_IDLE):{
-			//send hello
+			
 			ftpResponseSender(sock2, 200, "hello");
-			setFTPState(FTP_SERVER_WORKING);
-			curFTPStatus = FTP_SERVER_PROC_RUNNING;
+			setFTPState(FTP_SERVER_ACTIVE);
+			curFTPStatus = FTP_SERVER_ACTIVE;
 		}
-		break;
-		case(FTP_SERVER_WORKING):{
+		case(FTP_SERVER_ACTIVE):{
 			
 			//Actual FTP Service			
 			char buffer[MAX_TGDSFILENAME_LENGTH] = {0};
@@ -408,7 +403,7 @@ int FTPServerService(){
 				closeFTPDataPort(sock2);	//sock2, client disconnected, thus server closes its port.
 				return FTP_SERVER_CLIENT_DISCONNECTED;
 			}
-			curFTPStatus = FTP_SERVER_PROC_RUNNING;
+			curFTPStatus = FTP_SERVER_ACTIVE;
 		}
 		break;
 	}

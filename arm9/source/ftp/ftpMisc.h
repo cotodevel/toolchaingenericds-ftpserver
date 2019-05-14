@@ -73,14 +73,11 @@ class FileDirEntry
 };
 #endif
 
-#define FTP_SERVER_IDLE (uint32)(0xffff1010)				//idle -> connect FTP Client (FTP_SERVER_CONNECTING_PHASE1)
-#define FTP_SERVER_CONNECTING (uint32)(0xffff1011)	//FTP Server <--> FTP Client Initial Handshake (FTP_SERVER_CONNECTING_PHASE2)
-#define FTP_SERVER_CONNECTED_IDLE (uint32)(0xffff1012)	//FTP Server <--> FTP Client Initial Handshake (FTP_SERVER_CONNECTING_PHASE3)
-#define FTP_SERVER_WORKING (uint32)(0xffff1013)	//FTP Server <--> FTP Client Actual Session. If something fails it will disconnect here.
-
-#define FTP_SERVER_CLIENT_DISCONNECTED (sint32)(0)
-#define FTP_SERVER_PROC_RUNNING (sint32)(1)
-#define FTP_SERVER_PROC_FAILED (sint32)(2)
+//Internal FTP Server status
+#define FTP_SERVER_IDLE (uint32)(0xffff1010)				//idle -> FTP Server waiting for FTP Client to connect.
+#define FTP_SERVER_CONNECTING (uint32)(0xffff1011)			//FTP Server <--> FTP Client accept and start initial handshake 
+#define FTP_SERVER_ACTIVE (uint32)(0xffff1013)				//FTP Server <--> FTP Client Connected session. If something fails it will disconnect here and status will be the below this one.
+#define FTP_SERVER_CLIENT_DISCONNECTED (sint32)(0)			//FTP Server has just disconnected from FTP Client.
 
 #define SENDRECVBUF_SIZE (int)(512*1024)
 

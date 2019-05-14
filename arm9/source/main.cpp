@@ -65,8 +65,9 @@ USA
 
 void menuShow(){
 	clrscr();
-	printf("                              ");
-	printf("A: start FTP server. An IP and Port will be drawn shortly.");
+	printf("     ");
+	printf("     ");
+	printf("Starting FTP server. An IP and Port will be drawn shortly.");
 }
 
 int main(int _argc, sint8 **_argv) {
@@ -77,11 +78,6 @@ int main(int _argc, sint8 **_argv) {
 	GUI_clear();
 	
 	sint32 fwlanguage = (sint32)getLanguage();
-	
-	printf("     ");
-	printf("     ");
-	printf("     ");
-	printf("     ");
 	
 	int ret=FS_init();
 	if (ret == 0)
@@ -95,28 +91,32 @@ int main(int _argc, sint8 **_argv) {
 	switch_dswnifi_mode(dswifi_idlemode);
 	/*			TGDS 1.5 Standard ARM9 Init code end	*/
 	
-	//custom Handler
 	menuShow();
 	ftpInit();
 	
 	while (1){
-		sint32 FTP_STATUS = FTPServerService();
-		if(FTP_STATUS == FTP_SERVER_PROC_RUNNING){
+		sint32 FTP_SERVER_STATUS = FTPServerService();
+		switch(FTP_SERVER_STATUS){
 			//Server Running
-		}
-		else if(FTP_STATUS == FTP_SERVER_CLIENT_DISCONNECTED){
-			//Server Disconnected/Idle!
-			closeFTPDataPort(sock1);
-			setFTPState(FTP_SERVER_IDLE);
-			printf("Client disconnected!. Press A to retry.");
-			switch_dswnifi_mode(dswifi_idlemode);
-			scanKeys();
-			while(!(keysPressed() & KEY_A)){
-				scanKeys();
-				IRQVBlankWait();
+			case(FTP_SERVER_PROC_RUNNING):{
+				
 			}
-			main(0, (sint8**)"");
+			break;
 			
+			//Server Disconnected/Idle!
+			case(FTP_SERVER_CLIENT_DISCONNECTED):{				
+				closeFTPDataPort(sock1);
+				setFTPState(FTP_SERVER_IDLE);
+				printf("Client disconnected!. Press A to retry.");
+				switch_dswnifi_mode(dswifi_idlemode);
+				scanKeys();
+				while(!(keysPressed() & KEY_A)){
+					scanKeys();
+					IRQVBlankWait();
+				}
+				main(0, (sint8**)"");
+			}
+			break;
 		}
 	}
 }

@@ -84,34 +84,6 @@ template <class T> std::string to_string (const T& t)
 
 char CWDFTP[512];
 char curChosenBrowseFile[MAX_TGDSFILENAME_LENGTH+1];
-char * ListPathPrint = NULL;
-
-char * buildList(){
-	memset(ListPathPrint, 0, LISTPATH_SIZE);
-	std::string res = "";
-	// dir to browse
-	std::string curDir = string(CWDFTP);
-	std::vector<class FileDirEntry> filedirEntries = browse(curDir, false);
-	
-	int listFiles = 0;
-	int listDirs = 0;
-	for(int i = 0; i < (int)filedirEntries.size() ; i++){
-		if(filedirEntries.at(i).gettype() == FT_FILE){
-			int fSize = FS_getFileSize((char*)filedirEntries.at(i).getfilePathFilename().c_str());
-			res += (std::string("-rwxrwxrwx   2 DS        " + to_string(fSize) + " Feb  1  2009 " +filedirEntries.at(i).getfilePathFilename() +" \r\n"));
-			listFiles++;
-		}
-		else if(filedirEntries.at(i).gettype() == FT_DIR){
-			res += (std::string("drwxrwxrwx   2 DS        " + to_string(0) + " Feb  1  2009 " +filedirEntries.at(i).getfilePathFilename() +" \r\n"));
-			listDirs++;
-		}
-	}
-	printf(" >> browse(%s)", curDir.c_str());
-	printf("Dir: %s Browsing End. %d files - %d dir(s)", curDir.c_str(), listFiles, listDirs);
-	int sizeList = strlen(res.c_str()) + 1;
-	strncpy((char*)ListPathPrint, (const char *) res.c_str(), sizeList);
-	return (char*)ListPathPrint;
-}
 
 //FTP Command implementation.
 int ftp_cmd_USER(int s, int cmd, char* arg)
@@ -179,6 +151,46 @@ int ftp_cmd_RETR(int s, int cmd, char* arg){
 	return sendResponse;
 }
 
+int ftp_cmd_LIST(int s, int cmd, char* arg){	
+	//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
+	struct sockaddr_in clientAddr;
+	int clisock = openAndListenFTPDataPort(&clientAddr);
+	int sendResponse = ftpResponseSender(s, 150, "Opening BINARY mode data connection for file list.");
+	
+	if(clisock >= 0){
+		//todo: filter different LIST args here
+		char * LISTargs = getFtpCommandArg("LIST", arg, 0);  
+		string fnameRemote = parsefileNameTGDS(string(LISTargs));
+		
+		// send LIST through DATA Port.
+		// dir to browse
+		std::string curDir = string(CWDFTP);
+		std::vector<class FileDirEntry> filedirEntries = browse(curDir, false);
+		
+		for(int i = 0; i < (int)filedirEntries.size() ; i++){
+			if(filedirEntries.at(i).gettype() == FT_FILE){
+				int fSize = FS_getFileSize((char*)filedirEntries.at(i).getfilePathFilename().c_str());
+				std::string fileStr = (std::string("-rwxrwxrwx   2 DS        " + to_string(fSize) + " Feb  1  2009 " +filedirEntries.at(i).getfilePathFilename() +" \r\n"));
+				send(clisock, (char*)fileStr.c_str(), strlen(fileStr.c_str()), 0);
+			}
+			else if(filedirEntries.at(i).gettype() == FT_DIR){
+				std::string dirStr = (std::string("drwxrwxrwx   2 DS        " + to_string(0) + " Feb  1  2009 " +filedirEntries.at(i).getfilePathFilename() +" \r\n"));
+				send(clisock, (char*)dirStr.c_str(), strlen(dirStr.c_str()), 0);
+			}
+		}
+		//printf(" >> browse(%s)", curDir.c_str());
+		
+		u8 endByte=0x0;
+		send(clisock, &endByte, 1, 0);
+		closeFTPDataPort(clisock);
+		
+		sendResponse = ftpResponseSender(s, 226, "Transfer complete.");
+	}
+	else{
+		sendResponse = ftpResponseSender(s, 426, "Connection closed; transfer aborted.");
+	}
+	return sendResponse;
+}
 
 int ftp_cmd_STOR(int s, int cmd, char* arg){
 	char * fname = getFtpCommandArg("STOR", arg, 0); 

@@ -30,8 +30,6 @@ extern "C" {
 #endif
 
 extern int FTPServerService();
-int ftp_openCommandChannel();
-int ftp_getConnection();
 extern bool globaldatasocketEnabled;
 
 //server ctx for sock1

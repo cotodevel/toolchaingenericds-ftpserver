@@ -75,10 +75,6 @@ char currentPath[4096];
 char tempBuf[4096];
 
 void ftpInit(){
-	if(ListPathPrint==NULL){
-		ListPathPrint=(char*)malloc(LISTPATH_SIZE);
-	}
-	memset(ListPathPrint, 0, LISTPATH_SIZE);
 	setFTPState(FTP_SERVER_IDLE);
 }
 int FTPServerService(){
@@ -256,29 +252,7 @@ int FTPServerService(){
 					}
 					
 					else if(!strcmp(command, "LIST")){
-						//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
-						struct sockaddr_in clientAddr;
-						int clisock = openAndListenFTPDataPort(&clientAddr);
-						sendResponse = ftpResponseSender(sock2, 150, "Opening BINARY mode data connection for file list.");
-						
-						if(clisock >= 0){
-							//todo: filter different LIST args here
-							// send LIST through DATA Port.
-							char * listOut = buildList();
-							int totalListSize = strlen(listOut) + 1;
-							int written_list = 0;
-							send_all(clisock, listOut, totalListSize, &written_list);
-							//printf("LIST written: %d bytes", written_list); //4K list is sent about 1.3K
-							
-							u8 endByte=0x0;
-							send(clisock, &endByte, 1, 0);
-							closeFTPDataPort(clisock);
-							
-							sendResponse = ftpResponseSender(sock2, 226, "Transfer complete.");
-						}
-						else{
-							sendResponse = ftpResponseSender(sock2, 426, "Connection closed; transfer aborted.");
-						}
+						sendResponse = ftp_cmd_LIST(sock2, 0, buffer);
 						isValidcmd = true;
 					}
 					

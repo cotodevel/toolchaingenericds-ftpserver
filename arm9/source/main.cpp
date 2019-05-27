@@ -57,7 +57,6 @@ USA
 #include "dmaTGDS.h"
 #include "biosTGDS.h"
 #include "nds_cp15_misc.h"
-#include "notifierProcessor.h"
 #include "limitsTGDS.h"
 #include "ftpServer.h"
 #include "wifi_arm9.h"

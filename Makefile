@@ -21,7 +21,7 @@
 #ToolchainGenericDS specific: 
 #Non FPIC Code: Use Makefiles from either TGDS, or custom
 export SOURCE_MAKEFILE7 = default
-export SOURCE_MAKEFILE9 = default
+export SOURCE_MAKEFILE9 = custom
 
 #FPIC code is always default TGDS Makefile
 
@@ -31,7 +31,7 @@ include $(DEFAULT_GCC_PATH)Makefile.basenewlib
 
 #Custom
 # Project Specific
-export EXECUTABLE_FNAME = ToolchainGenericDS-FTP.nds
+export EXECUTABLE_FNAME = ToolchainGenericDS-ftpServer.nds
 export EXECUTABLE_VERSION_HEADER =	0.1
 export EXECUTABLE_VERSION =	"$(EXECUTABLE_VERSION_HEADER)"
 

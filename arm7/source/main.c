@@ -22,7 +22,7 @@ USA
 #include "InterruptsARMCores_h.h"
 #include "interrupts.h"
 
-#include "specific_shared.h"
+#include "ipcfifoTGDSUser.h"
 #include "wifi_arm7.h"
 #include "usrsettingsTGDS.h"
 #include "timerTGDS.h"

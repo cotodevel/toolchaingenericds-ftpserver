@@ -21,8 +21,8 @@ USA
 //TGDS required version: IPC Version: 1.3
 
 //inherits what is defined in: ipcfifoTGDS.h
-#ifndef __specific_shared_h__
-#define __specific_shared_h__
+#ifndef __ipcfifoTGDSUser_h__
+#define __ipcfifoTGDSUser_h__
 
 #include "dsregs.h"
 #include "dsregs_asm.h"

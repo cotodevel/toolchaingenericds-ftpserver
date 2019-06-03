@@ -22,7 +22,7 @@ USA
 //TGDS required version: IPC Version: 1.3
 
 #include "ipcfifoTGDS.h"
-#include "specific_shared.h"
+#include "ipcfifoTGDSUser.h"
 #include "dsregs.h"
 #include "dsregs_asm.h"
 #include "InterruptsARMCores_h.h"

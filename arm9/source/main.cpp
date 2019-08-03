@@ -46,7 +46,7 @@ USA
 #include "utilsTGDS.h"
 
 #include "devoptab_devices.h"
-#include "fsfatlayerTGDS.h"
+#include "fatfslayerTGDS.h"
 #include "usrsettingsTGDS.h"
 #include "exceptionTGDS.h"
 

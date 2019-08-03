@@ -28,7 +28,7 @@
 #include "wifi_shared.h"
 #include "utilsTGDS.h"
 #include "memoryHandleTGDS.h"
-#include "fsfatlayerTGDS.h"
+#include "fatfslayerTGDS.h"
 
 #include "netdb.h"
 #include <ctype.h>

@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "sgIP_Config.h"
-#include "fsfatlayerTGDS.h"
+#include "fatfslayerTGDS.h"
 
 #define FTP_SERVER_SERVICE_PORT 21
 #define FTP_SERVER_SERVICE_DATAPORT (sint32)(20)

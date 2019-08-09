@@ -27,6 +27,7 @@ USA
 #include "usrsettingsTGDS.h"
 #include "timerTGDS.h"
 #include "CPUARMTGDS.h"
+#include "utilsTGDS.h"
 
 
 //---------------------------------------------------------------------------------
@@ -37,6 +38,9 @@ int main(int _argc, sint8 **_argv) {
 	/*			TGDS 1.4 Standard ARM7 Init code end	*/
 	
     while (1) {
+		if((REG_KEYXY & KEY_HINGE) == KEY_HINGE){
+			setBacklight(0);
+		}
 		IRQVBlankWait();
 	}
    

@@ -23,7 +23,8 @@ USA
 #include "dsregs_asm.h"
 #include "main.h"
 #include "keypadTGDS.h"
-
+#include "utilsTGDS.h"
+#include "spifwTGDS.h"
 
 //User Handler Definitions
 #ifdef ARM9
@@ -81,5 +82,5 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void ScreenlidhandlerUser(){
-
+	setBacklight(POWMAN_BACKLIGHT_TOP_BIT | POWMAN_BACKLIGHT_BOTTOM_BIT);	//both lit screens
 }

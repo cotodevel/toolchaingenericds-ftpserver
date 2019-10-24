@@ -90,7 +90,8 @@ int FTPServerService(){
 			}
 			globaldatasocketEnabled = false;
 			sock1 = openServerSyncConn(FTP_SERVER_SERVICE_PORT, &server);	//DS Server: listens at port FTP_SERVER_SERVICE_PORT now. Further access() through this port will come from a client.
-			printf("[FTP Server:%s:%d]", print_ip((uint32)Wifi_GetIP()), FTP_SERVER_SERVICE_PORT);
+			char IP[16];
+			printf("[FTP Server:%s:%d]", print_ip((uint32)Wifi_GetIP(), IP), FTP_SERVER_SERVICE_PORT);
 			printf("Waiting for connection:");
 			setFTPState(FTP_SERVER_CONNECTING);
 			curFTPStatus = FTP_SERVER_ACTIVE;

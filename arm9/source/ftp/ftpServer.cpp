@@ -27,7 +27,6 @@
 #include "dswifi9.h"
 #include "wifi_shared.h"
 #include "utilsTGDS.h"
-#include "memoryHandleTGDS.h"
 #include "fatfslayerTGDS.h"
 
 #include "netdb.h"

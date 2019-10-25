@@ -35,7 +35,6 @@ USA
 #include "InterruptsARMCores_h.h"
 #include "ipcfifoTGDSUser.h"
 #include "ff.h"
-#include "memoryHandleTGDS.h"
 #include "fileHandleTGDS.h"
 #include "reent.h"
 #include "sys/types.h"

@@ -30,11 +30,16 @@ USA
 extern "C" {
 #endif
 
-extern void Timer1handler();
-extern void Vcounter();
-extern void Vblank();
-extern void Hblank();
-
+extern void IpcSynchandlerUser();
+extern void Timer0handlerUser();
+extern void Timer1handlerUser();
+extern void Timer2handlerUser();
+extern void Timer3handlerUser();
+extern void HblankUser();
+extern void VblankUser();
+extern void VcounterUser();
+extern void screenLidHasOpenedhandlerUser();
+extern void screenLidHasClosedhandlerUser();
 
 #ifdef __cplusplus
 }

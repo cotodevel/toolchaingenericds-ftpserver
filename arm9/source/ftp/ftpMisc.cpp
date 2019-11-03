@@ -1,80 +1,15 @@
-#include "typedefsTGDS.h"
-#include "dsregs.h"
-#include "dsregs_asm.h"
-
-#include "ftpMisc.h"
-#include "ftpServer.h"
-
-#include <stdarg.h>
-#include <string.h>
-#include <unistd.h>
-
-#include <dswifi9.h>
-#include <netdb.h>
-
-#include "netdb.h"
-#include <ctype.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <dirent.h>
-#include <stdbool.h>
-#include <assert.h>
-
-#include <string>
-
+//FTP server
 #include "ftpServer.h"
 #include "ftpMisc.h"
 #include "main.h"
-
-#include "typedefsTGDS.h"
-#include "dsregs.h"
-#include "dsregs_asm.h"
-#include "dswnifi_lib.h"
-#include "filehandleTGDS.h"
-
-#include <socket.h>
-#include <in.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
- 
 #include "sgIP_Config.h"
-#include "typedefsTGDS.h"
-#include "dsregs.h"
-#include "dsregs_asm.h"
-
-//FTP server
-#include <stdio.h>
-#include "ftpServer.h"
-#include <stdarg.h>
-#include <string.h>
-#include <unistd.h>
-#include <dswifi9.h>
-#include <netdb.h>
-#include <socket.h>
-#include <in.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-#include "sgIP_Config.h"
+#include "biosTGDS.h"
 
 //C++ part
-#include <iostream>
-#include <fstream>
-#include <list>
-#include <vector>
-#include <cmath>
-#include <cstdlib>
-#include <cstdio>
-#include <iterator>
 #include <sstream>
 
 //current working directory
 volatile char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
-
 
 using namespace std;
 

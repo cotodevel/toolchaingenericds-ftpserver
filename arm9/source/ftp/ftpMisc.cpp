@@ -56,7 +56,7 @@ int ftp_cmd_PASV(int s, int cmd, char* arg){
 
 int ftp_cmd_RETR(int s, int cmd, char* arg){
 	char * fname = getFtpCommandArg("RETR", arg, 0); 
-	string fnameRemote = parsefileNameTGDS(string("0:/") + string(fname));
+	string fnameRemote = parsefileNameTGDS(string(fname));
 	printf("RETR cmd: %s",fnameRemote.c_str());
 	
 	//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
@@ -255,39 +255,6 @@ int send_file(int peer, FILE *f, int fileSize) {
 
 string ToStr( char c ) {
    return string( 1, c );
-}
-
-template<class Iter>
-Iter splitStrings(const std::string &s, const std::string &delim, Iter out)
-{
-	if (delim.empty()) {
-		*out++ = s;
-		return out;
-	}
-	size_t a = 0, b = s.find(delim);
-	for (; b != std::string::npos;
-		a = b + delim.length(), b = s.find(delim, a))
-	{
-		*out++ = std::move(s.substr(a, b - a));
-	}
-	*out++ = std::move(s.substr(a, s.length() - a));
-	return out;
-}
-
-vector<string> splitCustom(string str, string token){
-    vector<string>result;
-    while(str.size()){
-        int index = str.find(token);
-        if(index != (int)string::npos){
-            result.push_back(str.substr(0,index));
-            str = str.substr(index+token.size());
-            if(str.size()==0)result.push_back(str);
-        }else{
-            result.push_back(str);
-            str = "";
-        }
-    }
-    return result;
 }
 
 

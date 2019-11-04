@@ -5,33 +5,15 @@
 #include "dsregs.h"
 #include "dsregs_asm.h"
 
-#include "typedefsTGDS.h"
-#include "dsregs.h"
-#include "dsregs_asm.h"
-
-#include <dswifi9.h>
-#include <netdb.h>
-
-//FTP server
-#include "dswnifi_lib.h"
-
-#include <socket.h>
-#include <in.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "fatfslayerTGDS.h"
 
 #ifdef __cplusplus
 
 //C++ part
 using namespace std;
-#include <iostream>
-#include <fstream>
+#include <string>
 #include <list>
 #include <vector>
-#include <cmath>
-#include <cstdlib>
-#include <cstdio>
 
 class FileDirEntry
 {

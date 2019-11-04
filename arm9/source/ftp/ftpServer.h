@@ -4,20 +4,6 @@
 #include "typedefsTGDS.h"
 #include "dsregs.h"
 #include "dsregs_asm.h"
-
-#include <stdarg.h>
-#include <string.h>
-#include <unistd.h>
-
-#include <dswifi9.h>
-#include <netdb.h>
-
-#include <socket.h>
-#include <in.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "sgIP_Config.h"
 #include "fatfslayerTGDS.h"
 
 #define FTP_SERVER_SERVICE_PORT 21

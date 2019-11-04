@@ -18,48 +18,13 @@ USA
 
 */
 
-#include "socket.h"
-#include "in.h"
-#include <netdb.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
-#include "ftpMisc.h"
-#include "main.h"
-#include "InterruptsARMCores_h.h"
-#include "ipcfifoTGDSUser.h"
-#include "ff.h"
-#include "fileHandleTGDS.h"
-#include "reent.h"
-#include "sys/types.h"
 #include "typedefsTGDS.h"
 #include "dsregs.h"
 #include "dsregs_asm.h"
-#include "consoleTGDS.h"
-#include "utilsTGDS.h"
-
-#include "devoptab_devices.h"
-#include "fatfslayerTGDS.h"
-#include "usrsettingsTGDS.h"
-#include "exceptionTGDS.h"
-
-#include "videoTGDS.h"
-#include "keypadTGDS.h"
-#include "dldi.h"
-#include "SpecialFunctions.h"
-#include "dmaTGDS.h"
-#include "biosTGDS.h"
-#include "nds_cp15_misc.h"
-#include "limitsTGDS.h"
-#include "ftpServer.h"
-#include "wifi_arm9.h"
+#include "ftpMisc.h"
 #include "dswnifi_lib.h"
+#include "ftpServer.h"
+#include "keypadTGDS.h"
 
 void menuShow(){
 	clrscr();

@@ -4,6 +4,8 @@
 #include "main.h"
 #include "sgIP_Config.h"
 #include "biosTGDS.h"
+#include <in.h>
+#include "dswnifi_lib.h"
 
 //C++ part
 #include <sstream>

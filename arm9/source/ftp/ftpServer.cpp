@@ -1,47 +1,12 @@
 #include "ftpServer.h"
-#include "main.h"
 
 #include "typedefsTGDS.h"
 #include "dsregs.h"
 #include "dsregs_asm.h"
-#include "dswnifi_lib.h"
-#include "filehandleTGDS.h"
-
-#include <stdarg.h>
-#include <string.h>
-#include <unistd.h>
-
-#include <dswifi9.h>
-#include <netdb.h>
-
-#include <socket.h>
 #include <in.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
- #include <sys/stat.h>
-
-#include "sgIP_Config.h"
-#include "sgIP_Hub.h"
-#include "wifi_arm9.h"
-#include "dswifi9.h"
-#include "wifi_shared.h"
-#include "utilsTGDS.h"
-#include "fatfslayerTGDS.h"
-
-#include "netdb.h"
-#include <ctype.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <dirent.h>
-#include <stdbool.h>
-#include <assert.h>
-
 #include "ftpMisc.h"
+#include "dswnifi_lib.h"
+
 
 bool FTPActiveMode = false;
 

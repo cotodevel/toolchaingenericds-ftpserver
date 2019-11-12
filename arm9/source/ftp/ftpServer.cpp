@@ -3,10 +3,12 @@
 #include "typedefsTGDS.h"
 #include "dsregs.h"
 #include "dsregs_asm.h"
+
 #include <in.h>
 #include "ftpMisc.h"
 #include "dswnifi_lib.h"
 
+#include "fileBrowse.hpp"	//generic template functions from TGDS: maintain 1 source, whose changes are globally accepted by all TGDS Projects.
 
 bool FTPActiveMode = false;
 

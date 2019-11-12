@@ -9,12 +9,12 @@
 
 //C++ part
 #include <sstream>
+#include "fileBrowse.hpp"	//generic template functions from TGDS: maintain 1 source, whose changes are globally accepted by all TGDS Projects.
 
 //current working directory
 volatile char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
 
 using namespace std;
-
 template <class T> std::string to_string (const T& t)
 {
    std::stringstream ss;
@@ -253,39 +253,6 @@ int send_file(int peer, FILE *f, int fileSize) {
     return written;
 }
 
-string ToStr( char c ) {
-   return string( 1, c );
-}
-
-
-std::string parseDirNameTGDS(std::string dirName){
-	int dirlen = strlen(dirName.c_str());
-	if(dirlen > 2){
-		if ((dirName.at(0) == '/') && (dirName.at(1) == '/')) {
-			dirName.erase(0,1);	//trim the starting / if it has one
-		}
-		dirName.erase(dirName.length());	//trim the leading "/"
-	}
-	return dirName;
-}
-
-std::string parsefileNameTGDS(std::string fileName){
-	int filelen = fileName.length();
-	if(filelen > 4){
-		if (fileName.at(0) == '/') {
-			fileName.erase(0,1);	//trim the starting / if it has one
-			return parsefileNameTGDS(fileName);	//keep removing further slashes
-		}
-		if ((fileName.at(2) == '/') && (fileName.at(3) == '/')) {
-			fileName.erase(2,2);	//trim the starting // if it has one (since getfspath appends 0:/)
-			if(fileName.at(2) != '/'){	//if we trimmed by accident the only leading / such as 0:filename instead of 0:/filename, restore it so it becomes the latter
-				fileName.insert(2, ToStr('/') );
-			}
-		}
-	}
-	return fileName;
-}
-
 // check error cases, e.g. newPath = '..//' , '/home/user/' , 'subdir' (without trailing slash), etc... and return a clean, valid string in the form 'subdir/'
 void getValidDir(std::string &dirName) {
     std::string slash = "/";
@@ -295,11 +262,6 @@ void getValidDir(std::string &dirName) {
         dirName.erase(foundSlash++,1); // Remove all slashs
     }
     dirName.append(slash); // Trailing slash is good and required, append it
-}
-
-// Returns the path to the current working dir starting from the server root dir
-std::string getCurrentWorkingDir(bool showRootPath) {
-	return string(getTGDSCurrentWorkingDirectory());
 }
 
 char *getFtpCommandArg(char * theCommand, char *theCommandString, int skipArgs)

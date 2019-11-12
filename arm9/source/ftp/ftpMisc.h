@@ -92,17 +92,10 @@ extern int currserverDataListenerSock;
 extern bool send_all(int socket, void *buffer, size_t length, int * written);
 extern int send_file(int peer, FILE *f, int fileSize);
 
-extern bool ShowBrowser(char * Path);
-
 #ifdef __cplusplus
 extern std::list<std::string> completePath;
 extern void getValidDir(std::string &dirName);
-extern std::string getCurrentWorkingDir(bool showRootPath);
-extern std::vector<class FileDirEntry> browse(std::string dir, bool strict);
 extern std::string getDldiDefaultPath();
-extern std::string parseDirNameTGDS(std::string dirName);
-extern std::string parsefileNameTGDS(std::string fileName);
-
 #endif
 
 extern char *getFtpCommandArg(char * theCommand, char *theCommandString, int skipArgs);

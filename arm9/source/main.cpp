@@ -25,7 +25,7 @@ USA
 #include "dswnifi_lib.h"
 #include "ftpServer.h"
 #include "keypadTGDS.h"
-#include "TGDSNDSLogo.h"
+#include "TGDSLogoLZSSCompressed.h"
 
 void menuShow(){
 	clrscr();
@@ -55,9 +55,8 @@ int main(int _argc, sint8 **_argv) {
 	switch_dswnifi_mode(dswifi_idlemode);
 	/*			TGDS 1.5 Standard ARM9 Init code end	*/
 	
-	//show TGDS logo
-	initFBModeSubEngine0x06200000();
-	renderFBMode3SubEngine((u16*)&TGDSLogoNDSSize[0], (int)TGDSLOGONDSSIZE_WIDTH,(int)TGDSLOGONDSSIZE_HEIGHT);
+	//render TGDSLogo from a LZSS compressed file
+	RenderTGDSLogoSubEngine((uint8*)&TGDSLogoLZSSCompressed[0], TGDSLogoLZSSCompressed_size);
 	
 	menuShow();
 	ftpInit();

@@ -8,7 +8,7 @@
 #include "ftpMisc.h"
 #include "dswnifi_lib.h"
 
-#include "fileBrowse.hpp"	//generic template functions from TGDS: maintain 1 source, whose changes are globally accepted by all TGDS Projects.
+#include "fileBrowse.h"	//generic template functions from TGDS: maintain 1 source, whose changes are globally accepted by all TGDS Projects.
 
 bool FTPActiveMode = false;
 
@@ -219,7 +219,11 @@ int FTPServerService(){
 					
 					else if(!strcmp(command, "DELE")){
 						char * fname = getFtpCommandArg("DELE", buffer, 0);  
-						string fnameRemote = parsefileNameTGDS(string(fname));
+						
+						char tmpBuf[MAX_TGDSFILENAME_LENGTH+1];
+						strcpy(tmpBuf, fname);
+						parsefileNameTGDS(tmpBuf);
+						string fnameRemote = (string(tmpBuf));
 						
 						int retVal = remove(fnameRemote.c_str());
 						if(retVal==0){

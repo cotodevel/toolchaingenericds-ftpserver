@@ -7,9 +7,8 @@
 #include <in.h>
 #include "dswnifi_lib.h"
 
-//C++ part
 #include <sstream>
-#include "fileBrowse.hpp"	//generic template functions from TGDS: maintain 1 source, whose changes are globally accepted by all TGDS Projects.
+#include "fileBrowse.h"	//generic template functions from TGDS: maintain 1 source, whose changes are globally accepted by all TGDS Projects.
 
 //current working directory
 volatile char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
@@ -56,7 +55,10 @@ int ftp_cmd_PASV(int s, int cmd, char* arg){
 
 int ftp_cmd_RETR(int s, int cmd, char* arg){
 	char * fname = getFtpCommandArg("RETR", arg, 0); 
-	string fnameRemote = parsefileNameTGDS(string(fname));
+	char tmpBuf[MAX_TGDSFILENAME_LENGTH+1];
+	strcpy(tmpBuf, fname);
+	parseDirNameTGDS(tmpBuf);
+	string fnameRemote = (string(tmpBuf));
 	printf("RETR cmd: %s",fnameRemote.c_str());
 	
 	//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
@@ -93,7 +95,10 @@ int ftp_cmd_RETR(int s, int cmd, char* arg){
 
 int ftp_cmd_STOR(int s, int cmd, char* arg){
 	char * fname = getFtpCommandArg("STOR", arg, 0); 
-	string fnameRemote = parsefileNameTGDS(string("0:/") + string(fname));
+	char tmpBuf[MAX_TGDSFILENAME_LENGTH+1];
+	strcpy(tmpBuf, string(string("0:/") + string(fname)).c_str());
+	parsefileNameTGDS(tmpBuf);
+	string fnameRemote = string(tmpBuf);
 	printf("STOR cmd: %s",fnameRemote.c_str());
 	
 	//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
@@ -333,23 +338,34 @@ int ftp_cmd_LIST(int s, int cmd, char* arg){
 		char fname[MAX_TGDSFILENAME_LENGTH+1];
 		strcpy(fname, CurrentWorkingDirectory);	// /DSOrganize works, / works, CWDFTP doesn`t
 		
-		int retf = FAT_FindFirstFile(fname);
-		while(retf != FT_NONE){
-			struct FileClass * fileClassInst = NULL;
-			
+		//Create TGDS Dir API context
+		struct FileClassList * fileClassListCtx = initFileList();
+		cleanFileList(fileClassListCtx);
+		
+		int startFromIndex = 0;
+		struct FileClass * fileClassInst = NULL;
+		fileClassInst = FAT_FindFirstFile(fname, fileClassListCtx, startFromIndex);
+		
+		while(fileClassInst != NULL){
 			//directory?
-			if(retf == FT_DIR){
-				fileClassInst = getFileClassFromList(LastDirEntry);
-				std::string newCurDirEntry = parseDirNameTGDS(std::string(fileClassInst->fd_namefullPath));
+			if(fileClassInst->type == FT_DIR){
+				char tmpBuf[512];
+				strcpy(tmpBuf, fileClassInst->fd_namefullPath);
+				parseDirNameTGDS(tmpBuf);
+				strcpy(fileClassInst->fd_namefullPath, tmpBuf);
+				std::string newCurDirEntry = std::string(fileClassInst->fd_namefullPath);
 				int fSize = strlen(newCurDirEntry.c_str());
 				std::string fileStr = (std::string("drw-r--r-- 1 DS group          "+to_string(fSize)+" Feb  1  2009 " + newCurDirEntry.c_str() +" \r\n"));
 				send(clisock, (char*)fileStr.c_str(), strlen(fileStr.c_str()), 0);
 				dirList++;
 			}
 			//file?
-			else if(retf == FT_FILE){
-				fileClassInst = getFileClassFromList(LastFileEntry);
-				std::string newCurFileEntry = parsefileNameTGDS(std::string(fileClassInst->fd_namefullPath));
+			else if(fileClassInst->type == FT_FILE){
+				char tmpBuf[512];
+				strcpy(tmpBuf, fileClassInst->fd_namefullPath);
+				parsefileNameTGDS(tmpBuf);
+				strcpy(fileClassInst->fd_namefullPath, tmpBuf);
+				std::string newCurFileEntry = std::string(fileClassInst->fd_namefullPath);
 				int fSize = FS_getFileSize((char*)newCurFileEntry.c_str());
 				std::string fileStr = (std::string("-rw-r--r-- 1 DS group          "+to_string(fSize)+" Feb  1  2009 " + newCurFileEntry.c_str() +" \r\n"));
 				send(clisock, (char*)fileStr.c_str(), strlen(fileStr.c_str()), 0);
@@ -357,10 +373,13 @@ int ftp_cmd_LIST(int s, int cmd, char* arg){
 			}
 			
 			//more file/dir objects?
-			retf = FAT_FindNextFile(fname);
+			fileClassInst = FAT_FindNextFile(fname, fileClassListCtx);
 			curFileDirIndx++;
 		}
-	
+		
+		//Free TGDS Dir API context
+		freeFileList(fileClassListCtx);
+		
 		printf("Files:%d - Dirs:%d",fileList, dirList);
 		
 		u8 endByte=0x0;

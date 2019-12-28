@@ -26,6 +26,7 @@ USA
 #include "ftpServer.h"
 #include "keypadTGDS.h"
 #include "TGDSLogoLZSSCompressed.h"
+#include "biosTGDS.h"
 
 void menuShow(){
 	clrscr();
@@ -85,5 +86,7 @@ int main(int _argc, sint8 **_argv) {
 			}
 			break;
 		}
+		
+		handleARM9SVC();	/* Do not remove, handles TGDS services */
 	}
 }

@@ -32,6 +32,7 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void Timer0handlerUser(){
+
 }
 
 #ifdef ARM9
@@ -39,6 +40,7 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void Timer1handlerUser(){
+
 }
 
 #ifdef ARM9
@@ -46,6 +48,7 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void Timer2handlerUser(){
+
 }
 
 #ifdef ARM9
@@ -53,6 +56,7 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void Timer3handlerUser(){
+
 }
 
 #ifdef ARM9
@@ -60,6 +64,7 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void HblankUser(){
+
 }
 
 #ifdef ARM9
@@ -67,6 +72,7 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void VblankUser(){
+
 }
 
 #ifdef ARM9
@@ -74,6 +80,7 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void VcounterUser(){
+
 }
 
 //Note: this event is hardware triggered from ARM7, on ARM9 a signal is raised through the FIFO hardware
@@ -82,7 +89,7 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void screenLidHasOpenedhandlerUser(){
-	setBacklight(POWMAN_BACKLIGHT_TOP_BIT | POWMAN_BACKLIGHT_BOTTOM_BIT);	//both lit screens
+	
 }
 
 //Note: this event is hardware triggered from ARM7, on ARM9 a signal is raised through the FIFO hardware

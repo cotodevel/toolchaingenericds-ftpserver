@@ -27,6 +27,21 @@ USA
 #include "spifwTGDS.h"
 
 //User Handler Definitions
+
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
+inline __attribute__((always_inline)) 
+void IpcSynchandlerUser(){
+	uint8 ipcByte = receiveByteIPC();
+	switch(ipcByte){
+		default:{
+			//ipcByte should be the byte you sent from external ARM Core through sendByteIPC(ipcByte);
+		}
+		break;
+	}
+}
+
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif

@@ -140,13 +140,9 @@ int ftp_cmd_STOR(int s, int cmd, char* arg){
 	return sendResponse;
 }
 
-
 int ftp_cmd_CDUP(int s, int cmd, char* arg){	
-	char tempnewDir[MAX_TGDSFILENAME_LENGTH+1] = {0};
-	char * CurrentWorkingDirectory = (char*)&TGDSCurrentWorkingDirectory[0];
-	strcpy (tempnewDir, CurrentWorkingDirectory);
 	int sendResponse = 0;
-	bool cdupStatus = leaveDir(tempnewDir);
+	bool cdupStatus = leaveDir((char*)CWDFTP);
 	if(cdupStatus == true){
 		sendResponse = ftpResponseSender(s, 200, "OK");
 	}
@@ -306,21 +302,8 @@ char *getFtpCommandArg(char * theCommand, char *theCommandString, int skipArgs)
 
 
 
-int ftp_cmd_LIST(int s, int cmd, char* arg){	
-	char * CurrentWorkingDirectory = (char*)CWDFTP;
-	
-	char curtgdswd[257];
-	strcpy(curtgdswd, TGDSCurrentWorkingDirectory);
-	
-	//bugged
-	/*
-	if(enterDir(CurrentWorkingDirectory) == true){
-		printf("dir loaded correctly:[%s]",CurrentWorkingDirectory);
-	}
-	else{
-		printf("failed to load dir:[%s]",CurrentWorkingDirectory);
-	}
-	*/
+int ftp_cmd_LIST(int s, int cmd, char* arg){
+
 	//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
 	struct sockaddr_in clientAddr;
 	int clisock = openAndListenFTPDataPort(&clientAddr);
@@ -335,8 +318,8 @@ int ftp_cmd_LIST(int s, int cmd, char* arg){
 		int dirList = 0;
 		int curFileDirIndx = 0;
 		
-		char fname[MAX_TGDSFILENAME_LENGTH+1];
-		strcpy(fname, CurrentWorkingDirectory);	// /DSOrganize works, / works, CWDFTP doesn`t
+		char curPath[MAX_TGDSFILENAME_LENGTH+1];
+		strcpy(curPath, (const char*)CWDFTP);
 		
 		//Create TGDS Dir API context
 		struct FileClassList * fileClassListCtx = initFileList();
@@ -344,7 +327,7 @@ int ftp_cmd_LIST(int s, int cmd, char* arg){
 		
 		int startFromIndex = 0;
 		struct FileClass * fileClassInst = NULL;
-		fileClassInst = FAT_FindFirstFile(fname, fileClassListCtx, startFromIndex);
+		fileClassInst = FAT_FindFirstFile(curPath, fileClassListCtx, startFromIndex);
 		
 		while(fileClassInst != NULL){
 			//directory?
@@ -373,14 +356,14 @@ int ftp_cmd_LIST(int s, int cmd, char* arg){
 			}
 			
 			//more file/dir objects?
-			fileClassInst = FAT_FindNextFile(fname, fileClassListCtx);
+			fileClassInst = FAT_FindNextFile(curPath, fileClassListCtx);
 			curFileDirIndx++;
 		}
 		
 		//Free TGDS Dir API context
 		freeFileList(fileClassListCtx);
 		
-		printf("Files:%d - Dirs:%d",fileList, dirList);
+		printf("Files:%d - Dirs:%d", fileList, dirList);
 		
 		u8 endByte=0x0;
 		send(clisock, &endByte, 1, 0);

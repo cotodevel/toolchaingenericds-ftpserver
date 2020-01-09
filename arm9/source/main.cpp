@@ -32,6 +32,7 @@ void menuShow(){
 	clrscr();
 	printf("     ");
 	printf("     ");
+	printf("Available heap memory: %d", getMaxRam());
 	printf("Starting FTP server. An IP and Port will be drawn shortly.");
 }
 

@@ -35,6 +35,11 @@ struct sIPCSharedTGDSSpecific {
 //---------------------------------------------------------------------------------
 };
 
+#ifdef ARM9
+//Used by ARM9. Required internally by ARM7
+#define TGDSDLDI_ARM7_ADDRESS (u32)(0x06000000)
+#endif
+
 #endif
 
 #ifdef __cplusplus

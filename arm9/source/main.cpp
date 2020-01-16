@@ -27,6 +27,8 @@ USA
 #include "keypadTGDS.h"
 #include "TGDSLogoLZSSCompressed.h"
 #include "biosTGDS.h"
+#include "ipcfifoTGDSUser.h"
+#include "dldi.h"
 
 void menuShow(){
 	clrscr();
@@ -45,6 +47,7 @@ int main(int _argc, sint8 **_argv) {
 	
 	sint32 fwlanguage = (sint32)getLanguage();
 	
+	setDLDIARM7Address((u32 *)TGDSDLDI_ARM7_ADDRESS);	//Required by ARM7DLDI!
 	int ret=FS_init();
 	if (ret == 0)
 	{

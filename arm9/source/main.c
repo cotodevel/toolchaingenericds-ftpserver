@@ -36,6 +36,7 @@ void menuShow(){
 	printf("     ");
 	printf("Available heap memory: %d", getMaxRam());
 	printf("Starting FTP server. An IP and Port will be drawn shortly.");
+	printf("ARM7 Status: %s", printf7Buffer);
 }
 
 int main(int _argc, sint8 **_argv) {

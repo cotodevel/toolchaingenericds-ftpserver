@@ -56,11 +56,37 @@ int ftp_cmd_PASV(int s, int cmd, char* arg){
 int ftp_cmd_RETR(int s, int cmd, char* arg){
 	char * fname = getFtpCommandArg("RETR", arg, 0); 
 	char tmpBuf[MAX_TGDSFILENAME_LENGTH+1];
+	memset(tmpBuf, 0, sizeof(tmpBuf));
 	strcpy(tmpBuf, fname);
-	parseDirNameTGDS(tmpBuf);
+	parsefileNameTGDS(tmpBuf);
+	
+	//Prevent "/0:" bad filename parsing when using POSIX FS
+	if(
+		(tmpBuf[0] == '/') &&
+		(tmpBuf[1] == '0') &&
+		(tmpBuf[2] == ':')
+	){
+		char tempnewDiroutPath2[MAX_TGDSFILENAME_LENGTH+1];
+		memcpy(tempnewDiroutPath2, &tmpBuf[1], strlen(tmpBuf)+1);
+		tempnewDiroutPath2[strlen(tmpBuf)+2] = '\0';
+		memset(tmpBuf, 0, sizeof(tmpBuf));
+		strcpy(tmpBuf, tempnewDiroutPath2);
+	}
+	
+	//if missing 0:/ add it
+	if(
+		(tmpBuf[0] != '0') &&
+		(tmpBuf[1] != ':') &&
+		(tmpBuf[2] != '/')
+	){
+		char tempnewDiroutPath2[MAX_TGDSFILENAME_LENGTH+1];
+		memset(tempnewDiroutPath2, 0, sizeof(tempnewDiroutPath2));
+		strcpy(tempnewDiroutPath2, getfatfsPath((sint8 *)tmpBuf));
+		memset(tmpBuf, 0, sizeof(tmpBuf));
+		strcpy(tmpBuf, tempnewDiroutPath2);
+	}
 	string fnameRemote = (string(tmpBuf));
 	printf("RETR cmd: %s",fnameRemote.c_str());
-	
 	//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
 	struct sockaddr_in clientAddr;
 	int clisock = openAndListenFTPDataPort(&clientAddr);
@@ -295,7 +321,16 @@ char *getFtpCommandArg(char * theCommand, char *theCommandString, int skipArgs)
             toReturn += 1;
         }
     }
-
+	
+	//is it a directory / file? If so, prevent "/0:" bad file/dir parsing from the FTP Client
+	if(
+		(toReturn[0] == '/') &&
+		(toReturn[1] == '0') &&
+		(toReturn[2] == ':')
+	){
+		toReturn += 1;
+	}
+	
     return toReturn;
 }
 

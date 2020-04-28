@@ -31,9 +31,11 @@ USA
 #include "utilsTGDS.h"
 
 //---------------------------------------------------------------------------------
-struct sIPCSharedTGDSSpecific {
+typedef struct sIPCSharedTGDSSpecific{
 //---------------------------------------------------------------------------------
-};
+}  IPCSharedTGDSSpecific	__attribute__((aligned (4)));
+
+#define TGDSUSERIPC ((IPCSharedTGDSSpecific volatile *)(0x027FF000 + TGDSIPCSize))
 
 #ifdef ARM9
 //Used by ARM9. Required internally by ARM7

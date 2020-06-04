@@ -32,6 +32,8 @@ USA
 #include "posixHandleTGDS.h"
 #include "TGDSMemoryAllocator.h"
 
+static bool setApp = false;
+
 void menuShow(){
 	clrscr();
 	printf("     ");
@@ -47,20 +49,27 @@ int main(int _argc, sint8 **_argv) {
 	bool isTGDSCustomConsole = false;	//set default console or custom console: default console
 	GUI_init(isTGDSCustomConsole);
 	GUI_clear();
-	setTGDSMemoryAllocator(getProjectSpecificMemoryAllocatorSetup());
-	sint32 fwlanguage = (sint32)getLanguage();
-	#ifdef ARM7_DLDI
-	setDLDIARM7Address((u32 *)TGDSDLDI_ARM7_ADDRESS);	//Required by ARM7DLDI!
-	#endif
-	int ret=FS_init();
-	if (ret == 0)
-	{
-		printf("FS Init ok.");
+	
+	if(setApp == false){
+		setTGDSMemoryAllocator(getProjectSpecificMemoryAllocatorSetup());
+		
+		sint32 fwlanguage = (sint32)getLanguage();
+		#ifdef ARM7_DLDI
+		setDLDIARM7Address((u32 *)TGDSDLDI_ARM7_ADDRESS);	//Required by ARM7DLDI!
+		#endif
+		int ret=FS_init();
+		if (ret == 0)
+		{
+			printf("FS Init ok.");
+		}
+		else if(ret == -1)
+		{
+			printf("FS Init error.");
+		}
+		
+		setApp = true;	
 	}
-	else if(ret == -1)
-	{
-		printf("FS Init error.");
-	}
+	
 	switch_dswnifi_mode(dswifi_idlemode);
 	/*			TGDS 1.5 Standard ARM9 Init code end	*/
 	

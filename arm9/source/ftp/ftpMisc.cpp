@@ -139,7 +139,7 @@ int ftp_cmd_STOR(int s, int cmd, char* arg){
 		
 		if(fh != NULL){
 			//retrieve data from client socket.
-			char * client_reply = (char*)malloc(SENDRECVBUF_SIZE);
+			char * client_reply = (char*)TGDSARM9Malloc(SENDRECVBUF_SIZE);
 			int received_len = 0;
 			int total_len = 0;
 			while( ( received_len = recv(clisock, client_reply, sizeof(client_reply), 0 ) ) != 0 ) { // if recv returns 0, the socket has been closed.
@@ -149,7 +149,7 @@ int ftp_cmd_STOR(int s, int cmd, char* arg){
 					//printf("Received byte size = %d", received_len);
 				}
 			}
-			free(client_reply);
+			TGDSARM9Free(client_reply);
 			disconnectAsync(clisock);
 			fclose(fh);
 			sendResponse = ftpResponseSender(s, 226, "Transfer complete.");
@@ -247,7 +247,7 @@ bool send_all(int socket, void *buffer, size_t length, int * written)
 }
 
 int send_file(int peer, FILE *f, int fileSize) {
-	char * filebuf = (char*)malloc(SENDRECVBUF_SIZE + 1024);
+	char * filebuf = (char*)TGDSARM9Malloc(SENDRECVBUF_SIZE + 1024);
     int written = 0;
 	int readSofar= 0;
 	int lastwritten = 0;
@@ -272,7 +272,7 @@ int send_file(int peer, FILE *f, int fileSize) {
 			}
 		}
     }
-	free(filebuf);
+	TGDSARM9Free(filebuf);
 	
 	u8 endByte=0x0;
 	send(peer, &endByte, 1, 0);	//finish connection so Client disconnects.

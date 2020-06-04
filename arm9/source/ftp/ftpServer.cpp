@@ -280,7 +280,7 @@ int FTPServerService(){
 								else
 									break;
 							}
-							f = malloc(size);
+							f = TGDSARM9Malloc(size);
 							recv(sock2, f, size, 0);
 							c = write(filehandle, f, size);
 							close(filehandle);

@@ -127,10 +127,14 @@ int ftp_cmd_STOR(int s, int cmd, char* arg){
 	string fnameRemote = string(tmpBuf);
 	printf("STOR cmd: %s",fnameRemote.c_str());
 	
+	swiDelay(8888);
+	
 	//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
 	struct sockaddr_in clientAddr;
 	int clisock = openAndListenFTPDataPort(&clientAddr);
 	int sendResponse = ftpResponseSender(s, 150, "Opening BINARY mode data connection for retrieve file from server.");
+	
+	swiDelay(8888);
 	
 	if(clisock >= 0){
 		std::string fileToRetr = fnameRemote;
@@ -148,20 +152,24 @@ int ftp_cmd_STOR(int s, int cmd, char* arg){
 					fwrite(client_reply , 1, received_len , fh);
 					//printf("Received byte size = %d", received_len);
 				}
+				swiDelay(1);
 			}
 			TGDSARM9Free(client_reply);
 			disconnectAsync(clisock);
 			fclose(fh);
 			sendResponse = ftpResponseSender(s, 226, "Transfer complete.");
+			swiDelay(8888);
 		}
 		//could not open file
 		else{
 			printf("STOR file %s open ERROR",fileToRetr.c_str());
 			sendResponse = ftpResponseSender(s, 451, "Could not open file.");
+			swiDelay(8888);
 		}
 	}
 	else{
 		sendResponse = ftpResponseSender(s, 425, "Connection closed; transfer aborted.");
+		swiDelay(8888);
 	}
 	return sendResponse;
 }
@@ -344,7 +352,9 @@ int ftp_cmd_LIST(int s, int cmd, char* arg){
 	int clisock = openAndListenFTPDataPort(&clientAddr);
 	int sendResponse = 0;
 	if(clisock >= 0){
+		swiDelay(8888);
 		sendResponse = ftpResponseSender(s, 150, "Opening BINARY mode data connection for file list.");
+		swiDelay(8888);
 		
 		//todo: filter different LIST args here
 		char * LISTargs = getFtpCommandArg("LIST", arg, 0);  
@@ -388,6 +398,7 @@ int ftp_cmd_LIST(int s, int cmd, char* arg){
 				std::string fileStr = (std::string("-rw-r--r-- 1 DS group          "+to_string(fSize)+" Feb  1  2009 " + newCurFileEntry.c_str() +" \r\n"));
 				send(clisock, (char*)fileStr.c_str(), strlen(fileStr.c_str()), 0);
 				fileList++;
+				swiDelay(8888);
 			}
 			
 			//more file/dir objects?
@@ -402,14 +413,16 @@ int ftp_cmd_LIST(int s, int cmd, char* arg){
 		
 		u8 endByte=0x0;
 		send(clisock, &endByte, 1, 0);
+		swiDelay(8888);
 		
 		closeFTPDataPort(clisock);
 		
 		sendResponse = ftpResponseSender(s, 226, "Transfer complete.");
-		
+		swiDelay(8888);
 	}
 	else{
 		sendResponse = ftpResponseSender(s, 426, "Connection closed; transfer aborted.");
+		swiDelay(8888);
 	}
 	
 	return sendResponse;

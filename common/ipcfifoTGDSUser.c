@@ -44,7 +44,7 @@ USA
 
 #endif
 
-//inherits what is defined in: common_shared.c
+//inherits what is defined in: ipcfifoTGDS.c
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif

@@ -45,14 +45,15 @@ void menuShow(){
 
 int main(int argc, char argv[argvItems][MAX_TGDSFILENAME_LENGTH]) {
 	
-	/*			TGDS 1.5 Standard ARM9 Init code start	*/
+	/*			TGDS 1.6 Standard ARM9 Init code start	*/
 	bool isTGDSCustomConsole = false;	//set default console or custom console: default console
 	GUI_init(isTGDSCustomConsole);
 	GUI_clear();
 	
 	if(setApp == false){
-		setTGDSMemoryAllocator(getProjectSpecificMemoryAllocatorSetup());
-		
+		bool isCustomTGDSMalloc = false;
+		setTGDSMemoryAllocator(getProjectSpecificMemoryAllocatorSetup(TGDS_ARM7_MALLOCSTART, TGDS_ARM7_MALLOCSIZE, isCustomTGDSMalloc));
+	
 		sint32 fwlanguage = (sint32)getLanguage();
 		#ifdef ARM7_DLDI
 		setDLDIARM7Address((u32 *)TGDSDLDI_ARM7_ADDRESS);	//Required by ARM7DLDI!
@@ -71,7 +72,7 @@ int main(int argc, char argv[argvItems][MAX_TGDSFILENAME_LENGTH]) {
 	}
 	
 	switch_dswnifi_mode(dswifi_idlemode);
-	/*			TGDS 1.5 Standard ARM9 Init code end	*/
+	/*			TGDS 1.6 Standard ARM9 Init code end	*/
 	
 	//Show logo
 	RenderTGDSLogoMainEngine((uint8*)&TGDSLogoLZSSCompressed[0], TGDSLogoLZSSCompressed_size);

@@ -29,10 +29,10 @@ USA
 extern "C" {
 #endif
 
-	////////[Custom Memory implementation is selected]////////
+	////////[Default Memory implementation is selected, thus stubs are implemented here]////////
 
 //Definition that overrides the weaksymbol expected from toolchain to init ARM9's TGDS memory allocation
-extern struct AllocatorInstance * getProjectSpecificMemoryAllocatorSetup();
+extern struct AllocatorInstance * getProjectSpecificMemoryAllocatorSetup(u32 ARM7MallocStartAddress, int ARM7MallocSize, bool isCustomTGDSMalloc);
 
 #ifdef __cplusplus
 }

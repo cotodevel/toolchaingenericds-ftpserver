@@ -51,7 +51,7 @@ int main(int argc, char argv[argvItems][MAX_TGDSFILENAME_LENGTH]) {
 	GUI_clear();
 	
 	if(setApp == false){
-		bool isCustomTGDSMalloc = false;
+		bool isCustomTGDSMalloc = true;
 		setTGDSMemoryAllocator(getProjectSpecificMemoryAllocatorSetup(TGDS_ARM7_MALLOCSTART, TGDS_ARM7_MALLOCSIZE, isCustomTGDSMalloc));
 	
 		sint32 fwlanguage = (sint32)getLanguage();
@@ -103,11 +103,10 @@ int main(int argc, char argv[argvItems][MAX_TGDSFILENAME_LENGTH]) {
 					scanKeys();
 					IRQVBlankWait();
 				}
-				main(0, (sint8**)"");
+				main(argc, argv);
 			}
 			break;
 		}
 		
-		handleARM9SVC();	/* Do not remove, handles TGDS services */
 	}
 }

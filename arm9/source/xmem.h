@@ -20,6 +20,7 @@
 	a power of 2, and the first arg is divisable by your second arg.	
 */
 
+//inherits what is defined in: ipcfifoTGDS.h
 #ifndef __xmem_h__
 #define __xmem_h__
 
@@ -54,11 +55,13 @@ extern void Xfree(const void *ptr);
 extern unsigned int XMEM_FreeMem(void);
 
 extern unsigned int XMEMTOTALSIZE;
+
 // Number of blocks to create (mem/bs)
 extern unsigned int XMEM_BLOCKCOUNT;
 
 // Size of Table in bytes
 extern unsigned int XMEM_TABLESIZE;
+
 
 #ifdef __cplusplus
 }

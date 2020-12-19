@@ -19,38 +19,36 @@ USA
 #include "main.h"
 #include "biosTGDS.h"
 #include "loader.h"
+#include "busTGDS.h"
+#include "dmaTGDS.h"
 #include "spifwTGDS.h"
-#include "posixHandleTGDS.h"
 
-
-
-void initDLDIARM7(u32 srcDLDIAddr){	//stubbed
-	
+static inline void enterGDBFromARM7(void){
+	SendFIFOWords(NDSLOADER_ENTERGDB_FROM_ARM7, 0);
 }
 
-//---------------------------------------------------------------------------------
 int main(int _argc, sint8 **_argv) {
-//---------------------------------------------------------------------------------
 	/*			TGDS 1.6 Standard ARM7 Init code start	*/
-	//wait for VRAM D to be assigned from ARM9->ARM7 (ARM7 has load/store on byte/half/words on VRAM)
-	while (!(*((vuint8*)0x04000240) & 0x2));
-		
 	installWifiFIFO();		
-		
-	int argBuffer[MAXPRINT7ARGVCOUNT];
-	memset((unsigned char *)&argBuffer[0], 0, sizeof(argBuffer));
-	argBuffer[0] = 0xc070ffff;
-	writeDebugBuffer7("TGDS ARM7.bin Boot OK!", 1, (int*)&argBuffer[0]);
-		
 	/*			TGDS 1.6 Standard ARM7 Init code end	*/
 	
-	waitWhileNotSetStatus(NDSLOADER_INIT_OK);	//wait for init NDSLoader code 
+	waitWhileNotSetStatus(NDSLOADER_LOAD_OK);	//this bootstub will proceed only when file has been loaded properly
 	
-    while (1) {
-		//up to this point, is free to reload the EWRAM code
-		
+	//NDS_LOADER_IPC_ARM7BIN_UNCACHED has ARM7.bin bootcode now
+	int arm7BootCodeSize = NDS_LOADER_IPC_CTX_UNCACHED->bootCode7FileSize;
+	u32 arm7entryaddress = NDS_LOADER_IPC_CTX_UNCACHED->arm7EntryAddress;
+	dmaTransferWord(3, (uint32)NDS_LOADER_IPC_ARM7BIN_UNCACHED, (uint32)arm7entryaddress, (uint32)arm7BootCodeSize);
+	
+	//reload ARM7.bin
+	setNDSLoaderInitStatus(NDSLOADER_START);	
+	reloadARMCore(NDS_LOADER_IPC_CTX_UNCACHED->arm7EntryAddress);
+	
+	//enterGDBFromARM7();	//debug
+    
+	while (1) {
 		handleARM7SVC();	/* Do not remove, handles TGDS services */
 		IRQWait(IRQ_VBLANK);
 	}
+   
 	return 0;
 }

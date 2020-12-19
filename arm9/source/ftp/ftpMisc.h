@@ -92,12 +92,6 @@ extern int currserverDataListenerSock;
 extern bool send_all(int socket, void *buffer, size_t length, int * written);
 extern int send_file(int peer, FILE *f, int fileSize);
 
-#ifdef __cplusplus
-extern std::list<std::string> completePath;
-extern void getValidDir(std::string &dirName);
-extern std::string getDldiDefaultPath();
-#endif
-
 extern char *getFtpCommandArg(char * theCommand, char *theCommandString, int skipArgs);
 extern int ftp_cmd_LIST(int s, int cmd, char* arg);
 

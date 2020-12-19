@@ -18,17 +18,11 @@ USA
 
 */
 
-#include "InterruptsARMCores_h.h"
-#include "ipcfifoTGDSUser.h"
+#include "typedefsTGDS.h"
+#include "dsregs.h"
 #include "dsregs_asm.h"
-#include "main.h"
-#include "keypadTGDS.h"
-#include "interrupts.h"
-#include "utilsTGDS.h"
-#include "spifwTGDS.h"
 
 //User Handler Definitions
-
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
@@ -55,7 +49,6 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void Timer1handlerUser(){
-
 }
 
 #ifdef ARM9
@@ -63,7 +56,6 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void Timer2handlerUser(){
-
 }
 
 #ifdef ARM9
@@ -71,7 +63,6 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void Timer3handlerUser(){
-
 }
 
 #ifdef ARM9
@@ -79,7 +70,6 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void HblankUser(){
-
 }
 
 #ifdef ARM9
@@ -87,13 +77,7 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void VblankUser(){
-	struct sIPCSharedTGDSSpecific* TGDSUSERIPC = getsIPCSharedTGDSSpecific();
-	if(TGDSUSERIPC->frameCounter9 < 60){
-		TGDSUSERIPC->frameCounter9++;
-	}
-	else{
-		TGDSUSERIPC->frameCounter9 = 0;
-	}
+	
 }
 
 #ifdef ARM9
@@ -101,7 +85,6 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void VcounterUser(){
-
 }
 
 //Note: this event is hardware triggered from ARM7, on ARM9 a signal is raised through the FIFO hardware
@@ -119,5 +102,5 @@ __attribute__((section(".itcm")))
 #endif
 inline __attribute__((always_inline)) 
 void screenLidHasClosedhandlerUser(){
-	
+
 }

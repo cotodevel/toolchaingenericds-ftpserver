@@ -17,24 +17,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
 USA
 
 */
-
-#ifndef __main7_h__
-#define __main7_h__
-
-#include "typedefsTGDS.h"
+#include "posixHandleTGDS.h"
 #include "dsregs.h"
-#include "soundTGDS.h"
-#endif
+#include "dsregs_asm.h"
+#include "nds_cp15_misc.h"
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-extern int main(int _argc, sint8 **_argv);
-extern void initDLDIARM7(u32 srcDLDIAddr);
-
-#ifdef __cplusplus
+void coherent_user_range_by_size(uint32 start,sint32 size){
+	uint32 end = (uint32)((uint8*)(uint32*)start + (sint32)size);
+	coherent_user_range(start,end);
 }
-#endif
 
+void flush_dcache_all(){
+	flush_dcache_area((uint32*)get_dtcm_start(), get_dtcm_size());
+}

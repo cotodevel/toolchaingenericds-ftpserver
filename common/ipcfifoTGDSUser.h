@@ -31,12 +31,12 @@ USA
 #include "dsregs.h"
 #include "dsregs_asm.h"
 #include "ipcfifoTGDS.h"
-#include "dswnifi.h"
-#include "utilsTGDS.h"
 
 //---------------------------------------------------------------------------------
 typedef struct sIPCSharedTGDSSpecific{
 //---------------------------------------------------------------------------------
+	uint32 frameCounter7;	//VBLANK counter7
+	uint32 frameCounter9;	//VBLANK counter9
 }  IPCSharedTGDSSpecific	__attribute__((aligned (4)));
 
 //TGDS Memory Layout ARM7/ARM9 Cores
@@ -50,8 +50,14 @@ typedef struct sIPCSharedTGDSSpecific{
 extern "C" {
 #endif
 
+extern  struct sIPCSharedTGDSSpecific* getsIPCSharedTGDSSpecific();
+//NOT weak symbols : the implementation of these is project-defined (here)
+extern void HandleFifoNotEmptyWeakRef(uint32 cmd1,uint32 cmd2);
+extern void HandleFifoEmptyWeakRef(uint32 cmd1,uint32 cmd2);
 
-extern struct sIPCSharedTGDSSpecific* getsIPCSharedTGDSSpecific();
+extern void EWRAMPrioToARM7();
+extern void EWRAMPrioToARM9();
+
 #ifdef __cplusplus
 }
 #endif

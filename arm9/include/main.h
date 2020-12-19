@@ -23,9 +23,10 @@ USA
 
 #include "typedefsTGDS.h"
 #include "dsregs.h"
-#include "limitsTGDS.h"
-#include "fatfslayerTGDS.h"
 #include "utilsTGDS.h"
+#include "limitsTGDS.h"
+#include "dldi.h"
+
 #endif
 
 
@@ -34,7 +35,10 @@ extern "C" {
 #endif
 
 extern int main(int argc, char argv[argvItems][MAX_TGDSFILENAME_LENGTH]);
-extern void menuShow();
+extern char curChosenBrowseFile[MAX_TGDSFILENAME_LENGTH+1];
+extern bool fillNDSLoaderContext(char * filename);
+extern bool GDBEnabled;
+extern struct FileClassList * thisFileList;
 
 #ifdef __cplusplus
 }

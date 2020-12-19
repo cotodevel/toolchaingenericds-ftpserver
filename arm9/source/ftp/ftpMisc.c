@@ -1,26 +1,17 @@
 //FTP server
+#include <string.h>
+#include <stdio.h>
+#include <in.h>
 #include "ftpServer.h"
 #include "ftpMisc.h"
 #include "main.h"
 #include "sgIP_Config.h"
 #include "biosTGDS.h"
-#include <in.h>
 #include "dswnifi_lib.h"
-
-#include <sstream>
 #include "fileBrowse.h"	//generic template functions from TGDS: maintain 1 source, whose changes are globally accepted by all TGDS Projects.
 
 //current working directory
 volatile char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
-
-using namespace std;
-template <class T> std::string to_string (const T& t)
-{
-   std::stringstream ss;
-   ss << t;
-   return ss.str();
-}
-
 
 //FTP Command implementation.
 int ftp_cmd_USER(int s, int cmd, char* arg)
@@ -85,17 +76,15 @@ int ftp_cmd_RETR(int s, int cmd, char* arg){
 		memset(tmpBuf, 0, sizeof(tmpBuf));
 		strcpy(tmpBuf, tempnewDiroutPath2);
 	}
-	string fnameRemote = (string(tmpBuf));
-	printf("RETR cmd: %s",fnameRemote.c_str());
+	printf("RETR cmd: %s",tmpBuf);
 	//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
 	struct sockaddr_in clientAddr;
 	int clisock = openAndListenFTPDataPort(&clientAddr);
 	int sendResponse = ftpResponseSender(s, 150, "Opening BINARY mode data connection for retrieve file from server.");
 	
 	if(clisock >= 0){
-		std::string fileToRetr = fnameRemote;
-		int total_len = FS_getFileSize((char*)fileToRetr.c_str());
-		FILE * fh = fopen(fileToRetr.c_str(), "r");
+		int total_len = FS_getFileSize((char*)tmpBuf);
+		FILE * fh = fopen(tmpBuf, "r");
 		
 		if(fh != NULL){
 			//retrieve from server, to client.
@@ -107,7 +96,7 @@ int ftp_cmd_RETR(int s, int cmd, char* arg){
 		}
 		//could not open file
 		else{
-			printf("RETR file %s open ERROR",fileToRetr.c_str());
+			printf("RETR file %s open ERROR",tmpBuf);
 			sendResponse = ftpResponseSender(s, 451, "Could not open file.");
 		}
 	}
@@ -122,10 +111,9 @@ int ftp_cmd_RETR(int s, int cmd, char* arg){
 int ftp_cmd_STOR(int s, int cmd, char* arg){
 	char * fname = getFtpCommandArg("STOR", arg, 0); 
 	char tmpBuf[MAX_TGDSFILENAME_LENGTH+1];
-	strcpy(tmpBuf, string(string("0:/") + string(fname)).c_str());
+	sprintf(tmpBuf, "%s%s", "0:/", fname);
 	parsefileNameTGDS(tmpBuf);
-	string fnameRemote = string(tmpBuf);
-	printf("STOR cmd: %s",fnameRemote.c_str());
+	printf("STOR cmd: %s",tmpBuf);
 	
 	swiDelay(8888);
 	
@@ -137,9 +125,8 @@ int ftp_cmd_STOR(int s, int cmd, char* arg){
 	swiDelay(8888);
 	
 	if(clisock >= 0){
-		std::string fileToRetr = fnameRemote;
-		int total_len = FS_getFileSize((char*)fileToRetr.c_str());
-		FILE * fh = fopen(fileToRetr.c_str(), "w+");
+		int total_len = FS_getFileSize((char*)tmpBuf);
+		FILE * fh = fopen(tmpBuf, "w+");
 		
 		if(fh != NULL){
 			//retrieve data from client socket.
@@ -154,15 +141,30 @@ int ftp_cmd_STOR(int s, int cmd, char* arg){
 				}
 				swiDelay(1);
 			}
+			sint32 FDToSync = fileno(fh);
+			fsync(FDToSync);	//save TGDS FS changes right away
+			fclose(fh);
+			
+			char tmpName[256];
+			char ext[256];
+			
+			strcpy(tmpName, tmpBuf);
+			separateExtension(tmpName, ext);
+			strlwr(ext);
+			
+			//Boot .NDS file! (homebrew only)
+			if(strncmp(ext,".nds", 4) == 0){
+				fillNDSLoaderContext((char*)tmpBuf);
+			}
+			
 			TGDSARM9Free(client_reply);
 			disconnectAsync(clisock);
-			fclose(fh);
 			sendResponse = ftpResponseSender(s, 226, "Transfer complete.");
 			swiDelay(8888);
 		}
 		//could not open file
 		else{
-			printf("STOR file %s open ERROR",fileToRetr.c_str());
+			printf("STOR file %s open ERROR",tmpBuf);
 			sendResponse = ftpResponseSender(s, 451, "Could not open file.");
 			swiDelay(8888);
 		}
@@ -288,16 +290,6 @@ int send_file(int peer, FILE *f, int fileSize) {
     return written;
 }
 
-// check error cases, e.g. newPath = '..//' , '/home/user/' , 'subdir' (without trailing slash), etc... and return a clean, valid string in the form 'subdir/'
-void getValidDir(std::string &dirName) {
-    std::string slash = "/";
-    size_t foundSlash = 0;
-    while ( (foundSlash = dirName.find_first_of(slash),(foundSlash)) != std::string::npos) {
-//        std::cout << " / @ " << foundSlash << std::endl;
-        dirName.erase(foundSlash++,1); // Remove all slashs
-    }
-    dirName.append(slash); // Trailing slash is good and required, append it
-}
 
 char *getFtpCommandArg(char * theCommand, char *theCommandString, int skipArgs)
 {
@@ -381,10 +373,10 @@ int ftp_cmd_LIST(int s, int cmd, char* arg){
 				strcpy(tmpBuf, fileClassInst->fd_namefullPath);
 				parseDirNameTGDS(tmpBuf);
 				strcpy(fileClassInst->fd_namefullPath, tmpBuf);
-				std::string newCurDirEntry = std::string(fileClassInst->fd_namefullPath);
-				int fSize = strlen(newCurDirEntry.c_str());
-				std::string fileStr = (std::string("drw-r--r-- 1 DS group          "+to_string(fSize)+" Feb  1  2009 " + newCurDirEntry.c_str() +" \r\n"));
-				send(clisock, (char*)fileStr.c_str(), strlen(fileStr.c_str()), 0);
+				char buffOut[256+1] = {0};
+				int fSizeDir = strlen(fileClassInst->fd_namefullPath);
+				sprintf(buffOut, "drw-r--r-- 1 DS group          %d Feb  1  2009 %s \r\n", fSizeDir, fileClassInst->fd_namefullPath);
+				send(clisock, (char*)buffOut, strlen(buffOut), 0);
 				dirList++;
 			}
 			//file?
@@ -393,10 +385,10 @@ int ftp_cmd_LIST(int s, int cmd, char* arg){
 				strcpy(tmpBuf, fileClassInst->fd_namefullPath);
 				parsefileNameTGDS(tmpBuf);
 				strcpy(fileClassInst->fd_namefullPath, tmpBuf);
-				std::string newCurFileEntry = std::string(fileClassInst->fd_namefullPath);
-				int fSize = FS_getFileSize((char*)newCurFileEntry.c_str());
-				std::string fileStr = (std::string("-rw-r--r-- 1 DS group          "+to_string(fSize)+" Feb  1  2009 " + newCurFileEntry.c_str() +" \r\n"));
-				send(clisock, (char*)fileStr.c_str(), strlen(fileStr.c_str()), 0);
+				char buffOut[256+1] = {0};
+				int fSizeFile = FS_getFileSize((char*)fileClassInst->fd_namefullPath);
+				sprintf(buffOut, "-rw-r--r-- 1 DS group          %d Feb  1  2009 %s \r\n", fSizeFile, fileClassInst->fd_namefullPath);
+				send(clisock, (char*)buffOut, strlen(buffOut), 0);
 				fileList++;
 				swiDelay(8888);
 			}

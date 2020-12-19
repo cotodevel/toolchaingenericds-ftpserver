@@ -14,11 +14,18 @@ user: anonymous
 pass:
 port: 21
 
-Current version :
-Alpha 0.1
-
 Sending files to FTP Server is not so slow! I mean I can upload a 800K file in about 20 seconds. On the other hand, retrieving files from FTP Server is painfully slow.
 This has actually sped up most DS development I am doing. Since I can now just use FTP to transfer binaries to DS!
+
+Launching .nds files over FTP:
+Simply send a .nds file over FTP, and it will be automatically launched.
+
+Changelog:
+Alpha 0.2
+- Add ToolchainGenericDS-multiboot (https://bitbucket.org/Coto88/toolchaingenericds-multiboot) loader code (ability to boot .NDS, homebrew files)
+
+Alpha 0.1:
+- Add FTP Server.
 
 Bugs/Notes:
 - Navigating between directories might cause invalid directory listing, but it works otherwise.

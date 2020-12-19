@@ -18,23 +18,22 @@ USA
 
 */
 
-#ifndef __main7_h__
-#define __main7_h__
-
-#include "typedefsTGDS.h"
+#include "loader.h"
 #include "dsregs.h"
-#include "soundTGDS.h"
-#endif
+#include "dsregs_asm.h"
+#include "ipcfifoTGDS.h"
+#include "ipcfifoTGDSUser.h"
+#include "InterruptsARMCores_h.h"
+#include "biosTGDS.h"
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-extern int main(int _argc, sint8 **_argv);
-extern void initDLDIARM7(u32 srcDLDIAddr);
-
-#ifdef __cplusplus
+//[Blocking]: Local ARM Core waits until External action takes place, waits while resolving internal NDS hardware wait states.
+void waitWhileNotSetStatus(u32 status){
+	while(NDS_LOADER_IPC_CTX_UNCACHED->ndsloaderInitStatus != status){
+		swiDelay(111);	
+	}
 }
-#endif
 
+void setNDSLoaderInitStatus(int ndsloaderStatus){
+	NDS_LOADER_IPC_CTX_UNCACHED->ndsloaderInitStatus = ndsloaderStatus;
+}

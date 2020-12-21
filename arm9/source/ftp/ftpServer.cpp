@@ -84,6 +84,7 @@ int FTPServerService(){
 			setFTPState(FTP_SERVER_ACTIVE);
 			curFTPStatus = FTP_SERVER_ACTIVE;
 		}
+		break;
 		case(FTP_SERVER_ACTIVE):{
 			//Actual FTP Service			
 			char buffer[MAX_TGDSFILENAME_LENGTH] = {0};

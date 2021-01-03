@@ -315,7 +315,7 @@ int main(int argc, char argv[argvItems][MAX_TGDSFILENAME_LENGTH]) {
 					printf("Client disconnected!. Press A to retry.");
 					switch_dswnifi_mode(dswifi_idlemode);
 					scanKeys();
-					while(!(keysPressed() & KEY_A)){
+					while(!(keysDown() & KEY_A)){
 						scanKeys();
 						IRQVBlankWait();
 					}

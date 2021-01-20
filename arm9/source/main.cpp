@@ -250,7 +250,15 @@ bool fillNDSLoaderContext(char * filename){
 	return false;
 }
 
-int main(int argc, char argv[argvItems][MAX_TGDSFILENAME_LENGTH]) {
+bool stopSoundStreamUser(){
+	
+}
+
+void closeSoundUser(){
+	//Stubbed. Gets called when closing an audiostream of a custom audio decoder
+}
+
+int main(int argc, char **argv) {
 	
 	/*			TGDS 1.6 Standard ARM9 Init code start	*/
 	bool isTGDSCustomConsole = false;	//set default console or custom console: default console
@@ -299,32 +307,29 @@ int main(int argc, char argv[argvItems][MAX_TGDSFILENAME_LENGTH]) {
 	//fillNDSLoaderContext((char*)"0:/ToolchainGenericDS-multiboot.nds");
 	
 	while (1){
-		while (1){
-			sint32 FTP_SERVER_STATUS = FTPServerService();
-			switch(FTP_SERVER_STATUS){
-				//Server Running
-				case(FTP_SERVER_ACTIVE):{
-					
-				}
-				break;
+		uint32 FTP_SERVER_STATUS = FTPServerService();
+		switch(FTP_SERVER_STATUS){
+			//Server Running
+			case(FTP_SERVER_ACTIVE):{
 				
-				//Server Disconnected/Idle!
-				case(FTP_SERVER_CLIENT_DISCONNECTED):{				
-					closeFTPDataPort(sock1);
-					setFTPState(FTP_SERVER_IDLE);
-					printf("Client disconnected!. Press A to retry.");
-					switch_dswnifi_mode(dswifi_idlemode);
-					scanKeys();
-					while(!(keysDown() & KEY_A)){
-						scanKeys();
-						IRQVBlankWait();
-					}
-					main(argc, argv);
-				}
-				break;
 			}
+			break;
+			
+			//Server Disconnected/Idle!
+			case(FTP_SERVER_CLIENT_DISCONNECTED):{				
+				closeFTPDataPort(sock1);
+				setFTPState(FTP_SERVER_IDLE);
+				printf("Client disconnected!. Press A to retry.");
+				switch_dswnifi_mode(dswifi_idlemode);
+				scanKeys();
+				while(!(keysDown() & KEY_A)){
+					scanKeys();
+					IRQVBlankWait();
+				}
+				main(argc, argv);
+			}
+			break;
 		}
-	
 	}
 }
 

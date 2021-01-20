@@ -37,7 +37,7 @@ typedef struct sIPCSharedTGDSSpecific{
 //---------------------------------------------------------------------------------
 	uint32 frameCounter7;	//VBLANK counter7
 	uint32 frameCounter9;	//VBLANK counter9
-}  IPCSharedTGDSSpecific	__attribute__((aligned (4)));
+}  IPCSharedTGDSSpecific;
 
 //TGDS Memory Layout ARM7/ARM9 Cores
 #define TGDS_ARM7_MALLOCSTART (u32)(0x06000000)
@@ -51,12 +51,12 @@ extern "C" {
 #endif
 
 extern  struct sIPCSharedTGDSSpecific* getsIPCSharedTGDSSpecific();
-//NOT weak symbols : the implementation of these is project-defined (here)
-extern void HandleFifoNotEmptyWeakRef(uint32 cmd1,uint32 cmd2);
-extern void HandleFifoEmptyWeakRef(uint32 cmd1,uint32 cmd2);
 
 extern void EWRAMPrioToARM7();
 extern void EWRAMPrioToARM9();
+
+extern void HandleFifoEmptyWeakRef(uint32 cmd1,uint32 cmd2);
+extern void HandleFifoNotEmptyWeakRef(uint32 cmd1,uint32 cmd2);
 
 #ifdef __cplusplus
 }

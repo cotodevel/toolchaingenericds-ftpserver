@@ -47,9 +47,10 @@ void menuShow(){
 	printarm7DebugBuffer();
 }
 
-static inline void initNDSLoader(){
-	coherent_user_range_by_size((uint32)(0x02000000), (0x02400000 - 0x02300000));
-	dmaFillHalfWord(0, 0, (uint32)(0x02000000), (0x02400000 - 0x02300000));
+__attribute__((section(".itcm")))
+void initNDSLoader()  __attribute__ ((optnone)) {
+	coherent_user_range_by_size((uint32)(0x02000000), (0x02400000 - 0x022A0000));
+	dmaFillHalfWord(0, 0, (uint32)(0x02000000), (0x02400000 - 0x022A0000));
 	
 	coherent_user_range_by_size((uint32)NDS_LOADER_DLDISECTION_CACHED, (48*1024) + (96*1024) + (64*1024) + (16*1024));
 	dmaFillHalfWord(0, 0, (uint32)NDS_LOADER_DLDISECTION_CACHED, (48*1024) + (96*1024) + (64*1024) + (16*1024));
@@ -57,15 +58,18 @@ static inline void initNDSLoader(){
 	//copy loader code (arm7bootldr.bin) to ARM7's EWRAM portion while preventing Cache issues
 	coherent_user_range_by_size((uint32)&arm7bootldr[0], (int)arm7bootldr_size);					
 	memcpy ((void *)NDS_LOADER_IPC_BOOTSTUBARM7_CACHED, (u32*)&arm7bootldr[0], arm7bootldr_size); 	//memcpy ( void * destination, const void * source, size_t num );	//memset(void *str, int c, size_t n)
-
+	
+	swiDelay(8888);
 	setNDSLoaderInitStatus(NDSLOADER_INIT_OK);
+	swiDelay(8888);
 }
 
 static u8 * outBuf7 = NULL;
 static u8 * outBuf9 = NULL;
 
 //generates a table of sectors out of a given file. It has the ARM7 binary and ARM9 binary
-bool fillNDSLoaderContext(char * filename){
+__attribute__((section(".itcm")))
+bool fillNDSLoaderContext(char * filename)  __attribute__ ((optnone)) {
 	
 	//Turn off wifi
 	//switch_dswnifi_mode(dswifi_idlemode);
@@ -75,6 +79,7 @@ bool fillNDSLoaderContext(char * filename){
 	
 	FILE * fh = fopen(filename, "r");
 	if(fh != NULL){
+		swiDelay(8888);
 		
 		int headerSize = sizeof(struct sDSCARTHEADER);
 		u8 * NDSHeader = (u8 *)malloc(headerSize*sizeof(u8));
@@ -215,6 +220,7 @@ bool fillNDSLoaderContext(char * filename){
 			data_read++;
 			cur_clustersector = (u32)NDS_LOADER_IPC_CTX_UNCACHED->sectorTableBootCode[data_read];
 		}
+		swiDelay(8888);
 		
 		printf("ARM7 %d bytes. [Addr: %x]", arm7BootCodeSize, (outBuf7 - 0x400000));
 		printf("ARM9 %d bytes. [Addr: %x]", arm9BootCodeSize, (outBuf9 - 0x400000));
@@ -229,7 +235,12 @@ bool fillNDSLoaderContext(char * filename){
 		fclose(fh);
 		int ret=FS_deinit();
 		
+		swiDelay(8888);
 		asm("mcr	p15, 0, r0, c7, c10, 4");
+		
+		//Shut down MPU
+		MProtectionDisable();
+		
 		WRAM_CR = WRAM_0KARM9_32KARM7;	//96K ARM7 : 0x037f8000 ~ 0x03810000
 		flush_icache_all();
 		flush_dcache_all();
@@ -258,36 +269,41 @@ void closeSoundUser(){
 	//Stubbed. Gets called when closing an audiostream of a custom audio decoder
 }
 
-int main(int argc, char **argv) {
+static bool setApp = false;
+
+__attribute__((section(".itcm")))
+int main(int argc, char **argv)   {
 	
 	/*			TGDS 1.6 Standard ARM9 Init code start	*/
 	bool isTGDSCustomConsole = false;	//set default console or custom console: default console
 	GUI_init(isTGDSCustomConsole);
 	GUI_clear();
-	bool isCustomTGDSMalloc = true;
-	setTGDSMemoryAllocator(getProjectSpecificMemoryAllocatorSetup(TGDS_ARM7_MALLOCSTART, TGDS_ARM7_MALLOCSIZE, isCustomTGDSMalloc));
-	sint32 fwlanguage = (sint32)getLanguage();
 	
-	printf("     ");
-	printf("     ");
-	
-	#ifdef ARM7_DLDI
-	setDLDIARM7Address((u32 *)TGDSDLDI_ARM7_ADDRESS);	//Required by ARM7DLDI!
-	#endif
-	
-	int ret=FS_init();
-	if (ret == 0)
-	{
-		printf("FS Init ok.");
+	if(setApp == false){
+		bool isCustomTGDSMalloc = false;
+		setTGDSMemoryAllocator(getProjectSpecificMemoryAllocatorSetup(TGDS_ARM7_MALLOCSTART, TGDS_ARM7_MALLOCSIZE, isCustomTGDSMalloc));
+		sint32 fwlanguage = (sint32)getLanguage();
+		
+		printf("     ");
+		printf("     ");
+		
+		#ifdef ARM7_DLDI
+		setDLDIARM7Address((u32 *)TGDSDLDI_ARM7_ADDRESS);	//Required by ARM7DLDI!
+		#endif
+		
+		int ret=FS_init();
+		if (ret == 0)
+		{
+			printf("FS Init ok.");
+		}
+		else if(ret == -1)
+		{
+			printf("FS Init error.");
+		}
+		setApp = true;	
 	}
-	else if(ret == -1)
-	{
-		printf("FS Init error.");
-	}
+	
 	switch_dswnifi_mode(dswifi_idlemode);
-	asm("mcr	p15, 0, r0, c7, c10, 4");
-	flush_icache_all();
-	flush_dcache_all();
 	/*			TGDS 1.6 Standard ARM9 Init code end	*/
 	
 	initNDSLoader();	//set up NDSLoader

@@ -14,37 +14,37 @@
 volatile char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
 
 //FTP Command implementation.
-int ftp_cmd_USER(int s, int cmd, char* arg)
+int ftp_cmd_USER(int s, int cmd, char* arg)  __attribute__ ((optnone)) 
 {
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_PASS(int s, int cmd, char* arg)
+int ftp_cmd_PASS(int s, int cmd, char* arg)  __attribute__ ((optnone)) 
 {
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_PWD(int s, int cmd, char* arg){
+int ftp_cmd_PWD(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_SYST(int s, int cmd, char* arg){
+int ftp_cmd_SYST(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_FEAT(int s, int cmd, char* arg){
+int ftp_cmd_FEAT(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_TYPE(int s, int cmd, char* arg){
+int ftp_cmd_TYPE(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_PASV(int s, int cmd, char* arg){
+int ftp_cmd_PASV(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_RETR(int s, int cmd, char* arg){
+int ftp_cmd_RETR(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 	char * fname = getFtpCommandArg("RETR", arg, 0); 
 	char tmpBuf[MAX_TGDSFILENAME_LENGTH+1];
 	memset(tmpBuf, 0, sizeof(tmpBuf));
@@ -108,7 +108,7 @@ int ftp_cmd_RETR(int s, int cmd, char* arg){
 
 
 
-int ftp_cmd_STOR(int s, int cmd, char* arg){
+int ftp_cmd_STOR(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 	char * fname = getFtpCommandArg("STOR", arg, 0); 
 	char tmpBuf[MAX_TGDSFILENAME_LENGTH+1];
 	sprintf(tmpBuf, "%s%s", "0:/", fname);
@@ -176,7 +176,7 @@ int ftp_cmd_STOR(int s, int cmd, char* arg){
 	return sendResponse;
 }
 
-int ftp_cmd_CDUP(int s, int cmd, char* arg){	
+int ftp_cmd_CDUP(int s, int cmd, char* arg)  __attribute__ ((optnone)) {	
 	int sendResponse = 0;
 	bool cdupStatus = leaveDir((char*)CWDFTP);
 	if(cdupStatus == true){
@@ -190,15 +190,15 @@ int ftp_cmd_CDUP(int s, int cmd, char* arg){
 
 
 uint32 CurFTPState = 0;
-u32 getFTPState(){
+u32 getFTPState()  __attribute__ ((optnone)) {
 	return CurFTPState;
 }
 
-void setFTPState(uint32 FTPState){
+void setFTPState(uint32 FTPState)  __attribute__ ((optnone)) {
 	CurFTPState = FTPState;
 } 
 
-int ftpResponseSender(int s, int n, char* mes){
+int ftpResponseSender(int s, int n, char* mes)  __attribute__ ((optnone)) {
 	volatile char data[MAX_TGDSFILENAME_LENGTH];
 	sprintf((char*)data, "%d %s \n", n, mes);
 	return send(s, (char*)&data[0], strlen((char*)&data[0]), 0);
@@ -207,7 +207,7 @@ int ftpResponseSender(int s, int n, char* mes){
 int currserverDataListenerSock = -1;
 
 //These two open/close a FTP Server (Passive Mode) Data Port
-int openAndListenFTPDataPort(struct sockaddr_in * sain){
+int openAndListenFTPDataPort(struct sockaddr_in * sain)  __attribute__ ((optnone)) {
 
 	int cliLen = sizeof(struct sockaddr_in);
 	int serverDataListenerSock = openServerSyncConn(FTP_SERVER_SERVICE_DATAPORT, sain);
@@ -231,7 +231,7 @@ int openAndListenFTPDataPort(struct sockaddr_in * sain){
 	return clisock;
 }
 
-void closeFTPDataPort(int sock){
+void closeFTPDataPort(int sock)  __attribute__ ((optnone)) {
 	disconnectAsync(sock);
 	if(currserverDataListenerSock != 0){
 		disconnectAsync(currserverDataListenerSock);
@@ -241,7 +241,7 @@ void closeFTPDataPort(int sock){
 
 
 
-bool send_all(int socket, void *buffer, size_t length, int * written)
+bool send_all(int socket, void *buffer, size_t length, int * written)  __attribute__ ((optnone)) 
 {
     char *ptr = (char*) buffer;
     while (length > 0)
@@ -256,7 +256,7 @@ bool send_all(int socket, void *buffer, size_t length, int * written)
     return true;
 }
 
-int send_file(int peer, FILE *f, int fileSize) {
+int send_file(int peer, FILE *f, int fileSize)  __attribute__ ((optnone))  {
 	char * filebuf = (char*)TGDSARM9Malloc(SENDRECVBUF_SIZE + 1024);
     int written = 0;
 	int readSofar= 0;

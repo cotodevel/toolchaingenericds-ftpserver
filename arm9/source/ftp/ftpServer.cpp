@@ -37,11 +37,11 @@ int k, size, srv_len, cli_len = 0, c;
 int filehandle;
 bool globaldatasocketEnabled = false;
 
-void ftpInit(){
+void ftpInit()  __attribute__ ((optnone)) {
 	strcpy((char*)CWDFTP,TGDSDirectorySeparator);
 	setFTPState(FTP_SERVER_IDLE);
 }
-int FTPServerService(){
+int FTPServerService()  __attribute__ ((optnone)) {
 	int curFTPStatus = 0;
 	//handle FTP Server handshake internal cases
 	switch(getFTPState()){

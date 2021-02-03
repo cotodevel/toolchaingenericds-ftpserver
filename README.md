@@ -1,12 +1,21 @@
 ![ToolchainGenericDS](img/TGDS-Logo.png)
 
-This is the ToolchainGenericDS FTP Server project:
 
-Compile Toolchain: To compile this project you will need to follow the steps at https://bitbucket.org/Coto88/toolchaingenericds : Then simply extract the project somewhere.
-Compile this project: Open msys, through msys commands head to the directory your extracted this project. Then write: make clean make
-After compiling, run the example in NDS.
+This is the ToolchainGenericDS Woopsi FTP Server project:
 
-Project Specific description: 
+1.	Compile Toolchain:
+To compile this project you will need to follow the steps at https://bitbucket.org/Coto88/toolchaingenericds :
+Then simply extract the project somewhere.
+
+2.	Compile this project: 
+Open msys, through msys commands head to the directory your extracted this project.
+Then write:
+make clean <enter>
+make <enter>
+
+After compiling, run the example in NDS. 
+
+Project Specific description:
 
 Finally a TGDS FTP Server! AUTH is not supported. It means only old insecure FTP Server mode.
 Settings to connect to FTP Server:
@@ -33,6 +42,5 @@ Bugs/Notes:
 - Currently it works with WinSCP. On filezilla I have no idea why it doesn't work, we'll see what I can do about it.
 
 
-Enjoy.
 
 Coto

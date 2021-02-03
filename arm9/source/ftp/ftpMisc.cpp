@@ -9,6 +9,7 @@
 #include "biosTGDS.h"
 #include "dswnifi_lib.h"
 #include "fileBrowse.h"	//generic template functions from TGDS: maintain 1 source, whose changes are globally accepted by all TGDS Projects.
+#include "WoopsiTemplate.h"
 
 //current working directory
 volatile char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
@@ -76,7 +77,12 @@ int ftp_cmd_RETR(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 		memset(tmpBuf, 0, sizeof(tmpBuf));
 		strcpy(tmpBuf, tempnewDiroutPath2);
 	}
-	printf("RETR cmd: %s",tmpBuf);
+	
+	char arrBuild[256+1];
+	memset(arrBuild, 0, sizeof(arrBuild));
+	sprintf(arrBuild, "%s%s\n", "RETR cmd:",tmpBuf);
+	WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
+
 	//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)
 	struct sockaddr_in clientAddr;
 	int clisock = openAndListenFTPDataPort(&clientAddr);
@@ -89,14 +95,15 @@ int ftp_cmd_RETR(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 		if(fh != NULL){
 			//retrieve from server, to client.
 			int written = send_file(clisock, fh, total_len);
-			//printf("To client: file written %d bytes", written);
 			disconnectAsync(clisock);
 			fclose(fh);
 			sendResponse = ftpResponseSender(s, 226, "Transfer complete.");
 		}
 		//could not open file
 		else{
-			printf("RETR file %s open ERROR",tmpBuf);
+			memset(arrBuild, 0, sizeof(arrBuild));
+			sprintf(arrBuild, "%s%s\n", "RETR file open ERROR", tmpBuf);
+			WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
 			sendResponse = ftpResponseSender(s, 451, "Could not open file.");
 		}
 	}
@@ -113,7 +120,11 @@ int ftp_cmd_STOR(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 	char tmpBuf[MAX_TGDSFILENAME_LENGTH+1];
 	sprintf(tmpBuf, "%s%s", "0:/", fname);
 	parsefileNameTGDS(tmpBuf);
-	printf("STOR cmd: %s",tmpBuf);
+	
+	char arrBuild[256+1];
+	memset(arrBuild, 0, sizeof(arrBuild));
+	sprintf(arrBuild, "%s%s\n", "STOR cmd: ",tmpBuf);
+	WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
 	
 	swiDelay(8888);
 	
@@ -137,7 +148,6 @@ int ftp_cmd_STOR(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 				if(received_len>0) { // data was received!
 					total_len += received_len;
 					fwrite(client_reply , 1, received_len , fh);
-					//printf("Received byte size = %d", received_len);
 				}
 				swiDelay(1);
 			}
@@ -154,7 +164,7 @@ int ftp_cmd_STOR(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 			
 			//Boot .NDS file! (homebrew only)
 			if(strncmp(ext,".nds", 4) == 0){
-				fillNDSLoaderContext((char*)tmpBuf);
+				//fillNDSLoaderContext((char*)tmpBuf);	//todo: write new homebrew loader that's compatible with WoopsiUI
 			}
 			
 			TGDSARM9Free(client_reply);
@@ -164,7 +174,9 @@ int ftp_cmd_STOR(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 		}
 		//could not open file
 		else{
-			printf("STOR file %s open ERROR",tmpBuf);
+			memset(arrBuild, 0, sizeof(arrBuild));
+			sprintf(arrBuild, "%s%s\n", "STOR file open ERROR", tmpBuf);
+			WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
 			sendResponse = ftpResponseSender(s, 451, "Could not open file.");
 			swiDelay(8888);
 		}
@@ -214,19 +226,31 @@ int openAndListenFTPDataPort(struct sockaddr_in * sain)  __attribute__ ((optnone
 	currserverDataListenerSock = serverDataListenerSock;
 	
 	if(serverDataListenerSock == -1){
-		printf("failed allocing serverDataListener");
+		char arrBuild[256+1];
+		memset(arrBuild, 0, sizeof(arrBuild));
+		sprintf(arrBuild, "%s\n", "failed allocing serverDataListener");
+		WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
 		while(1==1){}
 	}
 	
 	int clisock = accept(serverDataListenerSock, (struct sockaddr *)sain, &cliLen);
 	if(clisock == -1){
-		printf("failed allocing incoming client");
+		char arrBuild[256+1];
+		memset(arrBuild, 0, sizeof(arrBuild));
+		sprintf(arrBuild, "%s\n", "failed allocing incoming client");
+		WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
 		while(1==1){}
 	}
 	
 	if(clisock > 0) {
-		printf("FTP Server (DataPort): Got a connection from:");
-		printf("[%s:%d]", inet_ntoa(sain->sin_addr), ntohs(sain->sin_port));
+		char arrBuild[256+1];
+		memset(arrBuild, 0, sizeof(arrBuild));
+		sprintf(arrBuild, "%s\n", "FTP Server (DataPort): Got a connection from:");
+		WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
+		
+		memset(arrBuild, 0, sizeof(arrBuild));
+		sprintf(arrBuild, "[%s:%d]\n", inet_ntoa(sain->sin_addr), ntohs(sain->sin_port));
+		WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
 	}
 	return clisock;
 }
@@ -264,12 +288,11 @@ int send_file(int peer, FILE *f, int fileSize)  __attribute__ ((optnone))  {
     while((readSofar=fread(filebuf, 1, SENDRECVBUF_SIZE, f)) > 0) {
 		int write = 0;
 		if(send_all(peer, filebuf, readSofar, &write) == true){
-			//printf("written %d bytes", write);
 			written+=write;
 			lastwritten = write;
 		}
 		else{
-			//printf("failed to write %d bytes", readSofar);
+			//failed to write %d bytes
 		}
 
 		//the last part must be resent
@@ -401,7 +424,10 @@ int ftp_cmd_LIST(int s, int cmd, char* arg){
 		//Free TGDS Dir API context
 		freeFileList(fileClassListCtx);
 		
-		printf("Files:%d - Dirs:%d", fileList, dirList);
+		char arrBuild[256+1];
+		memset(arrBuild, 0, sizeof(arrBuild));
+		sprintf(arrBuild, "Files:%d - Dirs:%d\n", fileList, dirList);
+		WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
 		
 		u8 endByte=0x0;
 		send(clisock, &endByte, 1, 0);

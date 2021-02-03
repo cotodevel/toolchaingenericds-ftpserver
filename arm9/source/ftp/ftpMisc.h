@@ -61,7 +61,7 @@ class FileDirEntry
 #define FTP_SERVER_ACTIVE (uint32)(0xffff1013)				//FTP Server <--> FTP Client Connected session. If something fails it will disconnect here and status will be the below this one.
 #define FTP_SERVER_CLIENT_DISCONNECTED (sint32)(0)			//FTP Server has just disconnected from FTP Client.
 
-#define SENDRECVBUF_SIZE (int)(512*1024)
+#define SENDRECVBUF_SIZE (int)(128*1024)
 
 #endif
 

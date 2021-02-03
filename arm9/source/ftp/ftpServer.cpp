@@ -3,12 +3,11 @@
 #include "typedefsTGDS.h"
 #include "dsregs.h"
 #include "dsregs_asm.h"
-
 #include <in.h>
 #include "ftpMisc.h"
 #include "dswnifi_lib.h"
-
 #include "fileBrowse.h"	//generic template functions from TGDS: maintain 1 source, whose changes are globally accepted by all TGDS Projects.
+#include "WoopsiTemplate.h"
 
 bool FTPActiveMode = false;
 
@@ -57,15 +56,20 @@ int FTPServerService()  __attribute__ ((optnone)) {
 			globaldatasocketEnabled = false;
 			sock1 = openServerSyncConn(FTP_SERVER_SERVICE_PORT, &server);	//DS Server: listens at port FTP_SERVER_SERVICE_PORT now. Further access() through this port will come from a client.
 			char IP[16];
-			printf("[FTP Server:%s:%d]", print_ip((uint32)Wifi_GetIP(), IP), FTP_SERVER_SERVICE_PORT);
-			printf("Waiting for connection:");
+			
+			char arrBuild[256+1];
+			memset(arrBuild, 0, sizeof(arrBuild));
+			sprintf(arrBuild, "[FTP Server:%s:%d]\n", print_ip((uint32)Wifi_GetIP(), IP), FTP_SERVER_SERVICE_PORT);
+			WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
+			WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString("Waiting for connection:\n"));
+			
 			setFTPState(FTP_SERVER_CONNECTING);
 			curFTPStatus = FTP_SERVER_ACTIVE;
 		}
 		break;
 	
 		case(FTP_SERVER_CONNECTING):{
-			printf("[Waiting for client...]");
+			WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString("[Waiting for client...]\n"));
 			memset(&client, 0, sizeof(struct sockaddr_in));
 			cli_len = sizeof(client);
 			sock2 = accept(sock1,(struct sockaddr*)&client, &cli_len);
@@ -78,7 +82,10 @@ int FTPServerService()  __attribute__ ((optnone)) {
 			//ioctl(sock1, FIONBIO,&j); // Server socket is non blocking
 			
 			//Wait for client: FTP Server -> FTP Client Init session.
-			printf("[Client Connected:%s:%d]",inet_ntoa(client.sin_addr), ntohs(client.sin_port));
+			char arrBuild[256+1];
+			memset(arrBuild, 0, sizeof(arrBuild));
+			sprintf(arrBuild, "[Client Connected:%s:%d]\n",inet_ntoa(client.sin_addr), ntohs(client.sin_port));
+			WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
 			
 			ftpResponseSender(sock2, 200, "hello");
 			setFTPState(FTP_SERVER_ACTIVE);
@@ -103,7 +110,7 @@ int FTPServerService()  __attribute__ ((optnone)) {
 						sendResponse = ftpResponseSender(sock2, 504, "AUTH not supported");
 					}
 					else if(!strncmp(buffer, "BYE", 3) || !strncmp(buffer, "QUIT", 4)){
-						printf("FTP server quitting.. ");
+						WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString("FTP server quitting.. \n"));
 						int i = 1;
 						sendResponse = send(sock2, &i, sizeof(int), 0);
 					}
@@ -150,7 +157,6 @@ int FTPServerService()  __attribute__ ((optnone)) {
 					//PASV: mode that opens a data port aside the current server port, so binary data can be transfered through it.
 					else if(!strncmp(buffer, "PASV", 4)){
 						FTPActiveMode = false;	//enter FTP passive mode
-						//printf("PASV > set data transfer port @ %d", FTP_SERVER_SERVICE_DATAPORT);
 						char buf[MAX_TGDSFILENAME_LENGTH] = {0};
 						int currentIP = (int)Wifi_GetIP();
 						int dataPort = (int)FTP_SERVER_SERVICE_DATAPORT;
@@ -190,7 +196,11 @@ int FTPServerService()  __attribute__ ((optnone)) {
 						else{
 							sendResponse = ftpResponseSender(sock2, 450, "Delete Command error.");
 						}
-						printf("trying DELE: [%s] ret:[%d]", fnameRemote.c_str(),retVal);
+						
+						char arrBuild[256+1];
+						memset(arrBuild, 0, sizeof(arrBuild));
+						sprintf(arrBuild, "trying DELE: [%s] ret:[%d]\n", fnameRemote.c_str(),retVal);
+						WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
 					}
 					else if(!strncmp(buffer,"GET", 3)){
 						sendResponse = ftpResponseSender(sock2, 502, "invalid command");//todo
@@ -208,7 +218,7 @@ int FTPServerService()  __attribute__ ((optnone)) {
 						*/
 					}
 					else if(!strncmp(buffer, "PUT", 3)){
-						printf("put command! ");
+						WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString("put command! \n"));
 						sendResponse = ftpResponseSender(sock2, 502, "invalid command");//todo
 						/*
 						int c = 0;
@@ -238,11 +248,17 @@ int FTPServerService()  __attribute__ ((optnone)) {
 						char *pathToEnter;
 						pathToEnter = getFtpCommandArg("CWD", buffer, 0);
 						if(chdir((char*)pathToEnter) != 0) {
-							printf(" CWD fail => %s ", pathToEnter);
+							char arrBuild[256+1];
+							memset(arrBuild, 0, sizeof(arrBuild));
+							sprintf(arrBuild, " CWD fail => %s \n", pathToEnter);
+							WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
 							return ftpResponseSender(sock2, 550, "Error changing directory");
 						}
 						else{
-							printf("1 CWD OK => %s ", pathToEnter);
+							char arrBuild[256+1];
+							memset(arrBuild, 0, sizeof(arrBuild));
+							sprintf(arrBuild, "1 CWD OK => %s \n", pathToEnter);
+							WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
 							strcpy(CurrentWorkingDirectory, pathToEnter);
 							return ftpResponseSender(sock2, 250, "Directory successfully changed.");
 						}
@@ -259,7 +275,7 @@ int FTPServerService()  __attribute__ ((optnone)) {
 						sendResponse = ftpResponseSender(sock2, 502, "invalid command");//todo
 					}
 					else if(!strncmp(buffer, "LS", 2)){
-						printf("ls command!");
+						WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString("ls command!\n"));
 						/*
 						system("ls >temps.txt");
 						stat("temps.txt",&obj);
@@ -280,7 +296,10 @@ int FTPServerService()  __attribute__ ((optnone)) {
 						sendResponse = send(sock2, &c, sizeof(int), 0);
 					}
 					else{
-						printf("unhandled command: [%s]",buffer);
+						char arrBuild[256+1];
+						memset(arrBuild, 0, sizeof(arrBuild));
+						sprintf(arrBuild, "unhandled command: [%s]\n",buffer);
+						WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(arrBuild));
 						sendResponse = ftpResponseSender(sock2, 502, "invalid command");
 					}
 				}

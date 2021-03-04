@@ -82,11 +82,12 @@ ARCH_CFLAGS += \
 COMPILER_SPECIFIC_CFLAGS += \
   --target=arm-none-eabi \
   --sysroot= \
-  -Os	\
+  -O2	\
   -DARM9
   
 CFLAGS = \
   -g3 \
+  -ffunction-sections -fdata-sections \
   -nostdlib \
   -fshort-enums	\
   $(COMPILER_SPECIFIC_CFLAGS) \

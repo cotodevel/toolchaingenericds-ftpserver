@@ -85,7 +85,7 @@ ARCH_CFLAGS += \
 COMPILER_SPECIFIC_CFLAGS += \
   --target=arm-none-eabi \
   --sysroot= \
-  -O2	\
+  -Os	\
   -DARM9
   
 CFLAGS = \
@@ -96,7 +96,6 @@ CFLAGS = \
   -Wno-narrowing	\
   $(COMPILER_SPECIFIC_CFLAGS) \
   $(ARCH_CFLAGS) \
-  $(NEWLIB_NANO_COMPILE_FLAGS_C_9)	\
   $(CLI_CFLAG_OVERRIDES)
 	
 #------------------------------------------ CLANG END

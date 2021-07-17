@@ -10,6 +10,7 @@
 #include "dswnifi_lib.h"
 #include "fileBrowse.h"	//generic template functions from TGDS: maintain 1 source, whose changes are globally accepted by all TGDS Projects.
 #include "WoopsiTemplate.h"
+#include "utilsTGDS.h"
 
 //current working directory
 volatile char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
@@ -164,7 +165,7 @@ int ftp_cmd_STOR(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 			
 			//Boot .NDS file! (homebrew only)
 			if(strncmp(ext,".nds", 4) == 0){
-				//fillNDSLoaderContext((char*)tmpBuf);	//todo: write new homebrew loader that's compatible with WoopsiUI
+				TGDSMultibootRunNDSPayload((char*)tmpBuf);
 			}
 			
 			TGDSARM9Free(client_reply);

@@ -91,9 +91,7 @@ COMPILER_SPECIFIC_CFLAGS += \
 CFLAGS = \
   -g3 \
   -ffunction-sections -fdata-sections \
-  -nostdlib \
   -fshort-enums	\
-  -Wno-narrowing	\
   $(COMPILER_SPECIFIC_CFLAGS) \
   $(ARCH_CFLAGS) \
   $(CLI_CFLAG_OVERRIDES)

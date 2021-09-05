@@ -16,37 +16,93 @@
 volatile char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];
 
 //FTP Command implementation.
-int ftp_cmd_USER(int s, int cmd, char* arg)  __attribute__ ((optnone)) 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+int ftp_cmd_USER(int s, int cmd, char* arg)  
 {
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_PASS(int s, int cmd, char* arg)  __attribute__ ((optnone)) 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+int ftp_cmd_PASS(int s, int cmd, char* arg)  
 {
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_PWD(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+int ftp_cmd_PWD(int s, int cmd, char* arg) {
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_SYST(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+int ftp_cmd_SYST(int s, int cmd, char* arg) {
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_FEAT(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+int ftp_cmd_FEAT(int s, int cmd, char* arg) {
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_TYPE(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+int ftp_cmd_TYPE(int s, int cmd, char* arg) {
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_PASV(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+int ftp_cmd_PASV(int s, int cmd, char* arg) {
 	return ftpResponseSender(s, cmd, arg);
 }
 
-int ftp_cmd_RETR(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+int ftp_cmd_RETR(int s, int cmd, char* arg) {
 	char * fname = getFtpCommandArg("RETR", arg, 0); 
 	char tmpBuf[MAX_TGDSFILENAME_LENGTH+1];
 	memset(tmpBuf, 0, sizeof(tmpBuf));
@@ -116,7 +172,14 @@ int ftp_cmd_RETR(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 
 
 
-int ftp_cmd_STOR(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+int ftp_cmd_STOR(int s, int cmd, char* arg) {
 	char * fname = getFtpCommandArg("STOR", arg, 0); 
 	char tmpBuf[MAX_TGDSFILENAME_LENGTH+1];
 	sprintf(tmpBuf, "%s%s", "0:/", fname);
@@ -189,7 +252,14 @@ int ftp_cmd_STOR(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 	return sendResponse;
 }
 
-int ftp_cmd_CDUP(int s, int cmd, char* arg)  __attribute__ ((optnone)) {	
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+int ftp_cmd_CDUP(int s, int cmd, char* arg) {	
 	int sendResponse = 0;
 	bool cdupStatus = leaveDir((char*)CWDFTP);
 	if(cdupStatus == true){
@@ -203,15 +273,37 @@ int ftp_cmd_CDUP(int s, int cmd, char* arg)  __attribute__ ((optnone)) {
 
 
 uint32 CurFTPState = 0;
-u32 getFTPState()  __attribute__ ((optnone)) {
+
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+u32 getFTPState() {
 	return CurFTPState;
 }
 
-void setFTPState(uint32 FTPState)  __attribute__ ((optnone)) {
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+void setFTPState(uint32 FTPState) {
 	CurFTPState = FTPState;
 } 
 
-int ftpResponseSender(int s, int n, char* mes)  __attribute__ ((optnone)) {
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+int ftpResponseSender(int s, int n, char* mes) {
 	volatile char data[MAX_TGDSFILENAME_LENGTH];
 	sprintf((char*)data, "%d %s \n", n, mes);
 	return send(s, (char*)&data[0], strlen((char*)&data[0]), 0);
@@ -220,8 +312,14 @@ int ftpResponseSender(int s, int n, char* mes)  __attribute__ ((optnone)) {
 int currserverDataListenerSock = -1;
 
 //These two open/close a FTP Server (Passive Mode) Data Port
-int openAndListenFTPDataPort(struct sockaddr_in * sain)  __attribute__ ((optnone)) {
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
 
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+int openAndListenFTPDataPort(struct sockaddr_in * sain) {
 	int cliLen = sizeof(struct sockaddr_in);
 	int serverDataListenerSock = openServerSyncConn(FTP_SERVER_SERVICE_DATAPORT, sain);
 	currserverDataListenerSock = serverDataListenerSock;
@@ -256,7 +354,14 @@ int openAndListenFTPDataPort(struct sockaddr_in * sain)  __attribute__ ((optnone
 	return clisock;
 }
 
-void closeFTPDataPort(int sock)  __attribute__ ((optnone)) {
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+void closeFTPDataPort(int sock) {
 	disconnectAsync(sock);
 	if(currserverDataListenerSock != 0){
 		disconnectAsync(currserverDataListenerSock);
@@ -265,8 +370,14 @@ void closeFTPDataPort(int sock)  __attribute__ ((optnone)) {
 }
 
 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
 
-bool send_all(int socket, void *buffer, size_t length, int * written)  __attribute__ ((optnone)) 
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+bool send_all(int socket, void *buffer, size_t length, int * written) 
 {
     char *ptr = (char*) buffer;
     while (length > 0)
@@ -281,7 +392,14 @@ bool send_all(int socket, void *buffer, size_t length, int * written)  __attribu
     return true;
 }
 
-int send_file(int peer, FILE *f, int fileSize)  __attribute__ ((optnone))  {
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+int send_file(int peer, FILE *f, int fileSize) {
 	char * filebuf = (char*)TGDSARM9Malloc(SENDRECVBUF_SIZE + 1024);
     int written = 0;
 	int readSofar= 0;
@@ -314,7 +432,13 @@ int send_file(int peer, FILE *f, int fileSize)  __attribute__ ((optnone))  {
     return written;
 }
 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
 
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 char *getFtpCommandArg(char * theCommand, char *theCommandString, int skipArgs)
 {
     char *toReturn = theCommandString + strlen(theCommand);
@@ -359,8 +483,13 @@ char *getFtpCommandArg(char * theCommand, char *theCommandString, int skipArgs)
 }
 
 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
 
-
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 int ftp_cmd_LIST(int s, int cmd, char* arg){
 
 	//Open Data Port for FTP Server so Client can connect to it (FTP Passive Mode)

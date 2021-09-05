@@ -30,17 +30,31 @@ int client_datasocket = -1;
 int client_datasocketPortNumber = -1;
 char client_datasocketIP[MAX_TGDSFILENAME_LENGTH+1];
 
-
 char buf[100], command[5], filename[20];
 int k, size, srv_len, cli_len = 0, c;
 int filehandle;
 bool globaldatasocketEnabled = false;
 
-void ftpInit()  __attribute__ ((optnone)) {
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+void ftpInit() {
 	strcpy((char*)CWDFTP,TGDSDirectorySeparator);
 	setFTPState(FTP_SERVER_IDLE);
 }
-int FTPServerService()  __attribute__ ((optnone)) {
+
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+int FTPServerService() {
 	int curFTPStatus = 0;
 	//handle FTP Server handshake internal cases
 	switch(getFTPState()){

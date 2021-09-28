@@ -37,16 +37,19 @@ USA
 //---------------------------------------------------------------------------------
 struct sIPCSharedTGDSSpecific {
 //---------------------------------------------------------------------------------
-	uint32 frameCounter7;	//VBLANK counter7
-	uint32 frameCounter9;	//VBLANK counter9
+	char filename[256];
 };
+
+#define FIFO_DIRECTVIDEOFRAME_SETUP (u32)(0xFFFFABC8)
+#define FIFO_ARM7_RELOAD_OK (u32)(0xFFFFABC9)
+#define FIFO_ARM7_RELOAD (u32)(0xFFFFABCA)
 
 #ifdef ARM9
 
 //TGDS Memory Layout ARM7/ARM9 Cores
-#define TGDS_ARM7_MALLOCSTART (u32)(0x06000000)
-#define TGDS_ARM7_MALLOCSIZE (int)(112*1024)
-#define TGDSDLDI_ARM7_ADDRESS (u32)(TGDS_ARM7_MALLOCSTART + TGDS_ARM7_MALLOCSIZE)
+#define TGDS_ARM7_MALLOCSTART (u32)((int)0x06020000 + (96*1024))	//right after program end
+#define TGDS_ARM7_MALLOCSIZE (int)(32*1024)
+#define TGDSDLDI_ARM7_ADDRESS (u32)((int)0x03800000 + (32*1024))	//right after adpcm decoded buf
 
 #endif
 
@@ -61,6 +64,11 @@ extern void HandleFifoNotEmptyWeakRef(volatile u32 cmd1);
 extern void HandleFifoEmptyWeakRef(uint32 cmd1,uint32 cmd2);
 
 extern struct sIPCSharedTGDSSpecific* getsIPCSharedTGDSSpecific();
+
+#ifdef ARM9
+extern void reloadARM7PlayerPayload(u32 arm7entryaddress, int arm7BootCodeSize);
+extern u32 playARM7ADPCMAudio(char * adpcmFile);
+#endif
 
 #ifdef __cplusplus
 }

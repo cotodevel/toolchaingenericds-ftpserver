@@ -30,6 +30,7 @@ USA
 #include "dsregs.h"
 #include "dsregs_asm.h"
 #include "InterruptsARMCores_h.h"
+#include "loader.h"
 
 #ifdef ARM7
 #include <string.h>
@@ -41,12 +42,18 @@ USA
 #endif
 
 #ifdef ARM9
-
 #include <stdbool.h>
 #include "main.h"
 #include "wifi_arm9.h"
-
+#include <stdbool.h>
+#include "main.h"
+#include "wifi_arm9.h"
+#include "nds_cp15_misc.h"
+#include "videoTGDS.h"
+#include "arm7bootldr.h"
+#include "dmaTGDS.h"
 #endif
+
 
 #ifdef ARM9
 __attribute__((section(".itcm")))
@@ -63,11 +70,27 @@ __attribute__((section(".itcm")))
 void HandleFifoNotEmptyWeakRef(volatile u32 cmd1){
 	switch (cmd1) {
 		#ifdef ARM7
+		case(FIFO_ARM7_RELOAD):{
+			//NDS_LOADER_IPC_BOOTSTUBARM7_CACHED has ARM7.bin bootcode now
+			u32 arm7entryaddress = NDS_LOADER_IPC_CTX_UNCACHED_NTR->arm7EntryAddress;
+			int arm7BootCodeSize = NDS_LOADER_IPC_CTX_UNCACHED_NTR->bootCode7FileSize;
+			dmaTransferWord(3, (uint32)NDS_LOADER_IPC_BOOTSTUBARM7_CACHED, (uint32)arm7entryaddress, (uint32)arm7BootCodeSize);
+			reloadARMCore((u32)arm7entryaddress);	//Run Bootstrap7 
+		}
+		break;
+		
+		case(FIFO_DIRECTVIDEOFRAME_SETUP):{
+			handleARM7FSSetup();
+		}
+		break;
 		
 		#endif
 		
 		#ifdef ARM9
-		
+		case(FIFO_ARM7_RELOAD_OK):{
+			reloadStatus = 0;
+		}
+		break;
 		#endif
 	}
 }
@@ -79,15 +102,52 @@ void HandleFifoEmptyWeakRef(uint32 cmd1,uint32 cmd2){
 }
 
 //project specific stuff
-
 #ifdef ARM9
-
 void updateStreamCustomDecoder(u32 srcFrmt){
 
 }
 
 void freeSoundCustomDecoder(u32 srcFrmt){
 
+}
+#endif
+
+#ifdef ARM9
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+void reloadARM7PlayerPayload(u32 arm7entryaddress, int arm7BootCodeSize){
+	NDS_LOADER_IPC_CTX_UNCACHED_NTR->arm7EntryAddress = arm7entryaddress;
+	NDS_LOADER_IPC_CTX_UNCACHED_NTR->bootCode7FileSize = arm7BootCodeSize;
+	//copy payload to NDS_LOADER_IPC_BOOTSTUBARM7_CACHED region
+	coherent_user_range_by_size((u32)&arm7bootldr[0], arm7bootldr_size);
+	dmaTransferWord(0, (u32)&arm7bootldr[0], (u32)NDS_LOADER_IPC_BOOTSTUBARM7_CACHED, (uint32)arm7bootldr_size);
+	SendFIFOWords(FIFO_ARM7_RELOAD);
+}
+
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+u32 playARM7ADPCMAudio(char * adpcmFile){
+	struct sIPCSharedTGDSSpecific* sharedIPC = getsIPCSharedTGDSSpecific();
+	char * filename = (char*)&sharedIPC->filename[0];
+	strcpy(filename, adpcmFile);
+	
+	uint32 * fifomsg = (uint32 *)NDS_UNCACHED_SCRATCHPAD;
+	fifomsg[33] = (uint32)0xFFFFCCAA;
+	SendFIFOWords(FIFO_DIRECTVIDEOFRAME_SETUP);
+	while(fifomsg[33] == (uint32)0xFFFFCCAA){
+		swiDelay(1);
+	}
+	return fifomsg[33];
 }
 
 #endif

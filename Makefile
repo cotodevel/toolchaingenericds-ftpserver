@@ -41,6 +41,7 @@ export EXECUTABLE_VERSION =	"$(EXECUTABLE_VERSION_HEADER)"
 export TGDSPKG_TARGET_NAME := /
 #The ndstool I use requires to have the elf section removed, so these rules create elf headerless- binaries.
 export BINSTRIP_RULE_7 =	arm7.bin
+export BINSTRIP_RULE_arm7bootldr =	arm7bootldr.bin
 export BINSTRIP_RULE_9 =	arm9.bin
 export DIR_ARM7 = arm7
 export BUILD_ARM7	=	build
@@ -65,12 +66,14 @@ export TARGET_LIBRARY_TGDS_TWL_9 = $(TARGET_LIBRARY_TGDS_NTR_9)i
 
 export DIRS_ARM7_SRC = source/	\
 			source/interrupts/	\
+			source/petitfs-src/	\
 			../common/	\
 			../common/templateCode/source/	\
 			../common/templateCode/data/arm7/	
 			
 export DIRS_ARM7_HEADER = source/	\
 			source/interrupts/	\
+			source/petitfs-src/	\
 			include/	\
 			../common/	\
 			../common/templateCode/source/	\
@@ -118,6 +121,7 @@ ifeq ($(SOURCE_MAKEFILE7),default)
 	cp	-r	$(TARGET_LIBRARY_MAKEFILES_SRC7_NOFPIC)	$(CURDIR)/$(DIR_ARM7)
 endif
 	$(MAKE)	-R	-C	$(DIR_ARM7)/
+	$(MAKE)	-R	-C	arm7player/
 ifeq ($(SOURCE_MAKEFILE9),default)
 	cp	-r	$(TARGET_LIBRARY_MAKEFILES_SRC9_NOFPIC)	$(CURDIR)/$(DIR_ARM9)
 endif
@@ -137,6 +141,7 @@ each_obj = $(foreach dirres,$(dir_read_arm9_files),$(dirres).)
 clean:
 	$(MAKE)	clean	-C	$(DIR_ARM7)/
 	$(MAKE) clean	-C	$(PosIndCodeDIR_FILENAME)/$(DIR_ARM7)/
+	$(MAKE)	clean	-C	arm7player/
 ifeq ($(SOURCE_MAKEFILE7),default)
 	-@rm -rf $(CURDIR)/$(DIR_ARM7)/Makefile
 endif

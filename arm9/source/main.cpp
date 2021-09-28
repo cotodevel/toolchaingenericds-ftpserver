@@ -42,6 +42,9 @@ USA
 // Includes
 #include "WoopsiTemplate.h"
 
+__attribute__((section(".dtcm")))
+u32 reloadStatus = 0;
+
 //TGDS Soundstreaming API
 int internalCodecType = SRC_NONE; //Returns current sound stream format: WAV, ADPCM or NONE
 struct fd * _FileHandleVideo = NULL; 
@@ -73,9 +76,19 @@ int TGDSProjectReturnFromLinkedModule() {
 int main(int argc, char **argv) {
 	
 	/*			TGDS 1.6 Standard ARM9 Init code start	*/
-	bool isTGDSCustomConsole = false;	//set default console or custom console: default console
+	bool isTGDSCustomConsole = true;	//set default console or custom console: default console
 	GUI_init(isTGDSCustomConsole);
 	GUI_clear();
+	
+	//Reload ARM7 player payload
+	reloadStatus = (u32)0xFFFFFFFF;
+	reloadARM7PlayerPayload((u32)0x06020000, 96*1024); //last 32K as sound buffer
+	while(reloadStatus == (u32)0xFFFFFFFF){
+		swiDelay(1);	
+	}
+	
+	printf("              ");
+	printf("              ");
 	
 	bool isCustomTGDSMalloc = true;
 	setTGDSMemoryAllocator(getProjectSpecificMemoryAllocatorSetup(TGDS_ARM7_MALLOCSTART, TGDS_ARM7_MALLOCSIZE, isCustomTGDSMalloc, TGDSDLDI_ARM7_ADDRESS));

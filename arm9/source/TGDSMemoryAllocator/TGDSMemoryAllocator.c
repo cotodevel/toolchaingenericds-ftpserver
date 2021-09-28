@@ -57,7 +57,6 @@ struct AllocatorInstance * getProjectSpecificMemoryAllocatorSetup(u32 ARM7Malloc
 	customMemoryAllocator->DLDI9StartAddress = (u32)&_io_dldi_stub;
 	customMemoryAllocator->TargetARM7DLDIAddress = TargetARM7DLDIAddress;
 	
-	//Memory Setup: ARM7 TGDS 64K = 0x03800000 ~ 0x03810000. TGDS Sound Streaming code: Enabled
-	WRAM_CR = WRAM_32KARM9_0KARM7;
+	WRAM_CR = WRAM_0KARM9_32KARM7;	//96K ARM7 : 0x037f8000 ~ 0x03810000 //Custom Audio Streaming Code
 	return customMemoryAllocator;
 }

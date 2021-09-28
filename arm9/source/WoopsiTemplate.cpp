@@ -71,6 +71,8 @@ void WoopsiTemplate::startup(int argc, char **argv) {
 	
 	_MultiLineTextBoxLogger = NULL;	//destroyable TextBox
 	
+	playARM7ADPCMAudio((char *)"/bg-music.ima"); //ARM7 bg music play!
+	
 	ftpInit();
 	
 	enableDrawing();	// Ensure Woopsi can now draw itself

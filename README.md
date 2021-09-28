@@ -1,5 +1,6 @@
 ![ToolchainGenericDS](img/TGDS-Logo.png)
 
+Branch: TGDS1.64-ARM7Sound - plays ADPCM BG music, but while a transfer takes place ARM7 dies
 
 This is the ToolchainGenericDS Woopsi FTP Server project:
 

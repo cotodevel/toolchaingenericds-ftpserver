@@ -1,6 +1,8 @@
 ![ToolchainGenericDS](img/TGDS-Logo.png)
 
+NTR/TWL SDK: TGDS1.64
 
+master: Development branch. Use TGDS1.64Stable: branch for stable features.
 This is the ToolchainGenericDS Woopsi FTP Server project:
 
 1.	Compile Toolchain:
@@ -36,11 +38,15 @@ Alpha 0.2
 Alpha 0.1:
 - Add FTP Server.
 
+
+/release folder has the latest binary precompiled for your convenience.
+
+Latest stable release: https://bitbucket.org/Coto88/ToolchainGenericDS-FTPServer/get/TGDS1.64Stable.zip
+
 Bugs/Notes:
 - Navigating between directories might cause invalid directory listing, but it works otherwise.
 - Opening/closing data sockets in DSWIFI is very unstable. That means there could be hangs between directory listing and/or receiving or sending files. Run again the binary if this happens.
 - Currently it works with WinSCP. On filezilla I have no idea why it doesn't work, we'll see what I can do about it.
-
 
 
 Coto

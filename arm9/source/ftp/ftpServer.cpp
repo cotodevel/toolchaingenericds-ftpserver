@@ -201,7 +201,6 @@ int FTPServerService() {
 						char * fname = getFtpCommandArg("DELE", buffer, 0);
 						char tmpBuf[MAX_TGDSFILENAME_LENGTH+1];
 						strcpy(tmpBuf, fname);
-						parsefileNameTGDS(tmpBuf);
 						string fnameRemote = (string(tmpBuf));
 						int retVal = remove(fnameRemote.c_str());
 						if(retVal==0){

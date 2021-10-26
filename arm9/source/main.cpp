@@ -42,9 +42,6 @@ USA
 // Includes
 #include "WoopsiTemplate.h"
 
-__attribute__((section(".dtcm")))
-u32 reloadStatus = 0;
-
 //TGDS Soundstreaming API
 int internalCodecType = SRC_NONE; //Returns current sound stream format: WAV, ADPCM or NONE
 struct fd * _FileHandleVideo = NULL; 
@@ -73,6 +70,12 @@ int TGDSProjectReturnFromLinkedModule() {
 	return -1;
 }
 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 int main(int argc, char **argv) {
 	
 	/*			TGDS 1.6 Standard ARM9 Init code start	*/

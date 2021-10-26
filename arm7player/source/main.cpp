@@ -33,7 +33,7 @@ struct soundPlayerContext soundData;
 char fname[256];
 
 #if (defined(__GNUC__) && !defined(__clang__))
-__attribute__((optimize("O2")))
+__attribute__((optimize("O0")))
 #endif
 void handleARM7FSSetup(){
 	uint32 * fifomsg = (uint32 *)NDS_CACHED_SCRATCHPAD;			
@@ -44,6 +44,7 @@ void handleARM7FSSetup(){
 	if (fresult != FR_OK) { /* File System could not be mounted */
 		fifomsg[33] = 0xAABBCCDD;
 	}
+	
 	struct sIPCSharedTGDSSpecific* sharedIPC = getsIPCSharedTGDSSpecific();
 	char * filename = (char*)&sharedIPC->filename[0];
 	strcpy((char*)fname, filename);
@@ -59,6 +60,7 @@ void handleARM7FSSetup(){
 	else{
 		//strcpy((char*)0x02000000, "File open OK!");	//TGDS-FTPServer so far OK
 	}
+	
 	pf_lseek(0);
 	
 	//decode audio here
@@ -80,6 +82,12 @@ int fetchVideoFrame(int fileOffset, int bufferSize){
 	return 0;
 }
 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 int main(int argc, char **argv)  {
 	/*			TGDS 1.6 Standard ARM7 Init code start	*/
 	installWifiFIFO();		
@@ -88,7 +96,6 @@ int main(int argc, char **argv)  {
 	SendFIFOWords(FIFO_ARM7_RELOAD_OK);
 	while (1) {
 		handleARM7SVC();	/* Do not remove, handles TGDS services */
-		IRQWait(0, IRQ_VBLANK);
 	}
    
 	return 0;

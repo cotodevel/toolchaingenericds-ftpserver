@@ -40,17 +40,13 @@ struct sIPCSharedTGDSSpecific {
 	char filename[256];
 };
 
-#define FIFO_DIRECTVIDEOFRAME_SETUP (u32)(0xFFFFABC8)
-#define FIFO_ARM7_RELOAD_OK (u32)(0xFFFFABC9)
-#define FIFO_ARM7_RELOAD (u32)(0xFFFFABCA)
+#define FIFO_DIRECTVIDEOFRAME_SETUP (u32)(0xFFFFABCB)
 
 #ifdef ARM9
-
 //TGDS Memory Layout ARM7/ARM9 Cores
 #define TGDS_ARM7_MALLOCSTART (u32)((int)0x06020000 + (96*1024))	//right after program end
 #define TGDS_ARM7_MALLOCSIZE (int)(32*1024)
 #define TGDSDLDI_ARM7_ADDRESS (u32)((int)0x03800000 + (32*1024))	//right after adpcm decoded buf
-
 #endif
 
 #endif

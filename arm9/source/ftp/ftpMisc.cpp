@@ -226,6 +226,11 @@ int ftp_cmd_STOR(int s, int cmd, char* arg) {
 			
 			//Boot .NDS file! (homebrew only)
 			if(strncmp(ext,".nds", 4) == 0){
+				char thisArgv[3][MAX_TGDSFILENAME_LENGTH];
+				memset(thisArgv, 0, sizeof(thisArgv));
+				strcpy(&thisArgv[0][0], tmpBuf);	//Arg0:	NDS Binary loaded
+				strcpy(&thisArgv[1][0], "");				//Arg1: ARGV0
+				addARGV(2, (char*)&thisArgv);
 				TGDSMultibootRunNDSPayload((char*)tmpBuf);
 			}
 			

@@ -60,7 +60,6 @@ static inline void menuShow(){
 	printf("toolchaingenericds-FTPServer: ");
 	printf("(Select): This menu. ");
 	printf("Available heap memory: %d >%d", getMaxRam(), TGDSPrintfColor_Cyan);
-	printarm7DebugBuffer();
 }
 
 //ToolchainGenericDS-LinkedModule User implementation: Called if TGDS-LinkedModule fails to reload ARM9.bin from DLDI.

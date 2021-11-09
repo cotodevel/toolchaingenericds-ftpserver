@@ -2,7 +2,7 @@
 
 NTR/TWL SDK: TGDS1.64
 
-TGDS1.64Stable: branch for stable features.
+master: Development branch. Use TGDS1.64Stable: branch for stable features.
 This is the ToolchainGenericDS Woopsi FTP Server project:
 
 1.	Compile Toolchain:

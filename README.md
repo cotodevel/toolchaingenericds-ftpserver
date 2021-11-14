@@ -2,7 +2,7 @@
 
 NTR/TWL SDK: TGDS1.64
 
-master: Development branch. Use TGDS1.64Stable: branch for stable features.
+master: Development branch. Use TGDS1.65: branch for stable features.
 This is the ToolchainGenericDS Woopsi FTP Server project:
 
 1.	Compile Toolchain:
@@ -41,7 +41,7 @@ Alpha 0.1:
 
 /release folder has the latest binary precompiled for your convenience.
 
-Latest stable release: https://bitbucket.org/Coto88/ToolchainGenericDS-FTPServer/get/TGDS1.64Stable.zip
+Latest stable release: https://bitbucket.org/Coto88/ToolchainGenericDS-FTPServer/get/TGDS1.65.zip
 
 Bugs/Notes:
 - Navigating between directories might cause invalid directory listing, but it works otherwise.

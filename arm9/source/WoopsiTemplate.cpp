@@ -50,6 +50,17 @@ void WoopsiTemplate::startup(int argc, char **argv) {
 	woopsiApplication->addGadget(newScreen);
 	newScreen->setPermeable(true);
 	
+	// Add child windows: Indicates current NTR/TWLmode
+	WoopsiString currentMode;
+	if(__dsimode == true){
+		currentMode = WoopsiString("TWL Mode (NTR WIFI)");
+	}
+	else{
+		currentMode = WoopsiString("NTR Mode (NTR WIFI)");
+	}
+	AmigaWindow* _controlWindow = new AmigaWindow(0, 13, 256, 14, currentMode, Gadget::GADGET_DRAGGABLE, AmigaWindow::AMIGA_WINDOW_SHOW_DEPTH);
+	newScreen->addGadget(_controlWindow);
+	
 	// Add File listing screen
 	_fileScreen = new AmigaScreen("FTP Server status:", Gadget::GADGET_DRAGGABLE, AmigaScreen::AMIGA_SCREEN_SHOW_DEPTH | AmigaScreen::AMIGA_SCREEN_SHOW_FLIP);
 	woopsiApplication->addGadget(_fileScreen);

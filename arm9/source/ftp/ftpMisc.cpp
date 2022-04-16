@@ -224,8 +224,12 @@ int ftp_cmd_STOR(int s, int cmd, char* arg) {
 			separateExtension(tmpName, ext);
 			strlwr(ext);
 			
-			//Boot .NDS file! (homebrew only)
-			if(strncmp(ext,".nds", 4) == 0){
+			//Boot .NDS file! (NTR/TWL homebrew only)
+			if(
+				(strncmp(ext,".nds", 4) == 0)
+				||
+				(strncmp(ext,".srl", 4) == 0)
+			){
 				char thisArgv[3][MAX_TGDSFILENAME_LENGTH];
 				memset(thisArgv, 0, sizeof(thisArgv));
 				strcpy(&thisArgv[0][0], TGDSPROJECTNAME);	//Arg0:	This Binary loaded

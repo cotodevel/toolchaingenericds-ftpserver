@@ -81,7 +81,7 @@ void WoopsiTemplate::startup(int argc, char **argv) {
 	currentFileRequesterIndex = 0;
 	
 	_MultiLineTextBoxLogger = NULL;	//destroyable TextBox
-	
+	disableWaitForVblank();
 	ftpInit();
 	
 	enableDrawing();	// Ensure Woopsi can now draw itself

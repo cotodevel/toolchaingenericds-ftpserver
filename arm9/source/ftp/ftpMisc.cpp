@@ -11,6 +11,7 @@
 #include "fileBrowse.h"	//generic template functions from TGDS: maintain 1 source, whose changes are globally accepted by all TGDS Projects.
 #include "WoopsiTemplate.h"
 #include "utilsTGDS.h"
+#include "loader.h"
 
 //current working directory
 volatile char CWDFTP[MAX_TGDSFILENAME_LENGTH+1];

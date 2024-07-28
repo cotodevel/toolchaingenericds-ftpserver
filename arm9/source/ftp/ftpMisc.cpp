@@ -236,8 +236,8 @@ int ftp_cmd_STOR(int s, int cmd, char* arg) {
 				strcpy(&thisArgv[0][0], TGDSPROJECTNAME);	//Arg0:	This Binary loaded
 				strcpy(&thisArgv[1][0], tmpBuf);	//Arg1:	NDS Binary reloaded
 				strcpy(&thisArgv[2][0], "");					//Arg2: NDS Binary ARG0
-				addARGV(3, (char*)&thisArgv);
-				TGDSMultibootRunNDSPayload((char*)tmpBuf);
+				u32 * payload = getTGDSMBV3ARM7Bootloader();
+				TGDSMultibootRunNDSPayload((char*)tmpBuf, (u8*)payload, 3, (char*)&thisArgv);
 			}
 			
 			TGDSARM9Free(client_reply);

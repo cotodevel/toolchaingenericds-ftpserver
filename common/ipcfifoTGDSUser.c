@@ -30,15 +30,11 @@ USA
 #include "dsregs.h"
 #include "dsregs_asm.h"
 #include "InterruptsARMCores_h.h"
+#include "biosTGDS.h"
+#include "loader.h"
+#include "dmaTGDS.h"
 #include "libutilsShared.h"
-
-//libraries
 #include "microphoneShared.h"
-#include "libutilsShared.h"
-#include "wifi_shared.h"
-#ifdef ARM9
-#include "dswnifi_lib.h"
-#endif
 
 #ifdef ARM7
 #include <string.h>
@@ -66,20 +62,29 @@ struct sIPCSharedTGDSSpecific* getsIPCSharedTGDSSpecific(){
 	return sIPCSharedTGDSSpecificInst;
 }
 
-//inherits what is defined in: ipcfifoTGDS.c
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
-void HandleFifoNotEmptyWeakRef(u32 cmd1, uint32 cmd2){
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+void HandleFifoNotEmptyWeakRef(uint32 cmd1, uint32 cmd2){
 	switch (cmd1) {
+		//NDS7: 
 		#ifdef ARM7
 		
 		#endif
 		
+		//NDS9: 
 		#ifdef ARM9
 		
 		#endif
 	}
+	
 }
 
 #ifdef ARM9
@@ -100,10 +105,28 @@ void freeSoundCustomDecoder(u32 srcFrmt){
 
 }
 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
 #endif
 
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+void fcopy(FILE *f1, FILE *f2){
+    char            buffer[BUFSIZ];
+    size_t          n;
+    while ((n = fread(buffer, sizeof(char), sizeof(buffer), f1)) > 0){
+        if (fwrite(buffer, sizeof(char), n, f2) != n){
+            
+		}
+    }
+}
 
-//Libutils setup: TGDS project uses Soundstream, WIFI, ARM7 malloc, etc.
+#endif
+
+//Libutils setup: TGDS project doesn't use any libutils extensions.
+
+//Note: IGNORELIBS flag exists because default ARM7 TGDS-multiboot payload has remoteboot, and requires DSWIFI
 void setupLibUtils(){
 	//libutils:
 	

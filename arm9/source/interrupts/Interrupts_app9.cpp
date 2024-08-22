@@ -73,7 +73,7 @@ void Timer3handlerUser(){
 __attribute__((section(".itcm")))
 #endif
 void HblankUser(){
-	
+
 }
 
 #ifdef ARM9

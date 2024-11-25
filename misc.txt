@@ -1,8 +1,0 @@
-FTP Type:
-(tgds ftp assumes binary data)
-
-TYPE I :
-I - image (binary data)
-
-TYPE A :
-For transferring files with ASCII mode (type A) you would need to open the files in text mode and then transfer them with line ending CRLF

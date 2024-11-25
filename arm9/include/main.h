@@ -27,6 +27,9 @@ USA
 #include "limitsTGDS.h"
 #include "dldi.h"
 
+#define TGDSMULTIBOOT_CFG_FILE ((char*)"0:/toolchaingenericds-multiboot-config.txt")
+#define RemoteBootTGDSPackage ((char*)"0:/remotepackage.zip")
+
 #endif
 
 
@@ -36,6 +39,7 @@ extern "C" {
 
 extern u32 * getTGDSMBV3ARM7Bootloader();
 extern int main(int argc, char **argv);
+extern struct FileClassList * thisFileList;
 extern void ApplicationMainLoop();
 
 //TGDS Soundstreaming API
@@ -44,6 +48,13 @@ extern struct fd * _FileHandleVideo;
 extern struct fd * _FileHandleAudio;
 extern bool stopSoundStreamUser();
 extern void closeSoundUser();
+//Handle backlight timeout 
+extern void enableScreenPowerTimeout();
+extern void disableScreenPowerTimeout();
+extern void handleTurnOnTurnOffScreenTimeout();
+extern bool bottomScreenIsLit;
+extern char globalPath[256];
+extern char renameFnameSource[256];
 
 #ifdef __cplusplus
 }

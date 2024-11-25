@@ -20,10 +20,13 @@ USA
 
 #include "InterruptsARMCores_h.h"
 #include "ipcfifoTGDSUser.h"
-#include "consoleTGDS.h"
 #include "dsregs_asm.h"
 #include "main.h"
 #include "keypadTGDS.h"
+#include "interrupts.h"
+#include "utilsTGDS.h"
+#include "spifwTGDS.h"
+#include "powerTGDS.h"
 
 //User Handler Definitions
 #include "woopsifuncs.h"
@@ -59,7 +62,32 @@ void Timer1handlerUser(){
 __attribute__((section(".itcm")))
 #endif
 void Timer2handlerUser(){
-
+	handleTurnOnTurnOffScreenTimeout();
+	
+	//Handle normal input to turn back on bottom screen 
+	scanKeys();
+	u32 pressed = keysDown();
+	if(
+		(pressed&KEY_TOUCH)
+		||
+		(pressed&KEY_A)
+		||
+		(pressed&KEY_B)
+		||
+		(pressed&KEY_UP)
+		||
+		(pressed&KEY_DOWN)
+		||
+		(pressed&KEY_LEFT)
+		||
+		(pressed&KEY_RIGHT)
+		||
+		(pressed&KEY_L)
+		||
+		(pressed&KEY_R)
+		){
+		bottomScreenIsLit = true; //input event triggered
+	}
 }
 
 #ifdef ARM9
@@ -81,8 +109,6 @@ __attribute__((section(".itcm")))
 #endif
 void VblankUser(){
 	woopsiVblFunc();
-	
-	//Timing reserved for 2D/3D rendering
 }
 
 #ifdef ARM9
@@ -100,6 +126,7 @@ void screenLidHasOpenedhandlerUser(){
 	if(WoopsiTemplateProc != NULL){
 		WoopsiTemplateProc->handleLidOpen();
 	}
+	setBacklight(POWMAN_BACKLIGHT_BOTTOM_BIT); 
 }
 
 //Note: this event is hardware triggered from ARM7, on ARM9 a signal is raised through the FIFO hardware

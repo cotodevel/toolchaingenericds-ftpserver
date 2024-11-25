@@ -14,7 +14,6 @@
 #include "main.h"
 #include "posixHandleTGDS.h"
 #include "keypadTGDS.h"
-
 #include "dsregs.h"
 #include "dsregs_asm.h"
 #include "typedefsTGDS.h"
@@ -25,8 +24,17 @@
 #include "fatfslayerTGDS.h"
 #include "cartHeader.h"
 #include "dldi.h"
-#include "ftpMisc.h"
-#include "ftpServer.h"
+#include "conf.h"
+
+//TCP
+#include <stdio.h>
+#include <stdlib.h>
+#include <netdb.h>
+#include <in.h>
+#include <string.h>
+#include "socket2.h"
+
+char scrollingBoxLoggerOutput[256];
 
 __attribute__((section(".dtcm")))
 WoopsiTemplate * WoopsiTemplateProc = NULL;
@@ -69,8 +77,8 @@ void WoopsiTemplate::startup(int argc, char **argv) {
 	// Add screen background
 	_fileScreen->insertGadget(new Gradient(0, SCREEN_TITLE_HEIGHT, 256, 192 - SCREEN_TITLE_HEIGHT, woopsiRGB(0, 31, 0), woopsiRGB(0, 0, 31)));
 	
-	scrollingBoxLogger = new ScrollingTextBox(rect.x + 1, rect.y + 1, 246, 127, "FTP Server start.\n"
-		"---------------\n\n", Gadget::GADGET_DRAGGABLE, 50);
+	scrollingBoxLogger = new ScrollingTextBox(rect.x + 1, rect.y + 1, 246, 127, "ToolchainGenericDS-FTPServer start.\n"
+		"--------------------------------\n\n", Gadget::GADGET_DRAGGABLE, 50);
 	
 	scrollingBoxLogger->setRefcon(1);
 	_fileScreen->addGadget(scrollingBoxLogger);
@@ -82,7 +90,6 @@ void WoopsiTemplate::startup(int argc, char **argv) {
 	
 	_MultiLineTextBoxLogger = NULL;	//destroyable TextBox
 	disableWaitForVblank();
-	ftpInit();
 	
 	enableDrawing();	// Ensure Woopsi can now draw itself
 	redraw();			// Draw initial state
@@ -211,7 +218,7 @@ void WoopsiTemplate::handleClickEvent(const GadgetEventArgs& e) {
 __attribute__((section(".dtcm")))
 u32 pendPlay = 0;
 
-char currentFileChosen[256+1];
+char currentFileChosen[256];
 
 //Called once Woopsi events are ended: TGDS Main Loop
 __attribute__((section(".itcm")))
@@ -219,23 +226,38 @@ void Woopsi::ApplicationMainLoop(){
 	//Earlier.. main from Woopsi SDK.
 	
 	//Handle TGDS stuff...
-	uint32 FTP_SERVER_STATUS = FTPServerService();
-	switch(FTP_SERVER_STATUS){
-		//Server Running
-		case(FTP_SERVER_ACTIVE):{
-			
-		}
-		break;
-		
-		//Server Disconnected/Idle!
-		case(FTP_SERVER_CLIENT_DISCONNECTED):{				
-			closeFTPDataPort(sock1);
-			setFTPState(FTP_SERVER_IDLE);
-			WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString("Client disconnected!. Retrying..."));
-			switch_dswnifi_mode(dswifi_idlemode);
-			ftpInit();
-		}
-		break;
-	}
 	
+	//FTP Server start
+	if(_Wifi_InitTGDSFTPServer() == true){
+		int FTPPort = 21;
+		print_ip((uint32)Wifi_GetIP(), (sint8*)&DSServerIP);
+		sprintf(scrollingBoxLoggerOutput, "\nNintendoDS IP: %s \nPort: %d \n", (char*)&DSServerIP, FTPPort);
+		WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(scrollingBoxLoggerOutput));
+		CSocket2* server=new CSocket2(true);
+		server->Bind(FTPPort);
+		server->Listen();
+		while(true)
+		{
+			CSocket2* conn;
+			do
+			{
+				conn=server->Accept(false);
+				if(conn) {
+					sprintf(scrollingBoxLoggerOutput, "\nClient connected\n");
+					WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(scrollingBoxLoggerOutput));
+					break;
+				}
+				IRQVBlankWait();
+			} while(true);
+			process(conn);
+			delete conn;
+		}
+	}
+	else{
+		sprintf(scrollingBoxLoggerOutput, "\nNintendoDS AP Connection failure. Halting.\n");
+		WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(scrollingBoxLoggerOutput));
+		while(1==1){
+			IRQVBlankWait();
+		}
+	}
 }

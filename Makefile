@@ -20,7 +20,7 @@
 
 #ToolchainGenericDS specific: Use Makefiles from either TGDS, or custom
 export SOURCE_MAKEFILE7 = default
-export SOURCE_MAKEFILE9 = default
+export SOURCE_MAKEFILE9 = custom
 
 #Shared
 ifeq ($(TGDS_ENV),windows)
@@ -35,7 +35,7 @@ endif
 # Project Specific
 export TGDSPROJECTNAME = ToolchainGenericDS-FTPServer
 export EXECUTABLE_FNAME = $(TGDSPROJECTNAME).nds
-export EXECUTABLE_VERSION_HEADER =	0.1
+export EXECUTABLE_VERSION_HEADER =	0.3
 export EXECUTABLE_VERSION =	"$(EXECUTABLE_VERSION_HEADER)"
 export TGDSPKG_TARGET_PATH := '//'
 export TGDSREMOTEBOOTER_SERVER_IP_ADDR := '192.168.43.185'
@@ -140,8 +140,6 @@ compile	:
 	-cp	-r	$(TARGET_LIBRARY_MAKEFILES_SRC7_NOFPIC)	$(CURDIR)/common/templateCode/stage1_7/
 	$(MAKE)	-R	-C	$(CURDIR)/common/templateCode/stage1_7/
 	$(MAKE)	-R	-C	$(CURDIR)/common/templateCode/arm7bootldr/
-	-mv $(CURDIR)/common/templateCode/arm7bootldr/arm7vram.bin	$(DIR_ARM9)/data/arm7vram.bin
-	-mv $(CURDIR)/common/templateCode/arm7bootldr/arm7vram_twl.bin	$(DIR_ARM9)/data/arm7vram_twl.bin
 	
 ifeq ($(SOURCE_MAKEFILE9),default)
 	cp	-r	$(TARGET_LIBRARY_MAKEFILES_SRC9_NOFPIC)	$(CURDIR)/$(DIR_ARM9)

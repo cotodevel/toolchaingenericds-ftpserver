@@ -43,9 +43,10 @@ private:
 extern "C" {
 #endif
 
+extern char scrollingBoxLoggerOutput[256];
 extern WoopsiTemplate * WoopsiTemplateProc;
 extern u32 pendPlay;
-extern char currentFileChosen[256+1];
+extern char currentFileChosen[256];
 
 #ifdef __cplusplus
 }

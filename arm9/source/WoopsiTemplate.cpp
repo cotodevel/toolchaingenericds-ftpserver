@@ -247,7 +247,7 @@ void Woopsi::ApplicationMainLoop(){
 					WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(scrollingBoxLoggerOutput));
 					break;
 				}
-				IRQVBlankWait();
+				HandleTGDSThreadsAndWait(); //go to Sleep to save CPU cycles on timed interrupts
 			} while(true);
 			process(conn);
 			delete conn;
@@ -257,7 +257,7 @@ void Woopsi::ApplicationMainLoop(){
 		sprintf(scrollingBoxLoggerOutput, "\nNintendoDS AP Connection failure. Halting.\n");
 		WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(scrollingBoxLoggerOutput));
 		while(1==1){
-			IRQVBlankWait();
+			HandleTGDSThreadsAndWait();
 		}
 	}
 }

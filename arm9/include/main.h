@@ -41,6 +41,8 @@ extern u32 * getTGDSMBV3ARM7Bootloader();
 extern int main(int argc, char **argv);
 extern struct FileClassList * thisFileList;
 extern void ApplicationMainLoop();
+extern void HandleTGDSThreadsAndWait();
+extern void onThreadOverflowUserCode(u32 * args);
 
 //TGDS Soundstreaming API
 extern int internalCodecType;
@@ -48,6 +50,7 @@ extern struct fd * _FileHandleVideo;
 extern struct fd * _FileHandleAudio;
 extern bool stopSoundStreamUser();
 extern void closeSoundUser();
+
 //Handle backlight timeout 
 extern void enableScreenPowerTimeout();
 extern void disableScreenPowerTimeout();

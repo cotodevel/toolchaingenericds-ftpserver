@@ -45,6 +45,7 @@ USA
 #include "powerTGDS.h"
 #include "biosTGDS.h"
 #include "dmaTGDS.h"
+#include "TGDS_threads.h"
 
 // Includes
 #include "WoopsiTemplate.h"
@@ -129,6 +130,12 @@ void closeSoundUser() {
 char DSServerIP[32];
 char renameFnameSource[256];
 
+//TGDS-FTPServer ARM9 timer setup:
+
+//-> Screen power off timeout: Timer 1
+//-> TGDSThreads: Timer 2
+//-> DSWIFI: Timer 3
+
 #if (defined(__GNUC__) && !defined(__clang__))
 __attribute__((optimize("O0")))
 #endif
@@ -188,9 +195,9 @@ int main(int argc, char **argv) {
 	REG_IME = 1;
 	
 	//VBLANK can't be used to count up screen power timeout because sound stutters. Use timer instead
-	TIMERXDATA(2) = TIMER_FREQ((int)1);
-	TIMERXCNT(2) = TIMER_DIV_1 | TIMER_IRQ_REQ | TIMER_ENABLE;
-	irqEnable(IRQ_TIMER2);
+	TIMERXDATA(1) = TIMER_FREQ((int)1);
+	TIMERXCNT(1) = TIMER_DIV_1 | TIMER_IRQ_REQ | TIMER_ENABLE;
+	irqEnable(IRQ_TIMER1);
 
 	//ARGV Implementation test
 	if(getTGDSDebuggingState() == true){
@@ -223,20 +230,22 @@ int main(int argc, char **argv) {
 	WoopsiTemplateProc = &WoopsiTemplateApp;
 	return WoopsiTemplateApp.main(argc, argv);
 	
-	while (1){
-		handleARM9SVC();	/* Do not remove, handles TGDS services */
-		IRQVBlankWait();
-	}
 	return 0;
 }
 
+void HandleTGDSThreadsAndWait(){
+	struct task_Context * TGDSThreads = getTGDSThreadSystem();
+	bool waitForVblank = false;
+	int threadsRan = runThreads(TGDSThreads, waitForVblank);
+}
+
 void enableScreenPowerTimeout(){
-	REG_IE |= IRQ_TIMER2;
+	REG_IE |= IRQ_TIMER1;
 	setBacklight(POWMAN_BACKLIGHT_BOTTOM_BIT);
 }
 
 void disableScreenPowerTimeout(){
-	REG_IE &= ~(IRQ_TIMER2);
+	REG_IE &= ~(IRQ_TIMER1);
 	setBacklight(POWMAN_BACKLIGHT_BOTTOM_BIT);
 }
 
@@ -256,6 +265,65 @@ void handleTurnOnTurnOffScreenTimeout(){
 	}
 }
 
+//////////////////////////////////////////////////////// Threading User code start : TGDS Project specific ////////////////////////////////////////////////////////
+//User callback when Task Overflows. Intended for debugging purposes only, as normal user code tasks won't overflow if a task is implemented properly.
+//	u32 * args = This Task context
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+void onThreadOverflowUserCode(u32 * args){
+	struct task_def * thisTask = (struct task_def *)args;
+	struct task_Context * parentTaskCtx = thisTask->parentTaskCtx;	//get parent Task Context node 
+	char threadStatus[64];
+	switch(thisTask->taskStatus){
+		case(INVAL_THREAD):{
+			strcpy(threadStatus, "INVAL_THREAD");
+		}break;
+		
+		case(THREAD_OVERFLOW):{
+			strcpy(threadStatus, "THREAD_OVERFLOW");
+		}break;
+		
+		case(THREAD_EXECUTE_OK_WAIT_FOR_SLEEP):{
+			strcpy(threadStatus, "THREAD_EXECUTE_OK_WAIT_FOR_SLEEP");
+		}break;
+		
+		case(THREAD_EXECUTE_OK_WAKEUP_FROM_SLEEP_GO_IDLE):{
+			strcpy(threadStatus, "THREAD_EXECUTE_OK_WAKEUP_FROM_SLEEP_GO_IDLE");
+		}break;
+	}
+	
+	char debOut2[256];
+	char timerUnitsMeasurement[32];
+	if( thisTask->taskStatus == THREAD_OVERFLOW){
+		if(thisTask->timerFormat == tUnitsMilliseconds){
+			strcpy(timerUnitsMeasurement, "ms");
+		}
+		else if(thisTask->timerFormat == tUnitsMicroseconds){
+			strcpy(timerUnitsMeasurement, "us");
+		} 
+		else{
+			strcpy(timerUnitsMeasurement, "-");
+		}
+		sprintf(debOut2, "[%s]. Thread requires at least (%d) %s. ", threadStatus, thisTask->remainingThreadTime, timerUnitsMeasurement);
+	}
+	else{
+		sprintf(debOut2, "[%s]. ", threadStatus);
+	}
+	
+	int TGDSDebuggerStage = 10;
+	u8 fwNo = *(u8*)(0x027FF000 + 0x5D);
+	handleDSInitOutputMessage((char*)debOut2);
+	handleDSInitError(TGDSDebuggerStage, (u32)fwNo);
+	
+	while(1==1){
+		HaltUntilIRQ();
+	}
+}
+//////////////////////////////////////////////////////////////////////// Threading User code end /////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////// FTP Server code ////////////////////////////////////////// 
 char line[256];
@@ -688,6 +756,9 @@ WoopsiTemplateProc->scrollingBoxLogger->appendText(WoopsiString(scrollingBoxLogg
     {
       aConn->Send("500 command not recognized\r\n");
     }
+  
+	HandleTGDSThreadsAndWait(); //go to Sleep to save CPU cycles on timed interrupts
   }
+
   delete passiveConn;
 }

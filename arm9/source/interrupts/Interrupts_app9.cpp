@@ -55,13 +55,6 @@ void Timer0handlerUser(){
 __attribute__((section(".itcm")))
 #endif
 void Timer1handlerUser(){
-
-}
-
-#ifdef ARM9
-__attribute__((section(".itcm")))
-#endif
-void Timer2handlerUser(){
 	handleTurnOnTurnOffScreenTimeout();
 	
 	//Handle normal input to turn back on bottom screen 
@@ -88,6 +81,13 @@ void Timer2handlerUser(){
 		){
 		bottomScreenIsLit = true; //input event triggered
 	}
+}
+
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
+void Timer2handlerUser(){
+	
 }
 
 #ifdef ARM9

@@ -61,7 +61,7 @@ void WoopsiTemplate::startup(int argc, char **argv) {
 	// Add child windows: Indicates current NTR/TWLmode
 	WoopsiString currentMode;
 	if(__dsimode == true){
-		currentMode = WoopsiString("TWL Mode (NTR WIFI)");
+		currentMode = WoopsiString("TWL Mode (NTR WIFI: Only WEP Encryption or less)");
 	}
 	else{
 		currentMode = WoopsiString("NTR Mode (NTR WIFI)");

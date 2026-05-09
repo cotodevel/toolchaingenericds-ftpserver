@@ -25,6 +25,6 @@ Latest stable release: http://github.com/cotodevel/ToolchainGenericDS-FTPServer/
 
 Bugs/Notes:
 - DSWIFI is very unstable. That means there could be hangs between directory listing and/or receiving or sending files. Run TGDS-Ftpserver again.
-
+- TWL Mode ToolchainGenericDS-FTPServer only supports legacy Access Points (WEP or unsecured). Issue: https://github.com/cotodevel/toolchaingenericds-ftpserver/issues/3
 
 Coto

@@ -113,6 +113,9 @@ void bootfile(){
 	
 }
 
+extern u8 testram[400*1024];
+u8 testram[400*1024];
+
 #if (defined(__GNUC__) && !defined(__clang__))
 __attribute__((optimize("O0")))
 #endif
@@ -127,7 +130,12 @@ int main(int argc, char **argv) {
 	ARM7InitDLDI(TGDS_ARM7_MALLOCSTART, TGDS_ARM7_MALLOCSIZE, TGDSDLDI_ARM7_ADDRESS);
 	struct task_Context * TGDSThreads = getTGDSThreadSystem();
 	/*			TGDS 1.6 Standard ARM7 Init code end	*/
-
+	
+	int i = 0;
+	for(i = 0; i < sizeof(testram); i++){
+		testram[i] = i;
+	}
+	
 	while (1) {
 		bool waitForVblank = false;
 		int threadsRan = runThreads(TGDSThreads, waitForVblank);
@@ -138,6 +146,7 @@ int main(int argc, char **argv) {
 ////////////////////////////////TGDS-MB v3 VRAM Bootcode end////////////////////////////////
 
 //stubs for custom DSWIFI library
+/*
 void setupSound(uint32 sourceBuf){
 
 }
@@ -181,3 +190,4 @@ void libUtilsFIFONotEmpty(u32 cmd1, u32 cmd2){
 void TIMER1Handler(){	
 	
 }
+*/

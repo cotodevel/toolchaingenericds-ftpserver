@@ -6,9 +6,9 @@ ENTRY(_startarm7bootldr)
 
 
 MEMORY {
-	ewram  : ORIGIN = 0x02310000, LENGTH = 512K - 64K
+	ewram  : ORIGIN = 0x02240000, LENGTH = 512K
 	rom    : ORIGIN = 0x08000000, LENGTH = 32M
-	iwram  : ORIGIN = 0x02310000, LENGTH = 512K - 64K
+	iwram  : ORIGIN = 0x02240000, LENGTH = 512K
 
 	twl_ewram : ORIGIN = 0x02e80000, LENGTH = 512K - 64K
 	twl_iwram : ORIGIN = 0x03000000, LENGTH = 256K

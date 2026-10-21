@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
 	//Execute Stage 2: VRAM ARM7 payload: TWL (0x06000000).
 	u32 binSize = 0;
 	u32 * payload = getTGDSMBV3ARM7Bootloader(&binSize);
-	executeARM7Payload((u32)0x02310000, binSize, payload);
+	executeARM7Payload((u32)0x02240000, binSize, payload);
 	
 	printf("   ");
 	printf("   ");

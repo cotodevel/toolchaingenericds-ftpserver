@@ -62,11 +62,13 @@ USA
 #include "arm7bootldr.h"
 #include "arm7bootldr_twl.h"
 
-u32 * getTGDSMBV3ARM7Bootloader(){
+u32 * getTGDSMBV3ARM7Bootloader(u32 * leng){
 	if(__dsimode == false){
+		*leng = *(unsigned int *)arm7bootldr >> 8;
 		swiDecompressLZSSWram((u8*)&arm7bootldr[0], (u8*)TGDS_MB_V3_ARM7_SCRATCHPAD_LZSS_DECOMP_BUF);
 	}
 	else{
+		*leng = *(unsigned int *)arm7bootldr_twl >> 8;
 		swiDecompressLZSSWram((u8*)&arm7bootldr_twl[0], (u8*)TGDS_MB_V3_ARM7_SCRATCHPAD_LZSS_DECOMP_BUF);
 	}
 	return (u32*)TGDS_MB_V3_ARM7_SCRATCHPAD_LZSS_DECOMP_BUF;
@@ -164,8 +166,9 @@ int main(int argc, char **argv) {
 	//switch_dswnifi_mode(dswifi_idlemode); //breaks remoteboot, can't be enabled here
 	
 	//Execute Stage 2: VRAM ARM7 payload: TWL (0x06000000).
-	u32 * payload = getTGDSMBV3ARM7Bootloader();
-	executeARM7Payload((u32)0x02310000, 96*1024, payload);
+	u32 binSize = 0;
+	u32 * payload = getTGDSMBV3ARM7Bootloader(&binSize);
+	executeARM7Payload((u32)0x02310000, binSize, payload);
 	
 	printf("   ");
 	printf("   ");

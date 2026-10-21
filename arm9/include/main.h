@@ -39,7 +39,7 @@ USA
 extern "C" {
 #endif
 
-extern u32 * getTGDSMBV3ARM7Bootloader();
+extern u32 * getTGDSMBV3ARM7Bootloader(u32 * leng);
 extern int main(int argc, char **argv);
 extern struct FileClassList * thisFileList;
 extern void ApplicationMainLoop();

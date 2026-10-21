@@ -150,12 +150,6 @@ int main(int argc, char **argv) {
 	memcpy((void *)TGDS_MB_V3_ARM7_STAGE1_ADDR, (const void *)0x02380000, (int)(96*1024));	//
 	coherent_user_range_by_size((uint32)TGDS_MB_V3_ARM7_STAGE1_ADDR, (int)(96*1024)); //		also for TWL binaries 
 	
-	//Execute Stage 2: VRAM ARM7 payload: TWL (0x06000000). Otherwise DLDI init failure
-	if(__dsimode == true){ //Fixes TGDS WoopsiSDK TWL compatibility on TWL hardware
-		u32 * payload = getTGDSMBV3ARM7Bootloader();
-		executeARM7Payload((u32)0x02380000, 96*1024, payload);
-	}
-	
 	bool isTGDSCustomConsole = false;	//set default console or custom console: default console
 	GUI_init(isTGDSCustomConsole);
 	GUI_clear();
@@ -168,6 +162,10 @@ int main(int argc, char **argv) {
 	flush_icache_all();
 	flush_dcache_all();
 	//switch_dswnifi_mode(dswifi_idlemode); //breaks remoteboot, can't be enabled here
+	
+	//Execute Stage 2: VRAM ARM7 payload: TWL (0x06000000).
+	u32 * payload = getTGDSMBV3ARM7Bootloader();
+	executeARM7Payload((u32)0x02380000, 96*1024, payload);
 	
 	printf("   ");
 	printf("   ");

@@ -85,7 +85,7 @@ $(OBJDIR)/%.o : %.bin
 $(OBJDIR)/%.o : %.binlzss
 	-@echo 'LZSS Compressing .BIN (${<:.binlzss=.lzss}) -> .C output: ${@:.o=.c} : arrayName: $(subst build/,,${@:.o=})'
 	-cp	$<	${<:.binlzss=.lzss}
-	$(BIN2LZSS)	-ewo	${<:.binlzss=.lzss}
+	$(BIN2LZSS)	-evo	${<:.binlzss=.lzss}
 	$(BIN2C)	${<:.binlzss=.lzss}	${@:.o=.c}	$(subst build/,,${@:.o=})
 	$(CC)	$(CC_ASFLAGS)	$(DIRLIBS_HDR)	$(DIRLIBS_SRC)	$(DIRLIBS_PROHIBITED)	-o $@ -c ${@:.o=.c}
 	-@rm -fr	${<:.binlzss=.lzss}

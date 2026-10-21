@@ -139,7 +139,7 @@ compile	:
 	-$(MAKE)	-R	-C	$(PosIndCodeDIR_FILENAME)/$(DIR_ARM9)/
 	-cp	-r	$(TARGET_LIBRARY_MAKEFILES_SRC7_NOFPIC)	$(CURDIR)/common/templateCode/stage1_7/
 	$(MAKE)	-R	-C	$(CURDIR)/common/templateCode/stage1_7/
-	$(MAKE)	-R	-C	$(CURDIR)/common/templateCode/arm7bootldr/
+	$(MAKE)	-R	-C	$(CURDIR)/arm7bootldr/
 	
 ifeq ($(SOURCE_MAKEFILE9),default)
 	cp	-r	$(TARGET_LIBRARY_MAKEFILES_SRC9_NOFPIC)	$(CURDIR)/$(DIR_ARM9)
@@ -163,7 +163,7 @@ each_obj = $(foreach dirres,$(dir_read_arm9_files),$(dirres).)
 	
 clean:
 	$(MAKE) clean	-C	$(PosIndCodeDIR_FILENAME)/$(DIR_ARM7)/
-	$(MAKE) clean	-C	$(CURDIR)/common/templateCode/arm7bootldr/
+	$(MAKE) clean	-C	$(CURDIR)/arm7bootldr/
 #--------------------------------------------------------------------
 	$(MAKE)	clean	-C	$(DIR_ARM9)/
 	$(MAKE) clean	-C	$(PosIndCodeDIR_FILENAME)/$(DIR_ARM9)/

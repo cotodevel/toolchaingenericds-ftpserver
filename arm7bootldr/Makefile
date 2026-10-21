@@ -21,7 +21,7 @@
 #for 0x02380000 -> 0x06000000 arm7bootldr payload
 export BINSTRIP_RULE_arm7bootldr =	arm7bootldr.binlzss
 export TARGET_LIBRARY_CRT0_FILE_7custom = nds_arm_ld_crt0custom
-export TARGET_LIBRARY_LINKER_FILE_7custom = $(TARGET_LIBRARY_PATH)$(TARGET_LIBRARY_LINKER_SRC)/$(TARGET_LIBRARY_CRT0_FILE_7custom).S
+export TARGET_LIBRARY_LINKER_FILE_7custom = ../$(TARGET_LIBRARY_CRT0_FILE_7custom).S
 
 # relative path (if you are outside arm9 folder then $(DIR_ARM9), arm7 is $(DIR_ARM7))
 RELATIVE_PATH =	
@@ -117,8 +117,6 @@ $(TARGET_LIBRARY_CRT0_FILE_7custom).o:	$(TARGET_LIBRARY_LINKER_FILE_7custom)
 	-@echo 'S Compile start: crt0s'
 	rm -fr $(BUILD)/$(TARGET_LIBRARY_CRT0_FILE_7custom).o
 	$(CPP)	-x assembler-with-cpp	$(DIRLIBS_HDR)	$(DIRLIBS_SRC)	$(CC_ASFLAGS)	-o	$(OBJDIR)/$@	-c	$<
-	cp	-r $(TARGET_LIBRARY_LINKER_PATH_LD)dsi_arm7_ld_stage2.ld $(CURDIR)
-	cp	-r $(TARGET_LIBRARY_LINKER_PATH_LD)dsi_arm7_ld_stage2.specs $(CURDIR)
 	-@echo 'S Compile end: crt0s'
 
 #Linkage. 
@@ -147,5 +145,5 @@ $(BINSTRIP_RULE_arm7bootldr): $(ELF_ARM7)
 	
 clean:
 	-@echo 'cleanup $(DIR_ARM7)'
-	-@rm -fr $(BINSTRIP_RULE_arm7bootldr)	$(MAPFILE)	$(CURDIR)/dsi_arm7_ld_stage2.specs	$(CURDIR)/dsi_arm7_ld_stage2.ld	${BINSTRIP_RULE_arm7bootldr:.binlzss=_twl.binlzss}	$(BUILD)	$(CURDIR)/arm7-nonstripped_dsi.elf $(CURDIR)/arm7-nonstripped_dsi.map	../arm9/data/arm7bootldr.binlzss	../arm9/data/arm7bootldr_twl.binlzss
+	-@rm -fr $(BINSTRIP_RULE_arm7bootldr)	$(MAPFILE)	${BINSTRIP_RULE_arm7bootldr:.binlzss=_twl.binlzss}	$(BUILD)	$(CURDIR)/arm7-nonstripped_dsi.elf $(CURDIR)/arm7-nonstripped_dsi.map	../arm9/data/arm7bootldr.binlzss	../arm9/data/arm7bootldr_twl.binlzss
 
